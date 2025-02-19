@@ -1,9 +1,8 @@
 package com.nomad.producer;
 
 import com.microsoft.azure.functions.ExecutionContext;
-import com.microsoft.azure.functions.OutputBinding;
-import com.microsoft.azure.functions.annotation.*;
-import com.nomad.producer.messages.DataCollectionJob;
+import com.microsoft.azure.functions.annotation.FunctionName;
+import com.microsoft.azure.functions.annotation.TimerTrigger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
@@ -17,21 +16,23 @@ import java.util.function.Consumer;
 @Component
 public class ProducerHandler {
 
-    private static final String QUEUE_NAME = "nomad_12goasia";
+    public static String EXECUTION_CONTEXT = "executionContext";
+
+    private static AtomicInteger count = new AtomicInteger();
 
     @Autowired
-    private Consumer<OutputBinding<DataCollectionJob>> processAndShutdown;
+    private Consumer<Message<String>> processAndShutdown;
 
     @FunctionName("processAndShutdown")
-    public void execute(@TimerTrigger(name = "keepAliveTrigger", schedule = "*/60 * * * * *") String timerInfo,
-                        @QueueOutput(name = "response", queueName = QUEUE_NAME, connection = "OneToGoAsiaQueue") final OutputBinding<DataCollectionJob> result) {
+    public void execute(@TimerTrigger(name = "keepAliveTrigger", schedule = "0 */30 * * * *") String timerInfo,
+                        ExecutionContext context) {
 
-//        Message<String> message = MessageBuilder
-//                .withPayload(timerInfo)
-//                .setHeader(EXECUTION_CONTEXT, context)
-//                .build();
+        Message<String> message = MessageBuilder
+                .withPayload(timerInfo)
+                .setHeader(EXECUTION_CONTEXT, context)
+                .build();
 
-        this.processAndShutdown.accept(result);
+        this.processAndShutdown.accept(message);
     }
 
 }
