@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 
+import lombok.extern.log4j.Log4j2;
 import org.neo4j.driver.AuthToken;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Config;
@@ -17,7 +18,9 @@ import org.neo4j.driver.Session;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.neo4j.core.Neo4jClient;
 
+@Log4j2
 @Configuration
 public class Neo4jConfig {
 
@@ -52,6 +55,11 @@ public class Neo4jConfig {
 
         // Return configured Neo4j driver
         return GraphDatabase.driver(neo4j_uri, authToken, config);
+    }
+
+    @Bean
+    public Neo4jClient neo4jClient(Driver driver) {
+        return Neo4jClient.create(driver);
     }
 
     @Bean

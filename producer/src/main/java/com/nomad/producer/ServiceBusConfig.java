@@ -12,9 +12,9 @@ import org.springframework.context.annotation.Configuration;
 public class ServiceBusConfig {
 
     @Value("${sb_queue_name}")
-    private static String QUEUE_NAME;
+    private String QUEUE_NAME;
     @Value("${sb_fqdn_namespace}")
-    private static String FQDN_NAMESPACE;
+    private String FQDN_NAMESPACE;
 
     @Bean
     public ServiceBusSenderClient client() {

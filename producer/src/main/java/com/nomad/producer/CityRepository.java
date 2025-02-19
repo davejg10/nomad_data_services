@@ -17,18 +17,18 @@ import java.util.function.BiFunction;
 @Log4j2
 public class CityRepository {
 
-    private Neo4jClient client;
+    private Neo4jClient neo4jClient;
     private final BiFunction<TypeSystem, MapAccessor, City> cityMapper;
     private final BiFunction<TypeSystem, MapAccessor, Country> countryMapper;
 
-    public CityRepository(Neo4jClient client, Neo4jMappingContext schema) {
-        this.client = client;
+    public CityRepository(Neo4jClient neo4jClient, Neo4jMappingContext schema) {
+        this.neo4jClient = neo4jClient;
         this.cityMapper = schema.getRequiredMappingFunctionFor(City.class);
         this.countryMapper = schema.getRequiredMappingFunctionFor(Country.class);
     }
 
     public List<PotentialRoute> routeDiscoveryGivenCountry(String countryName) {
-        Collection<PotentialRoute> cities = client
+        Collection<PotentialRoute> cities = neo4jClient
                 .query("""
                     MATCH (source:City)-[:OF_COUNTRY]->(country:Country {name: $countryName})
                     MATCH (dest:City)-[:OF_COUNTRY]->(country)
