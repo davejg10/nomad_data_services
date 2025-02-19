@@ -70,6 +70,6 @@ jobs:
         id: fa
         with:
           app-name: ${{ env.FUNCTION_APP_NAME }}
-          package: '${{ env.POM_XML_DIRECTORY }}' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
+          package: '${{ env.WORK_DIR }}/${{ env.POM_XML_DIRECTORY }}' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
           publish-profile: ${{ env.PUBLISH_PROFILE }}
           respect-pom-xml: true
