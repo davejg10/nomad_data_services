@@ -1,0 +1,62 @@
+name: deploy-to-web-app
+run-name: Deploy to Azure Web App
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: Environment
+        options:
+          - dev
+  push:
+    branches:
+      - main
+
+env:
+  AZURE_FUNCTIONAPP_NAME: 'your-app-name'
+  POM_XML_DIRECTORY: '.'
+  JAVA_VERSION: '17'
+
+permissions:
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    env:
+      FUNCTION_APP_NAME: fa-${{ matrix.environment }}-uks-nomad-02-producer
+      FUNCTION_APP_RG_NAME: rg-${{ matrix.environment }}-uks-nomad-02
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v3
+
+      - name: Setup Java Sdk ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: 'Restore Project Dependencies Using Mvn'
+        shell: bash
+        run: |
+          pushd './${{ env.POM_XML_DIRECTORY }}'
+          mvn clean package
+          popd
+
+      - name: Fetch Function-App publish-profile
+        id: fetch_profile
+        run: |
+          PUBLISH_PROFILE=$(az functionapp deployment list-publishing-profiles --name ${{ env.FUNCTION_APP_NAME }} --resource-group ${{ env.FUNCTION_APP_RG_NAME }} --xml)
+          echo $PUBLISH_PROFILE
+          echo "::add-mask::$PUBLISH_PROFILE"
+          echo "PUBLISH_PROFILE=$PUBLISH_PROFILE" >> $GITHUB_ENV
+
+      - name: 'Run Azure Functions Action'
+        uses: Azure/functions-action@v1
+        id: fa
+        with:
+          app-name: ${{ env.FUNCTION_APP_NAME }}
+          package: '${{ env.POM_XML_DIRECTORY }}' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
+          publish-profile: ${{ env.PUBLISH_PROFILE }}
+          respect-pom-xml: true
