@@ -44,7 +44,6 @@ public class Producer implements Consumer<Message<String>> {
     public void accept(Message<String> stringMessage) {
         try {
             log.info("Waiting for auth");
-            TimeUnit.SECONDS.sleep(2);
 
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             Resource resource = new ClassPathResource("jobs-config.yml");
@@ -68,7 +67,6 @@ public class Producer implements Consumer<Message<String>> {
             ServiceBusTemplate serviceBusTemplate = ctx.getBean(ServiceBusTemplate.class);
 
             for (DataCollectionJob job : dataCollectionJobs) {
-                TimeUnit.SECONDS.sleep(1);
                 log.info("Queued job: {} for route {} -> {}", job.jobId(), job.sourceCity().getName(), job.destinationCity().getName());
                 serviceBusTemplate.sendAsync(QUEUE_NAME, MessageBuilder.withPayload(job).setHeader("Job name", job.jobId()).build()).subscribe();
             }
