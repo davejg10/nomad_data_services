@@ -2,5 +2,5 @@ jobs:
   - id: thailand-routes
     type: ROUTE_DISCOVERY
     countryName: Thailand
-    dateToCollectResults: 2025/02/16
+    dateToCollectResults: 2025/02/22
     isActive: true

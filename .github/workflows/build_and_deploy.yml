@@ -61,7 +61,6 @@ jobs:
         id: fetch_profile
         run: |
           PUBLISH_PROFILE=$(az rest -m POST --header "Accept=application/json" -u "https://management.azure.com/subscriptions/${{ vars.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.FUNCTION_APP_RG_NAME }}/providers/Microsoft.Web/sites/${{ env.FUNCTION_APP_NAME }}/publishxml?api-version=2024-04-01" )
-          echo $PUBLISH_PROFILE
           echo "::add-mask::$PUBLISH_PROFILE"
           echo "PUBLISH_PROFILE=$PUBLISH_PROFILE" >> $GITHUB_ENV
 
