@@ -1,5 +1,5 @@
-name: deploy-to-web-app
-run-name: Deploy to Azure Web App
+name: deploy-to-function-app
+run-name: Deploy to Azure Function App
 
 on:
   workflow_dispatch:
@@ -9,14 +9,17 @@ on:
         description: Environment
         options:
           - dev
-  push:
-    branches:
-      - main
+      service:
+        type: choice
+        description: Data service
+        options:
+          - producer
+          - consumer
 
 env:
-  AZURE_FUNCTIONAPP_NAME: 'your-app-name'
   POM_XML_DIRECTORY: '.'
   JAVA_VERSION: '17'
+  WORK_DIR: ./${{ github.event.inputs.service }}
 
 permissions:
   id-token: write
@@ -27,6 +30,9 @@ jobs:
       FUNCTION_APP_NAME: fa-${{ matrix.environment }}-uks-nomad-02-producer
       FUNCTION_APP_RG_NAME: rg-${{ matrix.environment }}-uks-nomad-02
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORK_DIR }}
     environment: dev
     steps:
       - name: 'Checkout GitHub Action'
@@ -43,6 +49,13 @@ jobs:
           pushd './${{ env.POM_XML_DIRECTORY }}'
           mvn clean package
           popd
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - name: Fetch Function-App publish-profile
         id: fetch_profile
