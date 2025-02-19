@@ -27,8 +27,8 @@ permissions:
 jobs:
   build-and-deploy:
     env:
-      FUNCTION_APP_NAME: fa-${{ matrix.environment }}-uks-nomad-02-producer
-      FUNCTION_APP_RG_NAME: rg-${{ matrix.environment }}-uks-nomad-02
+      FUNCTION_APP_NAME: fa-${{ github.event.inputs.environment }}-uks-nomad-02-producer
+      FUNCTION_APP_RG_NAME: rg-${{ github.event.inputs.environment }}-uks-nomad-02
     runs-on: ubuntu-latest
     defaults:
       run:
