@@ -71,9 +71,11 @@ public class Producer implements Consumer<Message<String>> {
                 serviceBusTemplate.sendAsync(QUEUE_NAME, MessageBuilder.withPayload(job).setHeader("Job name", job.jobId()).build()).subscribe();
             }
 
+            SpringApplication.exit(ctx, () -> 1);
+
         } catch (Exception e) {
             log.error("Error during processing", e);
-            //            SpringApplication.exit(ctx, () -> 1);
+            SpringApplication.exit(ctx, () -> 1);
         }
     }
 }
