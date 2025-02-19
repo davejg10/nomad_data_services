@@ -1,8 +1,5 @@
 package com.nomad.producer;
 
-import com.azure.core.credential.TokenCredential;
-import com.azure.identity.DefaultAzureCredentialBuilder;
-import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.ServiceBusMessage;
 import com.azure.messaging.servicebus.ServiceBusMessageBatch;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
@@ -13,7 +10,6 @@ import com.nomad.producer.config.JobConfig;
 import com.nomad.producer.messages.DataCollectionJob;
 import com.nomad.producer.nomad.PotentialRoute;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.messaging.Message;
@@ -41,8 +37,6 @@ public class Producer implements Consumer<Message<String>> {
     @Override
     public void accept(Message<String> stringMessage) {
         try {
-            log.info("Waiting for auth");
-
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             Resource resource = new ClassPathResource("jobs-config.yml");
             JobConfig jobConfig = mapper.readValue(resource.getInputStream(), JobConfig.class);
@@ -55,12 +49,10 @@ public class Producer implements Consumer<Message<String>> {
                     case ROUTE_DISCOVERY:
                         log.info("Job is of type ROUTE_DISCOVERY. Calling cityRepository.routeDiscovery()");
                         List<PotentialRoute> potentialRoutes = cityRepository.routeDiscoveryGivenCountry(configJob.countryName());
-                        log.info("Potential routes: {}", potentialRoutes);
                         for (PotentialRoute route : potentialRoutes) {
                             dataCollectionJobs.add(new DataCollectionJob(configJob.id(), configJob.type(), route.sourceCity(), route.destinationCity(), configJob.dateToCollectResults()));
                         }
                 }
-
             }
 
             // Creating a batch without options set.
@@ -87,7 +79,6 @@ public class Producer implements Consumer<Message<String>> {
             if (batch.getCount() > 0) {
                 sender.sendMessages(batch);
             }
-
 
         } catch (Exception e) {
             log.error("Error during processing", e);
