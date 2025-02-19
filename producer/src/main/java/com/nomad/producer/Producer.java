@@ -3,6 +3,7 @@ package com.nomad.producer;
 import com.azure.spring.messaging.servicebus.core.ServiceBusTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.microsoft.azure.functions.OutputBinding;
 import com.nomad.producer.config.Job;
 import com.nomad.producer.config.JobConfig;
 import com.nomad.producer.messages.DataCollectionJob;
@@ -27,9 +28,8 @@ import java.util.function.Consumer;
 
 @Service
 @Log4j2
-public class Producer implements Consumer<Message<String>> {
+public class Producer implements Consumer<OutputBinding<DataCollectionJob>> {
 
-    private static final String QUEUE_NAME = "nomad_12goasia";
 
     @Autowired
     ConfigurableApplicationContext ctx;
@@ -41,7 +41,7 @@ public class Producer implements Consumer<Message<String>> {
     }
 
     @Override
-    public void accept(Message<String> stringMessage) {
+    public void accept(OutputBinding<DataCollectionJob> result) {
         try {
             log.info("Waiting for auth");
 
@@ -64,11 +64,10 @@ public class Producer implements Consumer<Message<String>> {
                 }
 
             }
-            ServiceBusTemplate serviceBusTemplate = ctx.getBean(ServiceBusTemplate.class);
 
             for (DataCollectionJob job : dataCollectionJobs) {
                 log.info("Queued job: {} for route {} -> {}", job.jobId(), job.sourceCity().getName(), job.destinationCity().getName());
-                serviceBusTemplate.sendAsync(QUEUE_NAME, MessageBuilder.withPayload(job).setHeader("Job name", job.jobId()).build()).subscribe();
+                result.setValue(job);
             }
 
             SpringApplication.exit(ctx, () -> 0);
