@@ -20,6 +20,8 @@ env:
   POM_XML_DIRECTORY: '.'
   JAVA_VERSION: '17'
   WORK_DIR: ./${{ github.event.inputs.service }}
+  ACR_SERVER_NAME: acrglbuksdevopsutils.azurecr.io
+  REPOSITORY_NAME: nomad-data
 
 permissions:
   id-token: write
@@ -43,12 +45,47 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
 
-      - name: 'Restore Project Dependencies Using Mvn'
-        shell: bash
-        run: |
-          pushd './${{ env.POM_XML_DIRECTORY }}'
-          mvn clean package
-          popd
+      # - name: 'Restore Project Dependencies Using Mvn'
+      #   shell: bash
+      #   run: |
+      #     pushd './${{ env.POM_XML_DIRECTORY }}'
+      #     mvn clean package
+      #     popd
+
+      # - name: Azure CLI Login
+      #   uses: azure/login@v2
+      #   with:
+      #     client-id: ${{ secrets.AZURE_CLIENT_ID }}
+      #     tenant-id: ${{ vars.AZURE_TENANT_ID }}
+      #     subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      # - name: Fetch Function-App publish-profile
+      #   id: fetch_profile
+      #   run: |
+      #     PUBLISH_PROFILE=$(az rest -m POST --header "Accept=application/json" -u "https://management.azure.com/subscriptions/${{ vars.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.FUNCTION_APP_RG_NAME }}/providers/Microsoft.Web/sites/${{ env.FUNCTION_APP_NAME }}/publishxml?api-version=2024-04-01" )
+      #     echo "::add-mask::$PUBLISH_PROFILE"
+      #     echo "PUBLISH_PROFILE=$PUBLISH_PROFILE" >> $GITHUB_ENV
+
+      # - name: 'Run Azure Functions Action'
+      #   uses: Azure/functions-action@v1
+      #   if: ${{ github.event.inputs.service == 'producer' }}
+      #   with:
+      #     app-name: ${{ env.FUNCTION_APP_NAME }}
+      #     package: '${{ env.WORK_DIR }}/${{ env.POM_XML_DIRECTORY }}' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
+      #     publish-profile: ${{ env.PUBLISH_PROFILE }}
+      #     sku: flexconsumption
+      #     respect-pom-xml: true
+      
+      # - name: 'Run Azure Functions Action'
+      #   uses: Azure/functions-action@v1
+      #   if: ${{ github.event.inputs.service == 'consumer' }}
+      #   with:
+      #     app-name: ${{ env.FUNCTION_APP_NAME }}
+      #     package: '${{ env.WORK_DIR }}/${{ env.POM_XML_DIRECTORY }}' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
+      #     publish-profile: ${{ env.PUBLISH_PROFILE }}
+      #     respect-pom-xml: true
+          # - uses: actions/checkout@v4
+
 
       - name: Azure CLI Login
         uses: azure/login@v2
@@ -57,28 +94,19 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Fetch Function-App publish-profile
-        id: fetch_profile
+      - name: ACR build & push image
         run: |
-          PUBLISH_PROFILE=$(az rest -m POST --header "Accept=application/json" -u "https://management.azure.com/subscriptions/${{ vars.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.FUNCTION_APP_RG_NAME }}/providers/Microsoft.Web/sites/${{ env.FUNCTION_APP_NAME }}/publishxml?api-version=2024-04-01" )
-          echo "::add-mask::$PUBLISH_PROFILE"
-          echo "PUBLISH_PROFILE=$PUBLISH_PROFILE" >> $GITHUB_ENV
+          az acr build \
+            --registry ${{ env.ACR_SERVER_NAME }} \
+            --image "${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" \
+            --build-arg build_version=${{ env.TAG }} .
 
-      - name: 'Run Azure Functions Action'
-        uses: Azure/functions-action@v1
-        if: ${{ github.event.inputs.service == 'producer' }}
+          # Also tag with latest
+          az acr import --name ${{ env.ACR_SERVER_NAME }} --source "${{ env.ACR_SERVER_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" --image ${{ env.REPOSITORY_NAME }}:latest --force
+
+      - name: 'Run Azure Functions Container Action'
+        uses: Azure/functions-container-action@v1
+        id: fa
         with:
-          app-name: ${{ env.FUNCTION_APP_NAME }}
-          package: '${{ env.WORK_DIR }}/${{ env.POM_XML_DIRECTORY }}' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
-          publish-profile: ${{ env.PUBLISH_PROFILE }}
-          sku: flexconsumption
-          respect-pom-xml: true
-      
-      - name: 'Run Azure Functions Action'
-        uses: Azure/functions-action@v1
-        if: ${{ github.event.inputs.service == 'consumer' }}
-        with:
-          app-name: ${{ env.FUNCTION_APP_NAME }}
-          package: '${{ env.WORK_DIR }}/${{ env.POM_XML_DIRECTORY }}' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
-          publish-profile: ${{ env.PUBLISH_PROFILE }}
-          respect-pom-xml: true
+          app-name: fa-${{ github.event.inputs.environment }}-uks-nomad-${{ github.event.inputs.service }}-aca
+          image: '${{ env.ACR_SERVER_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}'
