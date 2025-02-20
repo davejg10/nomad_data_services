@@ -11,7 +11,7 @@ on:
           - dev
 
 env:
-  WORK_DIR: ./${{ github.event.inputs.service }}
+  WORK_DIR: ./consumer
   ACR_SERVER_NAME: acrglbuksdevopsutils.azurecr.io
   NAMESPACE_NAME: nomad-data
   REPOSITORY_NAME: onetogoasia
