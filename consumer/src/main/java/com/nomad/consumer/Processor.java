@@ -1,7 +1,11 @@
 package com.nomad.consumer;
 
 
+import com.azure.messaging.servicebus.ServiceBusMessage;
+import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.azure.spring.messaging.servicebus.implementation.core.annotation.ServiceBusListener;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.consumer.messages.DataCollectionJob;
 import com.nomad.consumer.nomad.*;
 import lombok.extern.log4j.Log4j2;
@@ -17,22 +21,24 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.function.Consumer;
 
 @Service
 @Log4j2
-public class Processor implements Function<Message<String>, Message<String>> {
+public class Processor implements Consumer<DataCollectionJob> {
 
-   private static final String QUEUE_NAME = "nomad-jobs";
+   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+   private final WebScraper scraper;
+   
+   private final ServiceBusSenderClient sender;
 
-   @Autowired
-   private WebScraper scraper;
-
+   public Processor(WebScraper scraper, ServiceBusSenderClient sender) {
+    this.scraper = scraper;
+    this.sender = sender;
+   }
 
    @Override
-   public Message<String> apply(Message<String> message) {
+   public void accept(DataCollectionJob job) {
        log.info("The job is {}, for route {} -> {}", job.jobId(), job.sourceCity().name(), job.destinationCity().name());
 
        List<RouteInfo> routeInfoList = scraper.scrapeData(job.sourceCity().name(), job.destinationCity().name(), job.dateToCollectResults());
@@ -68,23 +74,27 @@ public class Processor implements Function<Message<String>, Message<String>> {
 
            RouteDTO routeDTO = new RouteDTO(job.destinationCity(), 1.0, Double.parseDouble(routeTime), routeInfo.price(), routeInfo.transportType());
            CityDTO cityDTO = new CityDTO(job.sourceCity().id(), job.sourceCity().name(), routeDTO);
-
-           cityRepository.saveCityDTOWithDepth0(cityDTO);
-       }
-
-   }
-
-   public static Duration parseDuration(String timeStr) {
-       // Regex pattern to match hours and minutes
-       Pattern pattern = Pattern.compile("([+-]?\\d+)h\\s*(\\d+)m");
-       Matcher matcher = pattern.matcher(timeStr);
-
-       if (matcher.matches()) {
-           int hours = Integer.parseInt(matcher.group(1));
-           int minutes = Integer.parseInt(matcher.group(2));
-           return Duration.ofHours(hours).plusMinutes(minutes);
-       } else {
-           throw new IllegalArgumentException("Invalid time format: " + timeStr);
+           
+            try {
+                ServiceBusMessage message = new ServiceBusMessage(OBJECT_MAPPER.writeValueAsString(cityDTO));
+                sender.sendMessage(message);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
        }
    }
+
+//    public static Duration parseDuration(String timeStr) {
+//        // Regex pattern to match hours and minutes
+//        Pattern pattern = Pattern.compile("([+-]?\\d+)h\\s*(\\d+)m");
+//        Matcher matcher = pattern.matcher(timeStr);
+
+//        if (matcher.matches()) {
+//            int hours = Integer.parseInt(matcher.group(1));
+//            int minutes = Integer.parseInt(matcher.group(2));
+//            return Duration.ofHours(hours).plusMinutes(minutes);
+//        } else {
+//            throw new IllegalArgumentException("Invalid time format: " + timeStr);
+//        }
+//    }
 }

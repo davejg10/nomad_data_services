@@ -1,6 +1,6 @@
 package com.nomad.consumer;
 
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +11,7 @@ import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.ServiceBusQueueTrigger;
 import com.nomad.consumer.messages.DataCollectionJob;
+import com.nomad.consumer.nomad.CityDTO;
 
 @Component
 public class ConsumerHandler {
@@ -21,15 +22,15 @@ public class ConsumerHandler {
     private final String sb_processed_queue_name = "nomad_processed";
 
     @Autowired
-    private Function<Message<String>, Message<String>> scrape;
+    private Consumer<DataCollectionJob> scrape;
 
     @FunctionName("scrape")
-    public void execute(@ServiceBusQueueTrigger(name = "msg", queueName = sb_pre_processed_queue_name, connection = "nomadservicebus") DataCollectionJob message,
+    public void execute(@ServiceBusQueueTrigger(name = "msg", queueName = sb_pre_processed_queue_name, connection = "nomadservicebus") DataCollectionJob job,
                         ExecutionContext context) {
 
         
 
-        this.scrape.apply(message);
+        this.scrape.accept(job);
     }
 
 }

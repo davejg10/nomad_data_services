@@ -1,4 +1,4 @@
-package com.nomad.producer;
+package com.nomad.consumer;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.DefaultAzureCredentialBuilder;
@@ -11,9 +11,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ServiceBusConfig {
 
-    @Value("${sb_pre_processed_queue_name}")
+    @Value("${sb_processed_queue_name}")
     private String QUEUE_NAME;
-    @Value("${sb_fqdn_namespace}")
+    @Value("${nomadservicebus__fullyQualifiedNamespace}")
     private String FQDN_NAMESPACE;
 
     @Bean
