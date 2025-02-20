@@ -22,6 +22,7 @@ env:
   WORK_DIR: ./${{ github.event.inputs.service }}
   ACR_SERVER_NAME: acrglbuksdevopsutils.azurecr.io
   REPOSITORY_NAME: nomaddata
+  TAG: ${{ github.run_id }}
 
 permissions:
   id-token: write
