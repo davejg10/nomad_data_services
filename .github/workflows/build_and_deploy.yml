@@ -14,7 +14,7 @@ env:
   WORK_DIR: ./consumer
   ACR_SERVER_NAME: acrglbuksdevopsutils.azurecr.io
   NAMESPACE_NAME: nomad-data
-  REPOSITORY_NAME: onetogoasia
+  REPOSITORY_NAME: one2goasia
   TAG: ${{ github.run_id }}
 
 permissions:
