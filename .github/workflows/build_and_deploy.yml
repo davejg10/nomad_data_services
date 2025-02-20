@@ -21,7 +21,8 @@ env:
   JAVA_VERSION: '17'
   WORK_DIR: ./${{ github.event.inputs.service }}
   ACR_SERVER_NAME: acrglbuksdevopsutils.azurecr.io
-  REPOSITORY_NAME: nomaddata
+  NAMESPACE_NAME: nomad-data
+  REPOSITORY_NAME: onetogoasia
   TAG: ${{ github.run_id }}
 
 permissions:
@@ -95,19 +96,19 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      # - name: ACR build & push image
-      #   run: |
-      #     az acr build \
-      #       --registry ${{ env.ACR_SERVER_NAME }} \
-      #       --image "${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" \
-      #       --build-arg build_version=${{ env.TAG }} .
+      - name: ACR build & push image
+        run: |
+          az acr build \
+            --registry ${{ env.ACR_SERVER_NAME }} \
+            --image "${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" \
+            --build-arg build_version=${{ env.TAG }} .
 
-      #     # Also tag with latest
-      #     az acr import --name ${{ env.ACR_SERVER_NAME }} --source "${{ env.ACR_SERVER_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" --image ${{ env.REPOSITORY_NAME }}:latest --force
+          # Also tag with latest
+          az acr import --name ${{ env.ACR_SERVER_NAME }} --source "${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" --image ${{ env.REPOSITORY_NAME }}:latest --force
 
       - name: 'Run Azure Functions Container Action'
         uses: Azure/functions-container-action@v1
         id: fa
         with:
           app-name: fa-${{ github.event.inputs.environment }}-uks-nomad-${{ github.event.inputs.service }}-aca
-          image: '${{ env.ACR_SERVER_NAME }}/${{ env.REPOSITORY_NAME }}:latest'
+          image: '${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:latest'
