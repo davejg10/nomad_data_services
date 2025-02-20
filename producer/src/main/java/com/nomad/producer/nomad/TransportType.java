@@ -1,4 +1,4 @@
-package com.nomad.consumer.nomad;
+package com.nomad.producer.nomad;
 
 import java.util.Arrays;
 import java.util.List;
