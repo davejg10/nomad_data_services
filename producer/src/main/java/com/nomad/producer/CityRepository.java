@@ -1,5 +1,6 @@
 package com.nomad.producer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.producer.nomad.City;
 import com.nomad.producer.nomad.Country;
 import com.nomad.producer.nomad.PotentialRoute;
@@ -16,7 +17,7 @@ import java.util.function.BiFunction;
 @Configuration
 @Log4j2
 public class CityRepository {
-
+    private final static ObjectMapper objectMapper = new ObjectMapper();
     private Neo4jClient neo4jClient;
     private final BiFunction<TypeSystem, MapAccessor, City> cityMapper;
     private final BiFunction<TypeSystem, MapAccessor, Country> countryMapper;
@@ -46,4 +47,36 @@ public class CityRepository {
                 .all();
         return cities.stream().toList();
     }
+
+    // public void saveCityDTOWithDepth0(CityDTO city) {
+
+    //     Map<String, Object> cityAsMap = objectMapper.convertValue(city, Map.class);
+
+    //     neo4jClient.query("""
+    //         MERGE (c:City {id: $id})
+          
+    //         WITH c
+    //         UNWIND $routes AS routeData
+            
+    //         MERGE (t:City {id: routeData.targetCity.id})
+            
+    //         WITH c, t, routeData   
+    //         OPTIONAL MATCH (c)-[r:ROUTE {
+    //                transportType: routeData.transportType
+    //         }]->(t)
+    //         WHERE r.popularity <> routeData.popularity OR r.time <> routeData.time OR r.cost <> routeData.cost
+    //         DELETE r
+            
+    //         MERGE (c)-[rel:ROUTE {
+    //             popularity: routeData.popularity,
+    //             time: routeData.time,
+    //             cost: routeData.cost,
+    //             transportType: routeData.transportType
+    //         }]->(t)
+    //         ON CREATE SET rel.id = randomUUID()
+    //     """)
+    //             .bindAll(cityAsMap)
+    //             .run();
+
+    // }
 }
