@@ -27,7 +27,7 @@
 		<url/>
 	</scm>
 	<properties>
-		<start-class>com.nomad.producer.ProducerApplication</start-class>
+		<start-class>com.nomad.producer.ConsumerApplication</start-class>
 		<java.version>17</java.version>
 		<version.spring.cloud>2024.0.0</version.spring.cloud>
 		<version.spring.cloud.azure>5.18.0</version.spring.cloud.azure>
