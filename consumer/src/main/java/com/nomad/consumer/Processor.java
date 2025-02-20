@@ -3,16 +3,11 @@ package com.nomad.consumer;
 
 import com.azure.messaging.servicebus.ServiceBusMessage;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
-import com.azure.spring.messaging.servicebus.implementation.core.annotation.ServiceBusListener;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.consumer.messages.DataCollectionJob;
 import com.nomad.consumer.nomad.*;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
