@@ -60,7 +60,6 @@ jobs:
       - name: Fetch Function-App publish-profile
         id: fetch_profile
         run: |
-          # az functionapp deployment list-publishing-profiles --name fa-dev-uks-nomad-02-consumer --resource-group rg-dev-uks-nomad-02 --xml
           PUBLISH_PROFILE=$(az rest -m POST --header "Accept=application/json" -u "https://management.azure.com/subscriptions/${{ vars.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.FUNCTION_APP_RG_NAME }}/providers/Microsoft.Web/sites/${{ env.FUNCTION_APP_NAME }}/publishxml?api-version=2024-04-01" )
           echo "::add-mask::$PUBLISH_PROFILE"
           echo "PUBLISH_PROFILE=$PUBLISH_PROFILE" >> $GITHUB_ENV
@@ -83,4 +82,4 @@ jobs:
           package: '${{ env.WORK_DIR }}/${{ env.POM_XML_DIRECTORY }}' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
           publish-profile: ${{ env.PUBLISH_PROFILE }}
           respect-pom-xml: true
-          scm-do-build-during-deployment: true
+          # scm-do-build-during-deployment: true
