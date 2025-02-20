@@ -21,7 +21,7 @@ env:
   JAVA_VERSION: '17'
   WORK_DIR: ./${{ github.event.inputs.service }}
   ACR_SERVER_NAME: acrglbuksdevopsutils.azurecr.io
-  REPOSITORY_NAME: nomad-data
+  REPOSITORY_NAME: nomaddata
 
 permissions:
   id-token: write
