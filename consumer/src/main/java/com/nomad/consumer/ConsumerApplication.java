@@ -1,6 +1,5 @@
 package com.nomad.consumer;
 
-import com.azure.spring.messaging.implementation.annotation.EnableAzureMessaging;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

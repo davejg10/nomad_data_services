@@ -50,7 +50,7 @@ public class WebScraper {
            while (showMoreButton.count() > 0) {
                showMoreButton.scrollIntoViewIfNeeded();
                showMoreButton.click();
-               Thread.sleep(RATE_LIMIT_DELAY);
+               Thread.sleep(400);
                showMoreButton = page.locator(timeTableShowMoreButtonSelector);
            }
 
@@ -58,7 +58,7 @@ public class WebScraper {
            tableBody.waitFor();
 
            results = parseTableBody(tableBody.innerText());
-           Thread.sleep(RATE_LIMIT_DELAY);
+           Thread.sleep(500);
 
        } catch (PlaywrightException e) {
            System.err.println("Scraping error: " + e.getMessage());
