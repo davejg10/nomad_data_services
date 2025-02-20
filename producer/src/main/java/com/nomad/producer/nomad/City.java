@@ -4,6 +4,9 @@ import lombok.Getter;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Node
 @Getter
 public class City {
@@ -16,8 +19,11 @@ public class City {
 //        this.id = id;
 //        this.name = name;
 //    }
-
-    public City(String id, String name, Country country) {
+    
+    @JsonCreator
+    public City(@JsonProperty("id") String id,
+                @JsonProperty("name") String name,
+                @JsonProperty("country") Country country) {
         this.id = id;
         this.name = name;
         this.country = country;
