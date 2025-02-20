@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   aca_build-and-deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ${{ env.WORK_DIR }}
