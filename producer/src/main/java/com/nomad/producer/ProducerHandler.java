@@ -25,7 +25,7 @@ public class ProducerHandler {
     private Consumer<Message<String>> processAndShutdown;
 
     @FunctionName("processAndShutdown")
-    public void execute(@TimerTrigger(name = "keepAliveTrigger", schedule = "*/20 * * * * *") String timerInfo,
+    public void execute(@TimerTrigger(name = "keepAliveTrigger", schedule = "0 */5 * * * *") String timerInfo,
                         ExecutionContext context) {
 
         Message<String> message = MessageBuilder
