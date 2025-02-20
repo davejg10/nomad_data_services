@@ -2,6 +2,7 @@ package com.nomad.consumer;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.DefaultAzureCredentialBuilder;
+import com.azure.identity.ManagedIdentityCredentialBuilder;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
@@ -21,7 +22,7 @@ public class ServiceBusConfig {
 
     @Bean
     public ServiceBusSenderClient clientSender() {
-        TokenCredential credential = new DefaultAzureCredentialBuilder().build();
+        TokenCredential credential = new ManagedIdentityCredentialBuilder().build();
 
         ServiceBusSenderClient sender = new ServiceBusClientBuilder()
                 .credential(FQDN_NAMESPACE, credential)
@@ -33,7 +34,7 @@ public class ServiceBusConfig {
 
     @Bean
     public ServiceBusReceiverClient clientReciever() {
-        TokenCredential credential = new DefaultAzureCredentialBuilder().build();
+        TokenCredential credential = new ManagedIdentityCredentialBuilder().build();
 
         ServiceBusReceiverClient receiver = new ServiceBusClientBuilder()
                 .credential(FQDN_NAMESPACE, credential)
