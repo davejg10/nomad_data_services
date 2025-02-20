@@ -1,9 +1,6 @@
 package com.nomad.consumer;
 
-
-import com.azure.messaging.servicebus.ServiceBusMessage;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.consumer.messages.DataCollectionJob;
 import com.nomad.consumer.nomad.*;
@@ -16,24 +13,21 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Service
 @Log4j2
-public class Processor implements Consumer<DataCollectionJob> {
+public class Processor implements Function<DataCollectionJob, List<CityDTO>> {
 
    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
    private final WebScraper scraper;
    
-   private final ServiceBusSenderClient sender;
-
-   public Processor(WebScraper scraper, ServiceBusSenderClient sender) {
+   public Processor(WebScraper scraper) {
     this.scraper = scraper;
-    this.sender = sender;
    }
 
    @Override
-   public void accept(DataCollectionJob job) {
+   public List<CityDTO> apply(DataCollectionJob job) {
        log.info("The job is {}, for route {} -> {}", job.jobId(), job.sourceCity().name(), job.destinationCity().name());
 
        List<RouteInfo> routeInfoList = scraper.scrapeData(job.sourceCity().name(), job.destinationCity().name(), job.dateToCollectResults());
@@ -46,7 +40,7 @@ public class Processor implements Consumer<DataCollectionJob> {
        }
        log.info("All unique routes found: {}", uniqueTransportRouteList);
 
-
+       List<CityDTO> cityDTOs = new ArrayList<>();
        for (RouteInfo routeInfo  : uniqueTransportRouteList) {
            Duration duration;
 
@@ -69,14 +63,10 @@ public class Processor implements Consumer<DataCollectionJob> {
 
            RouteDTO routeDTO = new RouteDTO(job.destinationCity(), 1.0, Double.parseDouble(routeTime), routeInfo.price(), routeInfo.transportType());
            CityDTO cityDTO = new CityDTO(job.sourceCity().id(), job.sourceCity().name(), routeDTO);
-           
-            try {
-                ServiceBusMessage message = new ServiceBusMessage(OBJECT_MAPPER.writeValueAsString(cityDTO));
-                sender.sendMessage(message);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
+           cityDTOs.add(cityDTO);
+            
        }
+       return cityDTOs;
    }
 
 //    public static Duration parseDuration(String timeStr) {
