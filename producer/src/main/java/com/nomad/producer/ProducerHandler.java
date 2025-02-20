@@ -2,7 +2,9 @@ package com.nomad.producer;
 
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.annotation.FunctionName;
+import com.microsoft.azure.functions.annotation.ServiceBusQueueTrigger;
 import com.microsoft.azure.functions.annotation.TimerTrigger;
+import com.nomad.producer.messages.DataCollectionJob;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,5 +37,4 @@ public class ProducerHandler {
 
         this.processAndShutdown.accept(message);
     }
-
 }

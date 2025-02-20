@@ -1,0 +1,31 @@
+
+# To enable ssh & remote debugging on app service change the base image to the one below
+# FROM mcr.microsoft.com/azure-functions/node:2.0-appservice
+FROM mcr.microsoft.com/azure-functions/java:4-nightly-java17
+
+ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
+    AzureFunctionsJobHost__Logging__Console__IsEnabled=true \
+    FUNCTIONS_WORKER_RUNTIME=java
+
+# Base list from https://github.com/ahmelsayed/chrome-headless-func-test/blob/master/Dockerfile
+RUN apt-get update && \
+    apt-get install -y gconf-service libasound2 libatk1.0-0 libatk-bridge2.0-0 libc6 \
+    libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 \
+    libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 \
+    libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 \
+    libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation \
+    libappindicator1 libnss3 lsb-release xdg-utils wget \
+    # For (newer) Chromium
+    libgbm1 \
+    # For WebKit
+    libseccomp2 libxslt1.1 woff2 libevent-dev libopus0 libwebpdemux2 libegl1 libgles2 libgudev-1.0-0
+
+# WebKit requires libjpeg which needs to be built on buster
+RUN apt-get install -y build-essential
+COPY libjpeg.sh /libjpeg.sh
+RUN sh libjpeg.sh
+
+COPY . /home/site/wwwroot
+WORKDIR /home/site/wwwroot
+
+RUN apt-get install -y maven && mvn clean package

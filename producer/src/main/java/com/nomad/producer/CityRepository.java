@@ -1,6 +1,7 @@
 package com.nomad.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nomad.producer.nomad.CityDTO;
 import com.nomad.producer.nomad.City;
 import com.nomad.producer.nomad.Country;
 import com.nomad.producer.nomad.PotentialRoute;
@@ -48,35 +49,35 @@ public class CityRepository {
         return cities.stream().toList();
     }
 
-    // public void saveCityDTOWithDepth0(CityDTO city) {
+    public void saveCityDTOWithDepth0(CityDTO city) {
 
-    //     Map<String, Object> cityAsMap = objectMapper.convertValue(city, Map.class);
+        Map<String, Object> cityAsMap = objectMapper.convertValue(city, Map.class);
 
-    //     neo4jClient.query("""
-    //         MERGE (c:City {id: $id})
+        neo4jClient.query("""
+            MERGE (c:City {id: $id})
           
-    //         WITH c
-    //         UNWIND $routes AS routeData
+            WITH c
+            UNWIND $routes AS routeData
             
-    //         MERGE (t:City {id: routeData.targetCity.id})
+            MERGE (t:City {id: routeData.targetCity.id})
             
-    //         WITH c, t, routeData   
-    //         OPTIONAL MATCH (c)-[r:ROUTE {
-    //                transportType: routeData.transportType
-    //         }]->(t)
-    //         WHERE r.popularity <> routeData.popularity OR r.time <> routeData.time OR r.cost <> routeData.cost
-    //         DELETE r
+            WITH c, t, routeData   
+            OPTIONAL MATCH (c)-[r:ROUTE {
+                   transportType: routeData.transportType
+            }]->(t)
+            WHERE r.popularity <> routeData.popularity OR r.time <> routeData.time OR r.cost <> routeData.cost
+            DELETE r
             
-    //         MERGE (c)-[rel:ROUTE {
-    //             popularity: routeData.popularity,
-    //             time: routeData.time,
-    //             cost: routeData.cost,
-    //             transportType: routeData.transportType
-    //         }]->(t)
-    //         ON CREATE SET rel.id = randomUUID()
-    //     """)
-    //             .bindAll(cityAsMap)
-    //             .run();
+            MERGE (c)-[rel:ROUTE {
+                popularity: routeData.popularity,
+                time: routeData.time,
+                cost: routeData.cost,
+                transportType: routeData.transportType
+            }]->(t)
+            ON CREATE SET rel.id = randomUUID()
+        """)
+                .bindAll(cityAsMap)
+                .run();
 
-    // }
+    }
 }

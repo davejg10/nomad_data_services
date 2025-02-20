@@ -13,7 +13,7 @@ public class ServiceBusConfig {
 
     @Value("${sb_pre_processed_queue_name}")
     private String QUEUE_NAME;
-    @Value("${sb_fqdn_namespace}")
+    @Value("${nomadservicebus__fullyQualifiedNamespace}")
     private String FQDN_NAMESPACE;
 
     @Bean
