@@ -20,7 +20,7 @@ public class ServiceBusConfig {
     @Value("${sb_namespace_fqdn:sbns-dev-uks-nomad-02.servicebus.windows.net}")
     private String FQDN_NAMESPACE;
 
-    @Value(${"AZURE_CLIENT_ID"})
+    @Value("${AZURE_CLIENT_ID}")
     private String AZURE_CLIENT_ID;
 
     @Bean
