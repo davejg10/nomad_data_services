@@ -20,9 +20,12 @@ public class ServiceBusConfig {
     @Value("${sb_namespace_fqdn:sbns-dev-uks-nomad-02.servicebus.windows.net}")
     private String FQDN_NAMESPACE;
 
+    @Value(${"AZURE_CLIENT_ID"})
+    private String AZURE_CLIENT_ID;
+
     @Bean
     public ServiceBusSenderClient clientSender() {
-        TokenCredential credential = new ManagedIdentityCredentialBuilder().build();
+        TokenCredential credential = new ManagedIdentityCredentialBuilder().clientId(AZURE_CLIENT_ID).build();
 
         ServiceBusSenderClient sender = new ServiceBusClientBuilder()
                 .credential(FQDN_NAMESPACE, credential)
@@ -34,7 +37,7 @@ public class ServiceBusConfig {
 
     @Bean
     public ServiceBusReceiverClient clientReciever() {
-        TokenCredential credential = new ManagedIdentityCredentialBuilder().build();
+        TokenCredential credential = new ManagedIdentityCredentialBuilder().clientId(AZURE_CLIENT_ID).build();
 
         ServiceBusReceiverClient receiver = new ServiceBusClientBuilder()
                 .credential(FQDN_NAMESPACE, credential)
