@@ -5,7 +5,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.azure.core.util.IterableStream;
@@ -29,6 +32,9 @@ public class Handler implements CommandLineRunner {
     private final ServiceBusSenderClient sender;
     private final ServiceBusReceiverClient receiver;
     private Function<DataCollectionJob, List<CityDTO>> processor;
+
+    @Autowired
+    private ApplicationContext applicationContext;
     
     public Handler(ServiceBusSenderClient sender, ServiceBusReceiverClient receiver, Function<DataCollectionJob, List<CityDTO>> processor) {
         this.sender = sender;
@@ -40,7 +46,7 @@ public class Handler implements CommandLineRunner {
     public void run(String... args) throws JsonMappingException, JsonProcessingException {
 
         try {
-            Duration timeout = Duration.ofMinutes(5);
+            Duration timeout = Duration.ofMinutes(2);
             long endTime = System.currentTimeMillis() + timeout.toMillis();
             
             while (System.currentTimeMillis() < endTime) {
@@ -77,8 +83,14 @@ public class Handler implements CommandLineRunner {
             log.info("Timeout exeeceded, no messages in 5 mins");
             
         } finally {
+            log.info("Closing client connections...");
             receiver.close();
             sender.close();
+
+            // Add these lines to properly shut down the Spring application
+            log.info("Shutting down application...");
+            SpringApplication.exit(applicationContext, () -> 0);
+            System.exit(0);
         }
     }
 

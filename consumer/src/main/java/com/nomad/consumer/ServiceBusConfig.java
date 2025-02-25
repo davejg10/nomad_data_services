@@ -13,11 +13,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ServiceBusConfig {
 
-    @Value("${sb_processed_queue_name:nomad_processed}")
+    @Value("${sb_processed_queue_name}")
     private String PROCESSED_QUEUE_NAME;
-    @Value("${sb_pre_processed_queue_name:nomad_pre_processed}")
+    @Value("${sb_pre_processed_queue_name}")
     private String PRE_PROCESSED_QUEUE_NAME;
-    @Value("${sb_namespace_fqdn:sbns-dev-uks-nomad-02.servicebus.windows.net}")
+    @Value("${sb_namespace_fqdn}")
     private String FQDN_NAMESPACE;
 
     @Value("${AZURE_CLIENT_ID}")
