@@ -46,7 +46,7 @@ public class Handler implements CommandLineRunner {
     public void run(String... args) throws JsonMappingException, JsonProcessingException {
 
         try {
-            Duration timeout = Duration.ofMinutes(2);
+            Duration timeout = Duration.ofSeconds(30);
             long endTime = System.currentTimeMillis() + timeout.toMillis();
             
             while (System.currentTimeMillis() < endTime) {
@@ -58,10 +58,11 @@ public class Handler implements CommandLineRunner {
 
                 if (iterator.hasNext()) {
                     ServiceBusReceivedMessage message = iterator.next();
+                    log.info("Started processing message: {}", message.getMessageId());
 
                     try {
                         DataCollectionJob job = message.getBody().toObject(DataCollectionJob.class);
-                        log.info("Starting scraping with job: {}", message);
+                        log.info("Started scraping with job: {}", message);
         
                         List<CityDTO> allRoutes = processor.apply(job);
         
@@ -76,6 +77,7 @@ public class Handler implements CommandLineRunner {
                         endTime = System.currentTimeMillis() + timeout.toMillis();
     
                     } catch (Exception e) {
+                        log.info("Abandoning the following message with messageId {}, reason: {}", message.getMessageId(), e.getMessage());
                         receiver.abandon(message);
                     }
                 }
@@ -87,7 +89,6 @@ public class Handler implements CommandLineRunner {
             receiver.close();
             sender.close();
 
-            // Add these lines to properly shut down the Spring application
             log.info("Shutting down application...");
             SpringApplication.exit(applicationContext, () -> 0);
             System.exit(0);

@@ -1,6 +1,5 @@
 package com.nomad.consumer;
 
-import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.consumer.messages.DataCollectionJob;
 import com.nomad.consumer.nomad.*;
