@@ -15,12 +15,10 @@ env:
   NAMESPACE_NAME: nomad-data
   REPOSITORY_NAME: one2goasia
   TAG: ${{ github.run_id }}
+  JAVA_VERSION: '17'
 
 permissions:
   id-token: write
-
-env:
-  JAVA_VERSION: '17'
 
 jobs:
   aca_build-and-deploy:
