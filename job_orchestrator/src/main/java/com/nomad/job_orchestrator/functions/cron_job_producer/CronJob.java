@@ -2,6 +2,7 @@ package com.nomad.job_orchestrator.functions.cron_job_producer;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nomad.library.messages.ScraperJobType;
@@ -19,6 +20,7 @@ record CronJobs(List<CronJob> jobs) {}
 @Log4j2
 record CronJob(String id, ScraperJobType type, String countryName, boolean isActive, String searchDate) {
 
+    @JsonCreator
     public static CronJob create(
         @JsonProperty("id") String id,
         @JsonProperty("type") ScraperJobType type,

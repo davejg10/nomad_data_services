@@ -18,7 +18,7 @@ import java.util.function.BiFunction;
 @Log4j2
 public class CityRepository {
 
-    private final Neo4jClient neo4jClient;
+    private Neo4jClient neo4jClient;
     private final BiFunction<TypeSystem, MapAccessor, City> cityMapper;
     private final BiFunction<TypeSystem, MapAccessor, Country> countryMapper;
 

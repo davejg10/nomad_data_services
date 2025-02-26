@@ -61,8 +61,6 @@
 			<artifactId>spring-boot-starter-log4j2</artifactId>
 		</dependency>
 
-		
-
         <dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
