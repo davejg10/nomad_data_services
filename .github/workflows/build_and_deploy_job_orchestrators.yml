@@ -37,13 +37,7 @@ jobs:
       - name: 'Restore Project Dependencies Using Mvn'
         shell: bash
         run: |
-          ls
-
-          ls ${{ env.MODULE_DIR }}
-          pushd '/${{ env.POM_XML_DIRECTORY }}'
-          ls
-          # mvn clean package -pl job_orchestrator -am
-          popd
+          mvn clean package -pl job_orchestrator -am
 
       - name: Azure CLI Login
         uses: azure/login@v2
