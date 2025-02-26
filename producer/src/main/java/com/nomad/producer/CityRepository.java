@@ -1,10 +1,9 @@
 package com.nomad.producer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nomad.producer.nomad.CityDTO;
-import com.nomad.producer.nomad.City;
-import com.nomad.producer.nomad.Country;
-import com.nomad.producer.nomad.PotentialRoute;
+import com.nomad.library.domain.City;
+import com.nomad.library.domain.Country;
+import com.nomad.producer.domain.PotentialRoute;
+
 import lombok.extern.log4j.Log4j2;
 import org.neo4j.driver.types.MapAccessor;
 import org.neo4j.driver.types.TypeSystem;
@@ -18,8 +17,8 @@ import java.util.function.BiFunction;
 @Configuration
 @Log4j2
 public class CityRepository {
-    private final static ObjectMapper objectMapper = new ObjectMapper();
-    private Neo4jClient neo4jClient;
+
+    private final Neo4jClient neo4jClient;
     private final BiFunction<TypeSystem, MapAccessor, City> cityMapper;
     private final BiFunction<TypeSystem, MapAccessor, Country> countryMapper;
 
@@ -49,9 +48,7 @@ public class CityRepository {
         return cities.stream().toList();
     }
 
-    public void saveCityDTOWithDepth0(CityDTO city) {
-
-        Map<String, Object> cityAsMap = objectMapper.convertValue(city, Map.class);
+    public void saveCityDTOWithDepth0(Map<String, Object> cityAsMap) {
 
         neo4jClient.query("""
             MERGE (c:City {id: $id})

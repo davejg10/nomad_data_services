@@ -2,35 +2,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.2</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<groupId>com.nomad.multi</groupId>
+		<artifactId>data-services</artifactId>
+		<version>1.0</version>
 	</parent>
-	<groupId>com.nomad</groupId>
+
+	<groupId>com.nomad-function</groupId>
 	<artifactId>producer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>producer</name>
-	<description>Demo project for Spring Boot</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
+	<description>Deployed to Azure Function to create web scraping jobs</description>
+
 	<properties>
 		<start-class>com.nomad.producer.ProducerApplication</start-class>
-		<java.version>17</java.version>
 		<version.spring.cloud>2024.0.0</version.spring.cloud>
-		<version.spring.cloud.azure>5.18.0</version.spring.cloud.azure>
 		<!-- Plugins -->
 		<functionResourceGroup>rg-dev-uks-nomad-02</functionResourceGroup>
 		<functionAppName>fa-dev-uks-nomad-02-producer</functionAppName>
@@ -38,17 +25,11 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<!-- Used for spring-cloud-function-adapter-azure below -->
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
 				<version>${version.spring.cloud}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.azure.spring</groupId>
-				<artifactId>spring-cloud-azure-dependencies</artifactId>
-				<version>${version.spring.cloud.azure}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -57,16 +38,11 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-logging</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>com.nomad.library</groupId>
+			<artifactId>common</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-
+		
 		<!-- Used to create Azure Functions -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -78,48 +54,18 @@
 			<artifactId>spring-boot-starter-data-neo4j</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<optional>true</optional>
-		</dependency>
-
 		<!-- Used to read YML file -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-yaml</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-log4j2</artifactId>
-		</dependency>
-
-
-		<!-- Service Bus dependencies -->
-		<dependency>
-			<groupId>com.azure</groupId>
-			<artifactId>azure-messaging-servicebus</artifactId>
-			<version>7.17.8</version>
-		</dependency>
-		<!-- Used to login to Managed Identity	-->
-		<dependency>
-			<groupId>com.azure</groupId>
-			<artifactId>azure-identity</artifactId>
-			<version>1.14.2</version>
-		</dependency>
+	
 		<!-- Used to access Key Vault to pull Neo4j password -->
 		<dependency>
 			<groupId>com.azure</groupId>
 			<artifactId>azure-security-keyvault-secrets</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-
 	</dependencies>
 
 	<build>
