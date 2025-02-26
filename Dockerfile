@@ -10,7 +10,7 @@ ARG MODULE_TO_BUILD
 WORKDIR /app
 
 # Pre-install browsers during image build
-RUN playwright install
+RUN npx playwright install
 
 COPY  /${MODULE_TO_BUILD}/target/*.jar app.jar
 
