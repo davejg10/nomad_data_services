@@ -78,7 +78,6 @@
 					<resourceGroup>${functionResourceGroup}</resourceGroup>
 					<appName>${functionAppName}</appName>
 					<hostJson>${project.basedir}/host.json</hostJson>
-                    <localSettingsJson>${project.basedir}/local.settings.json</localSettingsJson>
 				</configuration>
 				<executions>
 					<execution>
