@@ -37,7 +37,7 @@ jobs:
       - name: 'Restore Project Dependencies Using Mvn'
         shell: bash
         run: |
-          pushd './${{ env.MODULE_DIR }}/${{ env.POM_XML_DIRECTORY }}'
+          pushd '${{ env.MODULE_DIR }}/${{ env.POM_XML_DIRECTORY }}'
           mvn clean package -pl job_orchestrator -am
           popd
 
