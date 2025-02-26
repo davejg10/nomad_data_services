@@ -1,0 +1,50 @@
+name: deploy-one2go-container-app-job
+run-name: Deploy One2GoAsia Container App Job
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: Environment
+        options:
+          - dev
+
+env:
+  WORK_DIR: ./one2goasia
+  ACR_SERVER_NAME: acrglbuksdevopsutils.azurecr.io
+  NAMESPACE_NAME: nomad-data
+  REPOSITORY_NAME: one2goasia
+  TAG: ${{ github.run_id }}
+
+permissions:
+  id-token: write
+
+jobs:
+  aca_build-and-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORK_DIR }}
+    environment: dev
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v3
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: ACR build & push image
+        run: |
+          az acr build \
+            --registry ${{ env.ACR_SERVER_NAME }} \
+            --image "${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" \
+            --build-arg build_version=${{ env.TAG }} .
+
+          # Also tag with latest
+          az acr import --name ${{ env.ACR_SERVER_NAME }} --source "${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" --image ${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:latest --force
+

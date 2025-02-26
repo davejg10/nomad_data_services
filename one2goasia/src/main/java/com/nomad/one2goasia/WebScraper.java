@@ -9,7 +9,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @Log4j2
@@ -61,7 +60,7 @@ public class WebScraper {
            Thread.sleep(500);
 
        } catch (PlaywrightException e) {
-           System.err.println("Scraping error: " + e.getMessage());
+           log.error("Playwright Scraping error: " + e.getMessage());
        } catch (InterruptedException e) {
            throw new RuntimeException(e);
        }
