@@ -2,6 +2,7 @@ package com.nomad.job_orchestrator.functions.processed_queue_consumer;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,11 +22,12 @@ public class ProcessedQueueTrigger {
     private final String sb_processed_queue_name = "nomad_processed";
 
     private final CityRepository cityRepository;
-    private final ObjectMapper objectMapper;
 
-    public ProcessedQueueTrigger(CityRepository cityRepository, ObjectMapper objectMapper) {
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    public ProcessedQueueTrigger(CityRepository cityRepository) {
         this.cityRepository = cityRepository;
-        this.objectMapper = objectMapper;
     }
 
     @FunctionName("processedQueueConsumer")
