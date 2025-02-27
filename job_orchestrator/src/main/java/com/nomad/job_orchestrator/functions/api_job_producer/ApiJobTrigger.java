@@ -30,11 +30,8 @@ public class ApiJobTrigger {
 
     private final String sb_pre_processed_queue_name = "nomad_pre_processed";
 
-    private final ObjectMapper objectMapper;
-
-    public ApiJobTrigger(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
+    @Autowired
+    private ObjectMapper objectMapper;
     
     @FunctionName("apiJobProducer")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
