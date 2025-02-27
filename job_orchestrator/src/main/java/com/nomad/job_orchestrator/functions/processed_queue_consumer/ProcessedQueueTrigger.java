@@ -36,7 +36,7 @@ public class ProcessedQueueTrigger {
         log.info("processedQueueConsumer Azure Function. Triggered with following message {} Service Bus Queue : {}", message, sb_processed_queue_name);
       
         CityDTO cityDTO = objectMapper.readValue(message, CityDTO.class);
-        Map<String, Object> cityAsMap = objectMapper.convertValue(cityDTO,  new TypeReference<Map<String, Object>>() {});
+        Map<String, Object> cityAsMap = objectMapper.convertValue(cityDTO,  Map.class);
         cityRepository.saveCityDTOWithDepth0(cityAsMap);
     }
 
