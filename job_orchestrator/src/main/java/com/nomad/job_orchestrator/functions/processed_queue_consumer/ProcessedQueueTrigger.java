@@ -22,7 +22,7 @@ public class ProcessedQueueTrigger {
 
     private final CityRepository cityRepository;
     
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     public ProcessedQueueTrigger(CityRepository cityRepository) {
         this.cityRepository = cityRepository;

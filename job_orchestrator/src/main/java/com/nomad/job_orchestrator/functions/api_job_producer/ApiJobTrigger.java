@@ -2,7 +2,6 @@ package com.nomad.job_orchestrator.functions.api_job_producer;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,7 +14,6 @@ import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.OutputBinding;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
-import com.microsoft.azure.functions.annotation.HttpOutput;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.microsoft.azure.functions.annotation.ServiceBusQueueOutput;
 import com.nomad.job_orchestrator.domain.HttpRouteRequest;
@@ -30,7 +28,7 @@ public class ApiJobTrigger {
 
     private final String sb_pre_processed_queue_name = "nomad_pre_processed";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static ObjectMapper objectMapper = new ObjectMapper();
     
     @FunctionName("apiJobProducer")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
