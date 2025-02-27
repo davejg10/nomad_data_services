@@ -9,9 +9,6 @@ ARG MODULE_TO_BUILD
 
 WORKDIR /app
 
-ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-
 COPY  /${MODULE_TO_BUILD}/target/*.jar app.jar
 
 # Run the application
