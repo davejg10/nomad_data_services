@@ -21,11 +21,10 @@ public class ProcessedQueueTrigger {
     private final String sb_processed_queue_name = "nomad_processed";
 
     private final CityRepository cityRepository;
-    private final ObjectMapper objectMapper;
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
-    public ProcessedQueueTrigger(CityRepository cityRepository, ObjectMapper objectMapper) {
+    public ProcessedQueueTrigger(CityRepository cityRepository) {
         this.cityRepository = cityRepository;
-        this.objectMapper = objectMapper;
     }
 
     @FunctionName("processedQueueConsumer")
