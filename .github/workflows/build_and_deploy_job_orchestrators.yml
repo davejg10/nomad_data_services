@@ -61,3 +61,4 @@ jobs:
           publish-profile: ${{ env.PUBLISH_PROFILE }}
           sku: flexconsumption
           respect-pom-xml: true
+        
