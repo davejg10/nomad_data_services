@@ -5,7 +5,6 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.annotation.FunctionName;
@@ -30,13 +29,13 @@ public class ProcessedQueueTrigger {
     }
 
     @FunctionName("processedQueueConsumer")
-    public void execute(@ServiceBusQueueTrigger(name = "msg", queueName = sb_processed_queue_name, connection = "nomadservicebus") String message, String id,
+    public void execute(@ServiceBusQueueTrigger(name = "msg", queueName = sb_processed_queue_name, connection = "nomadservicebus") String message,
                         ExecutionContext context) throws JsonProcessingException {
 
         log.info("processedQueueConsumer Azure Function. Triggered with following message {} Service Bus Queue : {}", message, sb_processed_queue_name);
       
         CityDTO cityDTO = objectMapper.readValue(message, CityDTO.class);
-        Map<String, Object> cityAsMap = objectMapper.convertValue(cityDTO,  new TypeReference<Map<String, Object>>() {});
+        Map<String, Object> cityAsMap = objectMapper.convertValue(cityDTO,  Map.class);
         cityRepository.saveCityDTOWithDepth0(cityAsMap);
     }
 

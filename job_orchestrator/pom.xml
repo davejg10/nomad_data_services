@@ -9,14 +9,13 @@
 		<version>1.0</version>
 	</parent>
 
-	<groupId>com.nomad.</groupId>
+	<groupId>com.nomad.job_orchestrator</groupId>
 	<artifactId>job_orchestrator</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>job_orchestrator</name>
 	<description>Deployed to Azure Function to create web scraping jobs</description>
 
 	<properties>
-		<start-class>com.nomad.producer.JobOrchestratorApplication</start-class>
+		<start-class>com.nomad.job_orchestrator.JobOrchestratorApplication</start-class>
 		<version.spring.cloud>2024.0.0</version.spring.cloud>
 		<!-- Plugins -->
 		<functionResourceGroup>rg-dev-uks-nomad-02</functionResourceGroup>
@@ -41,7 +40,7 @@
 			<groupId>com.nomad.library</groupId>
 			<artifactId>common</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+		</dependency>    
 		
 		<!-- Used to create Azure Functions -->
 		<dependency>

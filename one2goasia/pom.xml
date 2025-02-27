@@ -26,7 +26,8 @@
 		<dependency>
 			<groupId>com.microsoft.playwright</groupId>
 			<artifactId>playwright</artifactId>
-			<version>1.50.0</version>
+			<!-- This version should be same version as used in Dockerfile, else it will reinstall browsers. -->
+			<version>1.49.0</version> 
 		</dependency>
 
 	</dependencies>

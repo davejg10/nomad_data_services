@@ -1,4 +1,4 @@
-package com.nomad.consumer;
+package com.nomad.one2goasia;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
