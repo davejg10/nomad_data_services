@@ -23,7 +23,7 @@ public class CronJobProcessor {
 
     private final CityRepository cityRepository;
 
-    public CronJobProcessor(CityRepository cityRepository, ObjectMapper objectMapper) {
+    public CronJobProcessor(CityRepository cityRepository) {
         this.cityRepository = cityRepository;
     }
 

@@ -2,6 +2,7 @@ package com.nomad.job_orchestrator.functions.api_job_producer;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,7 +29,12 @@ import lombok.extern.log4j.Log4j2;
 public class ApiJobTrigger {
 
     private final String sb_pre_processed_queue_name = "nomad_pre_processed";
-    private static ObjectMapper objectMapper = new ObjectMapper();
+
+    private final ObjectMapper objectMapper;
+
+    public ApiJobTrigger(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
     
     @FunctionName("apiJobProducer")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
