@@ -11,7 +11,5 @@ WORKDIR /app
 
 COPY  /${MODULE_TO_BUILD}/target/*.jar app.jar
 
-RUN apt-get install libgtk-4-1 -y
-
 # Run the application
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

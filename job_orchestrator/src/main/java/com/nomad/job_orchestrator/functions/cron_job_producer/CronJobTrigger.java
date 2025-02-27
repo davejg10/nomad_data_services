@@ -26,7 +26,7 @@ public class CronJobTrigger {
     private ServiceBusBatchSender serviceBusBatchSender;
 
     @FunctionName("cronJobProducer")
-    public void execute(@TimerTrigger(name = "keepAliveTrigger", schedule = "0 * * * * *") String timerInfo,
+    public void execute(@TimerTrigger(name = "keepAliveTrigger", schedule = "0 */10 * * *") String timerInfo,
                         ExecutionContext context) throws StreamReadException, DatabindException, IOException {
 
         List<ScraperJob> scraperJobs = cronJobProcessor.generateScraperJobs();
