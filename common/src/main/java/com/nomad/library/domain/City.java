@@ -4,12 +4,14 @@ import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 // public record City(String id, String name, Country country) {}
 @Node
 @Getter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class City {
     @Id
     private final String id;
