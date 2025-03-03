@@ -22,7 +22,7 @@ permissions:
 jobs:
   build-and-deploy:
     env:
-      FUNCTION_APP_NAME: fa-${{ github.event.inputs.environment }}-uks-nomad-02-admin-apo
+      FUNCTION_APP_NAME: fa-${{ github.event.inputs.environment }}-uks-nomad-02-admin-api
       FUNCTION_APP_RG_NAME: rg-${{ github.event.inputs.environment }}-uks-nomad-02
     runs-on: ubuntu-latest
     environment: dev
