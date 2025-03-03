@@ -18,7 +18,6 @@ import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.nomad.admin_api.Neo4jRepository;
 import com.nomad.admin_api.SqlCountryRepository;
 
-import com.nomad.admin_api.domain.CountryDTO;
 import com.nomad.admin_api.domain.SqlCountry;
 import com.nomad.library.domain.Country;
 
