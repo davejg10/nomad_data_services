@@ -28,14 +28,14 @@ public class Neo4jRepository {
     }
 
     public Country syncCountry(SqlCountry country) {
-
-        Country neo4jCountry = neo4jClient
+        try {
+            Country neo4jCountry = neo4jClient
             .query("""
                 MERGE (country:Country {id: $id})
                 ON CREATE SET country.name = $name
                 RETURN country
             """)
-            .bind(country.getId()).to("id")
+            .bind(country.getId().toString()).to("id")
             .bind(country.getName()).to("name")
             .fetchAs(Country.class)
             .mappedBy((typeSystem, record) -> {
@@ -43,6 +43,12 @@ public class Neo4jRepository {
             })
             .first()
             .get();
-        return neo4jCountry;
+            return neo4jCountry;
+        } catch (Exception e) {
+            log.info("Exception when trying to sync country; {}", e );
+            throw e;
+        }
+
+        
     }
 }
