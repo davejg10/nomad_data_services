@@ -1,11 +1,14 @@
 package com.nomad.admin_api.domain;
 
+import java.util.UUID;
+
 import org.springframework.data.annotation.Id;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Table;
 import lombok.Getter;
 
@@ -15,7 +18,8 @@ import lombok.Getter;
 public class SqlCountry {
 
     @Id
-    private final String id;
+    @GeneratedValue
+    private final UUID id;
 
     private final String name;
 
@@ -27,7 +31,7 @@ public class SqlCountry {
         return new SqlCountry(null, name, description);
     }
 
-    public SqlCountry(String id, String name, String description) {
+    public SqlCountry(UUID id, String name, String description) {
         this.id = id;
         this.name = name;
         this.description = description;
