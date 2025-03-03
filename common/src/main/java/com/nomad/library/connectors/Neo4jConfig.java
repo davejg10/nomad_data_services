@@ -7,8 +7,6 @@ import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Config;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.neo4j.core.Neo4jClient;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.DefaultAzureCredentialBuilder;
@@ -29,8 +27,7 @@ public class Neo4jConfig {
         this.neo4jPasswordKey =neo4jPasswordKey;
     }
 
-
-    public Neo4jClient neo4jClient() {
+    public Driver neo4jDriver() {
         // Get Key Vault secrets using Azure SDK
         TokenCredential credential = new DefaultAzureCredentialBuilder().build();
 
@@ -50,11 +47,8 @@ public class Neo4jConfig {
                 .build();
 
         // Return configured Neo4j driver
-        Driver driver =  GraphDatabase.driver(neo4jUri, authToken, config);
+        Driver driver = GraphDatabase.driver(neo4jUri, authToken, config);
 
-        return Neo4jClient.create(driver);
+        return driver;
     }
-
-
-
 }

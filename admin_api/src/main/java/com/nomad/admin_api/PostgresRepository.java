@@ -7,8 +7,8 @@ import java.sql.SQLException;
 
 import org.springframework.stereotype.Repository;
 
-import com.nomad.admin_api.domain.Country;
 import com.nomad.admin_api.domain.CountryDTO;
+import com.nomad.library.domain.Country;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -48,6 +48,6 @@ public class PostgresRepository {
         String uuid = rs.getString(1);
         log.info("Country %s inserted", rs.getString(2));
 
-        return new Country(uuid, countryDTO.name(), countryDTO.description());            
+        return new Country(uuid, countryDTO.name());            
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 import org.springframework.stereotype.Repository;
 
-import com.nomad.admin_api.domain.Country;
+import com.nomad.library.domain.Country;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -34,8 +34,8 @@ public class Neo4jRepository {
                 ON CREATE SET country.name = $name
                 RETURN country
             """)
-            .bind(country.id()).to("id")
-            .bind(country.name()).to("name")
+            .bind(country.getId()).to("id")
+            .bind(country.getName()).to("name")
             .fetchAs(Country.class)
             .mappedBy((typeSystem, record) -> {
                 return countryMapper.apply(typeSystem, record.get("country").asNode());

@@ -17,8 +17,8 @@ import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.nomad.admin_api.Neo4jRepository;
 import com.nomad.admin_api.PostgresRepository;
-import com.nomad.admin_api.domain.Country;
 import com.nomad.admin_api.domain.CountryDTO;
+import com.nomad.library.domain.Country;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -47,11 +47,11 @@ public class CreateCountry {
             log.info("createCountry function hit. Request body is {}", countryToBeCreated);
 
             Country country = postgresRepository.createCountry(countryToBeCreated);
-            log.info("Created country in PostgreSQL flexible server with id: {}, and name: {}", country.id(), country.name());
+            log.info("Created country in PostgreSQL flexible server with id: {}, and name: {}", country.getId(), country.getName());
 
             Country neo4jCountry = neo4jRepository.syncCountry(country);
 
-            log.info("Synced country to Neo4j database with id {}, and name: {}", neo4jCountry.id(), neo4jCountry.name());
+            log.info("Synced country to Neo4j database with id {}, and name: {}", neo4jCountry.getId(), neo4jCountry.getName());
             return request.createResponseBuilder(HttpStatus.OK).body("Successfully created Country " + countryToBeCreated.name() + " in PostgreSQl flexible server & synced to Neo4j.").build();
         }
     }
