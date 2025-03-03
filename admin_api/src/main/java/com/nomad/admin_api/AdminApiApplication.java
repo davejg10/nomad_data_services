@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 @SpringBootApplication
-@EntityScan(basePackages = {"com.nomad.library.domain"}) // Required for the Neo4j Entities
+@EntityScan(basePackages = {"com.nomad.library.domain", "com.nomad.admin_api.domain" }) // Required for the Neo4j Entities
 public class AdminApiApplication {
     
     public static void main(String[] args) {
