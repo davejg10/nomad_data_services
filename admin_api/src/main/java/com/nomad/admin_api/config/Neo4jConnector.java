@@ -23,10 +23,12 @@ public class Neo4jConnector {
     private String neo4j_user;
     @Value("${neo4j_password_key}")
     private String neo4j_password_key;
+    @Value("${azure_client_id}")
+    private String AZURE_CLIENT_ID;
 
     @Bean
     public Driver neo4jDriver() {
-        return new Neo4jConfig(key_vault_uri, neo4j_uri, neo4j_user, neo4j_password_key).neo4jDriver();
+        return new Neo4jConfig(AZURE_CLIENT_ID, key_vault_uri, neo4j_uri, neo4j_user, neo4j_password_key).neo4jDriver();
     }
 
     @Bean
