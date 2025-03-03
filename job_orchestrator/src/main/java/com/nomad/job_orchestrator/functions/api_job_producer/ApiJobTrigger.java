@@ -15,7 +15,6 @@ import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.OutputBinding;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
-import com.microsoft.azure.functions.annotation.HttpOutput;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.microsoft.azure.functions.annotation.ServiceBusQueueOutput;
 import com.nomad.job_orchestrator.domain.HttpRouteRequest;

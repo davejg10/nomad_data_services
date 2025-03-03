@@ -23,6 +23,7 @@
 		<module>common</module>
         <module>one2goasia</module>
         <module>job_orchestrator</module>
+        <module>admin_api</module>
     </modules>
 
     <properties>
@@ -73,11 +74,7 @@
 			<scope>test</scope>
 		</dependency>
 
-        <!-- Service Bus dependencies -->
-        <dependency>
-			<groupId>com.azure</groupId>
-			<artifactId>azure-messaging-servicebus</artifactId>
-		</dependency>
+        
         <!-- Used to login to Managed Identity	-->
         <dependency>
 			<groupId>com.azure</groupId>

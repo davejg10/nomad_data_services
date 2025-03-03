@@ -30,6 +30,12 @@
 			<version>1.49.0</version> 
 		</dependency>
 
+		<!-- Service Bus dependencies -->
+        <dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-messaging-servicebus</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>

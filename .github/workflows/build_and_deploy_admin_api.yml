@@ -1,6 +1,5 @@
-
-name: deploy-admin-api-azure-functions
-run-name: Deploy Admin-Api Azure Functions
+name: deploy-job-orchestrator-azure-functions
+run-name: Deploy Job-Orchestrator Azure Functions
 
 on:
   workflow_dispatch:
@@ -14,7 +13,7 @@ on:
 env:
   POM_XML_DIRECTORY: '.'
   JAVA_VERSION: '17'
-  MODULE_DIR: ./admin_api
+  MODULE_DIR: ./job_orchestrator
 
 permissions:
   id-token: write
@@ -22,7 +21,7 @@ permissions:
 jobs:
   build-and-deploy:
     env:
-      FUNCTION_APP_NAME: fa-${{ github.event.inputs.environment }}-uks-nomad-02-admin-api
+      FUNCTION_APP_NAME: fa-${{ github.event.inputs.environment }}-uks-nomad-02-job-orchestrator
       FUNCTION_APP_RG_NAME: rg-${{ github.event.inputs.environment }}-uks-nomad-02
     runs-on: ubuntu-latest
     environment: dev
@@ -38,7 +37,7 @@ jobs:
       - name: 'Restore Project Dependencies Using Mvn'
         shell: bash
         run: |
-          mvn clean package -pl admin_api -am
+          mvn clean package -pl job_orchestrator -am
 
       - name: Azure CLI Login
         uses: azure/login@v2
