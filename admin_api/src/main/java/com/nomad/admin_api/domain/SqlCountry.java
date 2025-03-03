@@ -11,19 +11,21 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "country")
 @Getter
+@NoArgsConstructor
 public class SqlCountry {
 
     @Id
     @GeneratedValue
-    private final UUID id;
+    private UUID id;
 
-    private final String name;
+    private String name;
 
-    private final String description;
+    private String description;
 
     @JsonCreator
     public SqlCountry of(@JsonProperty("name") String name,
