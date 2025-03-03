@@ -3,6 +3,7 @@ package com.nomad.admin_api.functions.create_country;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,8 +45,14 @@ public class CreateCountry {
         } else {
             SqlCountry countryToBeCreated = objectMapper.readValue(request.getBody().get(), SqlCountry.class);
             log.info("createCountry function hit. Request body is {}", countryToBeCreated);
+            SqlCountry country;
+            try {
+                country = countryRepository.save(countryToBeCreated);
+            } catch (DataIntegrityViolationException  e) {
+                log.error("There was an issue saving the country {} in the Postgres Flexible server. Likely a bad requst. Message; {}", e.getMessage());
+                return request.createResponseBuilder(HttpStatus.BANDWIDTH_LIMIT_EXCEEDED).body("Issue creating Country " + countryToBeCreated.getName() + " Issue: " + e.getMessage()).build();
+            }
 
-            SqlCountry country = countryRepository.save(countryToBeCreated);
             log.info("Created country in PostgreSQL flexible server with id: {}, and name: {}", country.getId(), country.getName());
 
             Country neo4jCountry = neo4jRepository.syncCountry(country);
