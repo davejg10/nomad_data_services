@@ -69,7 +69,7 @@ public class Neo4jRepository {
             """)
             .bind(city.getId().toString()).to("id")
             .bind(city.getName()).to("name")
-            .bind(city.getCountryId()).to("countryId")
+            .bind(city.getCountryId().toString()).to("countryId")
             .fetchAs(City.class)
             .mappedBy((typeSystem, record) -> {
                 return cityMapper.apply(typeSystem, record.get("c").asNode());
@@ -78,7 +78,7 @@ public class Neo4jRepository {
             .get();
             return neo4jCity;
         } catch (Exception e) {
-            log.info("Exception when trying to sync country; {}", e );
+            log.info("Exception when trying to sync city; {}", e );
             throw e;
         }
     }
