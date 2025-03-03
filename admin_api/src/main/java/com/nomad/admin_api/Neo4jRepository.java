@@ -8,6 +8,7 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 import org.springframework.stereotype.Repository;
 
+import com.nomad.admin_api.domain.SqlCountry;
 import com.nomad.library.domain.Country;
 
 import lombok.extern.log4j.Log4j2;
@@ -26,7 +27,7 @@ public class Neo4jRepository {
         this.countryMapper = schema.getRequiredMappingFunctionFor(Country.class);
     }
 
-    public Country syncCountry(Country country) {
+    public Country syncCountry(SqlCountry country) {
 
         Country neo4jCountry = neo4jClient
             .query("""
