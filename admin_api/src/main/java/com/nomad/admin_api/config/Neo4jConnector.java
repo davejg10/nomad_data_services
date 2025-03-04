@@ -7,11 +7,13 @@ import lombok.extern.log4j.Log4j2;
 import org.neo4j.driver.Driver;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.core.Neo4jClient;
 
 @Log4j2
+@ConditionalOnProperty(name="disableInTest", havingValue="true", matchIfMissing=true)
 @Configuration
 public class Neo4jConnector {
 

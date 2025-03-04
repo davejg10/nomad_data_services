@@ -48,7 +48,7 @@ public class CreateCountry {
                 SqlCountry countryToBeCreated = objectMapper.readValue(request.getBody().get(), SqlCountry.class);
                 log.info("createCountry function hit. Request body is {}", countryToBeCreated);
             
-                createAndSyncCountry(countryToBeCreated);
+                // createAndSyncCountry(countryToBeCreated);
 
                 return request.createResponseBuilder(HttpStatus.OK).body("Successfully created Country " + countryToBeCreated.getName() + " in PostgreSQl flexible server & synced to Neo4j.").build();
 
@@ -59,21 +59,21 @@ public class CreateCountry {
         }
     }
 
-    // This ensures the transaction is rolled back if we fail to sync the Country to the neo4j db
-    @Transactional(
-        value = "transactionManager",
-        rollbackFor = {Exception.class}
-    )
-    public void createAndSyncCountry(SqlCountry countryToBeCreated) {
-        try {
-            SqlCountry country = countryRepository.save(countryToBeCreated);
-            log.info("Created country in PostgreSQL flexible server with id: {}, and name: {}", country.getId(), country.getName());
+    // // This ensures the transaction is rolled back if we fail to sync the Country to the neo4j db
+    // @Transactional(
+    //     value = "transactionManager",
+    //     rollbackFor = {Exception.class}
+    // )
+    // public void createAndSyncCountry(SqlCountry countryToBeCreated) {
+    //     try {
+    //         SqlCountry country = countryRepository.save(countryToBeCreated);
+    //         log.info("Created country in PostgreSQL flexible server with id: {}, and name: {}", country.getId(), country.getName());
 
-            Country neo4jCountry = neo4jRepository.syncCountry(country);
-            log.info("Synced country to Neo4j database with id {}, and name: {}", neo4jCountry.getId(), neo4jCountry.getName());
-        } catch (Exception e) {
-            log.error("Failed to save country: {} to Postgres OR Neo4j. Rolling backing transactions. Error: {}", countryToBeCreated.getName(), e);
-            throw new RuntimeException("Failed to save country: " + countryToBeCreated.getName() + " to Postgres OR Neo4j. Rolling backing transactions.", e);
-        }
-    }
+    //         Country neo4jCountry = neo4jRepository.syncCountry(country);
+    //         log.info("Synced country to Neo4j database with id {}, and name: {}", neo4jCountry.getId(), neo4jCountry.getName());
+    //     } catch (Exception e) {
+    //         log.error("Failed to save country: {} to Postgres OR Neo4j. Rolling backing transactions. Error: {}", countryToBeCreated.getName(), e);
+    //         throw new RuntimeException("Failed to save country: " + countryToBeCreated.getName() + " to Postgres OR Neo4j. Rolling backing transactions.", e);
+    //     }
+    // }
 }

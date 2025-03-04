@@ -53,7 +53,7 @@ public class CreateCity {
                 CityDTO cityToBeCreated = objectMapper.readValue(request.getBody().get(), CityDTO.class);
                 log.info("createCity function hit. Request body is {}", cityToBeCreated);
 
-                createAndSyncCity(cityToBeCreated);
+                // createAndSyncCity(cityToBeCreated);
 
                 return request.createResponseBuilder(HttpStatus.OK).body("Successfully created City " + cityToBeCreated.name() + " in PostgreSQl flexible server & synced to Neo4j.").build();
 
@@ -64,29 +64,29 @@ public class CreateCity {
         }
     }
 
-    // This ensures the transaction is rolled back if we fail to sync the Country to the neo4j db
-    @Transactional(
-        value = "transactionManager",
-        rollbackFor = {Exception.class}
-    )
-    public void createAndSyncCity(CityDTO cityToBeCreated) {
-        try {
-            SqlCountry citiesCountry = countryRepository.findByName(cityToBeCreated.countryName()).get();
-            SqlCity city = SqlCity.of(cityToBeCreated.name(), cityToBeCreated.description(), citiesCountry.getId());
+    // // This ensures the transaction is rolled back if we fail to sync the Country to the neo4j db
+    // @Transactional(
+    //     value = "transactionManager",
+    //     rollbackFor = {Exception.class}
+    // )
+    // public void createAndSyncCity(CityDTO cityToBeCreated) {
+    //     try {
+    //         SqlCountry citiesCountry = countryRepository.findByName(cityToBeCreated.countryName()).get();
+    //         SqlCity city = SqlCity.of(cityToBeCreated.name(), cityToBeCreated.description(), citiesCountry.getId());
             
-            city = cityRepository.save(city);
+    //         city = cityRepository.save(city);
 
-            log.info("Created city in PostgreSQL flexible server with id: {}, and name: {}", city.getId(), city.getName());
+    //         log.info("Created city in PostgreSQL flexible server with id: {}, and name: {}", city.getId(), city.getName());
 
-            City neo4jCity = neo4jRepository.syncCity(city);
+    //         City neo4jCity = neo4jRepository.syncCity(city);
 
-            log.info("Synced city to Neo4j database with id {}, and name: {}", neo4jCity.getId(), neo4jCity.getName());
+    //         log.info("Synced city to Neo4j database with id {}, and name: {}", neo4jCity.getId(), neo4jCity.getName());
 
-        } catch (Exception e) {
-            log.error("Failed to save city: {} to Postgres OR Neo4j. Rolling backing transactions. Error: {}", cityToBeCreated.name(), e);
-            throw new RuntimeException("Failed to save city: " + cityToBeCreated.name() + " to Postgres OR Neo4j. Rolling backing transactions.", e);
-        }
+    //     } catch (Exception e) {
+    //         log.error("Failed to save city: {} to Postgres OR Neo4j. Rolling backing transactions. Error: {}", cityToBeCreated.name(), e);
+    //         throw new RuntimeException("Failed to save city: " + cityToBeCreated.name() + " to Postgres OR Neo4j. Rolling backing transactions.", e);
+    //     }
         
-    }
+    // }
     
 }

@@ -28,7 +28,7 @@ public class SqlCountry {
     private String description;
 
     @JsonCreator
-    public SqlCountry of(@JsonProperty("name") String name,
+    public static SqlCountry of(@JsonProperty("name") String name,
                          @JsonProperty("description") String description) {
         return new SqlCountry(null, name, description);
     }
