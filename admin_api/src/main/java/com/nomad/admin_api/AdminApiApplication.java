@@ -3,9 +3,11 @@ package com.nomad.admin_api;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@EntityScan(basePackages = {"com.nomad.library.domain", "com.nomad.admin_api.domain" }) // Required for the Neo4j Entities
+@EntityScan(basePackages = {"com.nomad.library.domain"})
+@EnableJpaRepositories({"com.nomad.library.repositories"})
 public class AdminApiApplication {
     
     public static void main(String[] args) {

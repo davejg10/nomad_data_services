@@ -1,5 +1,5 @@
 package com.nomad.library.messages;
 
-import com.nomad.library.domain.City;
+import com.nomad.library.domain.Neo4jCity;
 
-public record ScraperJob(String scraperJobSource, ScraperJobType type, City sourceCity, City destinationCity, String searchDate) {}
+public record ScraperJob(String scraperJobSource, ScraperJobType type, Neo4jCity sourceCity, Neo4jCity destinationCity, String searchDate) {}

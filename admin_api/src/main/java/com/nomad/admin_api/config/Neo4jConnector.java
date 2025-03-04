@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.core.Neo4jClient;
 
 @Log4j2
-@ConditionalOnProperty(name="disableInTest", havingValue="true", matchIfMissing=true)
+@ConditionalOnProperty(name="disableInTest", havingValue="true", matchIfMissing=true) // This just means we dont load the class in testing. For testing we provider our own Neo4jClient using a test-harness
 @Configuration
 public class Neo4jConnector {
 

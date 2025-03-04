@@ -1,7 +1,6 @@
-package com.nomad.admin_api.domain;
+package com.nomad.library.domain;
 
 import java.util.UUID;
-
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,11 +11,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "country")
 @Getter
 @NoArgsConstructor
+@ToString
 public class SqlCountry {
 
     @Id
@@ -29,7 +30,7 @@ public class SqlCountry {
 
     @JsonCreator
     public static SqlCountry of(@JsonProperty("name") String name,
-                         @JsonProperty("description") String description) {
+                                @JsonProperty("description") String description) {
         return new SqlCountry(null, name, description);
     }
 
@@ -38,5 +39,7 @@ public class SqlCountry {
         this.name = name;
         this.description = description;
     }
+
+
 
 }

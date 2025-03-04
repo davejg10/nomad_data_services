@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.functions.HttpMethod;
@@ -14,11 +13,7 @@ import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
-import com.nomad.admin_api.Neo4jRepository;
-import com.nomad.admin_api.SqlCountryRepository;
-
-import com.nomad.admin_api.domain.SqlCountry;
-import com.nomad.library.domain.Country;
+import com.nomad.library.domain.SqlCountry;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -30,10 +25,7 @@ public class CreateCountry {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private SqlCountryRepository countryRepository;
-
-    @Autowired
-    private Neo4jRepository neo4jRepository;
+    private CreateCountryHandler createCountryHandler;
 
     @FunctionName("createCountry")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
@@ -49,6 +41,7 @@ public class CreateCountry {
                 log.info("createCountry function hit. Request body is {}", countryToBeCreated);
             
                 // createAndSyncCountry(countryToBeCreated);
+                createCountryHandler.accept(countryToBeCreated);
 
                 return request.createResponseBuilder(HttpStatus.OK).body("Successfully created Country " + countryToBeCreated.getName() + " in PostgreSQl flexible server & synced to Neo4j.").build();
 
@@ -58,22 +51,4 @@ public class CreateCountry {
             }
         }
     }
-
-    // // This ensures the transaction is rolled back if we fail to sync the Country to the neo4j db
-    // @Transactional(
-    //     value = "transactionManager",
-    //     rollbackFor = {Exception.class}
-    // )
-    // public void createAndSyncCountry(SqlCountry countryToBeCreated) {
-    //     try {
-    //         SqlCountry country = countryRepository.save(countryToBeCreated);
-    //         log.info("Created country in PostgreSQL flexible server with id: {}, and name: {}", country.getId(), country.getName());
-
-    //         Country neo4jCountry = neo4jRepository.syncCountry(country);
-    //         log.info("Synced country to Neo4j database with id {}, and name: {}", neo4jCountry.getId(), neo4jCountry.getName());
-    //     } catch (Exception e) {
-    //         log.error("Failed to save country: {} to Postgres OR Neo4j. Rolling backing transactions. Error: {}", countryToBeCreated.getName(), e);
-    //         throw new RuntimeException("Failed to save country: " + countryToBeCreated.getName() + " to Postgres OR Neo4j. Rolling backing transactions.", e);
-    //     }
-    // }
 }

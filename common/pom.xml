@@ -20,11 +20,18 @@
             <artifactId>spring-boot-starter-data-neo4j</artifactId>
         </dependency>
 
-      <!-- Used to access Key Vault to pull Neo4j password -->
+        <!-- Used to access Key Vault to pull Neo4j password -->
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-security-keyvault-secrets</artifactId>
         </dependency>
+
+        <!-- Required for @Table @Entity annotations -->
+        <dependency>
+        	<groupId>org.springframework.boot</groupId>
+        	<artifactId>spring-boot-starter-data-jpa</artifactId>
+    	</dependency>
+       
     </dependencies>
 
 </project>

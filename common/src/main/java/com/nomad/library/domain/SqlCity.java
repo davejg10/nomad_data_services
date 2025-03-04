@@ -1,4 +1,4 @@
-package com.nomad.admin_api.domain;
+package com.nomad.library.domain;
 
 import java.util.UUID;
 
@@ -10,11 +10,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "city")
 @Getter
 @NoArgsConstructor
+@ToString
 public class SqlCity {
 
     @Id

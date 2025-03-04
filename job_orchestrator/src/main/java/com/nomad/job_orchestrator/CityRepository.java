@@ -1,7 +1,7 @@
 package com.nomad.job_orchestrator;
 
-import com.nomad.library.domain.City;
-import com.nomad.library.domain.Country;
+import com.nomad.library.domain.Neo4jCity;
+import com.nomad.library.domain.Neo4jCountry;
 import com.nomad.job_orchestrator.domain.PotentialRoute;
 
 import lombok.extern.log4j.Log4j2;
@@ -19,13 +19,13 @@ import java.util.function.BiFunction;
 public class CityRepository {
 
     private Neo4jClient neo4jClient;
-    private final BiFunction<TypeSystem, MapAccessor, City> cityMapper;
-    private final BiFunction<TypeSystem, MapAccessor, Country> countryMapper;
+    private final BiFunction<TypeSystem, MapAccessor, Neo4jCity> cityMapper;
+    private final BiFunction<TypeSystem, MapAccessor, Neo4jCountry> countryMapper;
 
     public CityRepository(Neo4jClient neo4jClient, Neo4jMappingContext schema) {
         this.neo4jClient = neo4jClient;
-        this.cityMapper = schema.getRequiredMappingFunctionFor(City.class);
-        this.countryMapper = schema.getRequiredMappingFunctionFor(Country.class);
+        this.cityMapper = schema.getRequiredMappingFunctionFor(Neo4jCity.class);
+        this.countryMapper = schema.getRequiredMappingFunctionFor(Neo4jCountry.class);
     }
 
     public List<PotentialRoute> routeDiscoveryGivenCountry(String countryName) {
@@ -39,9 +39,9 @@ public class CityRepository {
                 .bind(countryName).to("countryName")
                 .fetchAs(PotentialRoute.class)
                 .mappedBy((typeSystem, record) -> {
-                    City sourceCity = cityMapper.apply(typeSystem, record.get("source").asNode());
-                    City destinationCity = cityMapper.apply(typeSystem, record.get("dest").asNode());
-                    Country country = countryMapper.apply(typeSystem, record.get("country").asNode());
+                    Neo4jCity sourceCity = cityMapper.apply(typeSystem, record.get("source").asNode());
+                    Neo4jCity destinationCity = cityMapper.apply(typeSystem, record.get("dest").asNode());
+                    Neo4jCountry country = countryMapper.apply(typeSystem, record.get("country").asNode());
                     return new PotentialRoute(sourceCity.withCountry(country), destinationCity.withCountry(country));
                 })
                 .all();

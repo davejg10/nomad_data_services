@@ -8,26 +8,24 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
-// public record City(String id, String name, Country country) {}
-@Node
+import lombok.ToString;
+
+// public record Country(String id, String name) {}
+@Node("Country")
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class City {
+@ToString
+public class Neo4jCountry {
     @Id
     private final String id;
     private final String name;
-    private Country country;
-    
+
     @JsonCreator
-    public City(@JsonProperty("id") String id,
-                @JsonProperty("name") String name,
-                @JsonProperty("country") Country country) {
+    public Neo4jCountry(@JsonProperty("id") String id,
+                   @JsonProperty("name") String name) {
+
         this.id = id;
         this.name = name;
-        this.country = country;
-    }
-
-    public City withCountry(Country country) {
-        return new City(this.id, this.name, country);
     }
 }
+
