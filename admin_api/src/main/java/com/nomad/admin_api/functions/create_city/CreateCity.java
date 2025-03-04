@@ -2,10 +2,7 @@ package com.nomad.admin_api.functions.create_city;
 
 import java.util.Optional;
 
-import javax.net.ssl.SSLEngineResult;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +20,6 @@ import com.nomad.admin_api.domain.CityDTO;
 import com.nomad.admin_api.domain.SqlCity;
 import com.nomad.admin_api.domain.SqlCountry;
 import com.nomad.library.domain.City;
-import com.nomad.library.domain.Country;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -51,7 +47,6 @@ public class CreateCity {
             log.info("Unable to read request body. Is empty");
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Unable to read request body.").build();
         } else {
-            
 
             try {
                 CityDTO cityToBeCreated = objectMapper.readValue(request.getBody().get(), CityDTO.class);
@@ -69,11 +64,10 @@ public class CreateCity {
 
                 return request.createResponseBuilder(HttpStatus.OK).body("Successfully created City " + cityToBeCreated.name() + " in PostgreSQl flexible server & synced to Neo4j.").build();
 
-            } catch (DataIntegrityViolationException  e) {
+            } catch (Exception  e) {
                 log.error("There was an issue saving the country {} in the Postgres Flexible server. Likely a bad requst. Message; {}", e.getMessage());
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Issue creating City. Issue: " + e.getMessage()).build();
-            }
-
+            } 
         }
     } 
     
