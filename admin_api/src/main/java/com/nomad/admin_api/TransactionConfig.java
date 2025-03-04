@@ -26,7 +26,6 @@ public class TransactionConfig {
     }
 
     // Combine PostgreSQL & Neo4j into a single transaction
-    @Bean(name = "chainedTransactionManager")
     public ChainedTransactionManager transactionManager(
             PlatformTransactionManager postgresTransactionManager,
             PlatformTransactionManager neo4jTransactionManager) {

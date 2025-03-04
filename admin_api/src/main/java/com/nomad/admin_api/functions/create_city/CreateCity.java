@@ -66,7 +66,7 @@ public class CreateCity {
 
     // This ensures the transaction is rolled back if we fail to sync the Country to the neo4j db
     @Transactional(
-        value = "chainedTransactionManager",
+        value = "transactionManager",
         rollbackFor = {Exception.class}
     )
     public void createAndSyncCity(CityDTO cityToBeCreated) {
