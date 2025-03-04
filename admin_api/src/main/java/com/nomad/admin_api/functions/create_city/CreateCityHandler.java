@@ -46,8 +46,8 @@ public class CreateCityHandler implements Consumer<CityDTO> {
         } catch (Neo4jGenericException e) {
             log.error("Failed to sync city: {} to Neo4j. Rolling backing transactions. Error: {}", cityToBeCreated.name(), e);
             sqlCityRepository.delete(sqlCity);
+            throw new RuntimeException("Failed to save city: " + cityToBeCreated.name() + " to Postgres OR Neo4j. Rolling backing transactions.", e);
         } catch (Exception e) {
-            log.error("Failed to save city: {} to Postgres OR Neo4j. Rolling backing transactions. Error: {}", cityToBeCreated.name(), e);
             throw new RuntimeException("Failed to save city: " + cityToBeCreated.name() + " to Postgres OR Neo4j. Rolling backing transactions.", e);
         }
     }

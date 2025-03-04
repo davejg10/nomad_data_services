@@ -37,6 +37,8 @@ public class CreateCountryHandler implements Consumer<SqlCountry> {
         } catch (Neo4jGenericException e) {
             log.error("Failed to sync country: {} to Neo4j. Rolling backing transactions. Error: {}", countryToBeCreated.getName(), e);
             sqlCountryRepository.delete(countryToBeCreated);
+            throw new RuntimeException("Failed to save country: " + countryToBeCreated.getName() + " to Postgres OR Neo4j.", e);
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to save country: " + countryToBeCreated.getName() + " to Postgres OR Neo4j.", e);
         }
