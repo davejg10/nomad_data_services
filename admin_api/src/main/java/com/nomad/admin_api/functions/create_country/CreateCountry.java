@@ -69,8 +69,8 @@ public class CreateCountry {
             Country neo4jCountry = neo4jRepository.syncCountry(country);
             log.info("Synced country to Neo4j database with id {}, and name: {}", neo4jCountry.getId(), neo4jCountry.getName());
         } catch (Exception e) {
-            log.error("Failed to save country to Postgres OR Neo4j. Rolling backing transactions. Error: {}", e);
-            throw new RuntimeException("Failed to save country to Postgres OR Neo4j. Rolling backing transactions.", e);
+            log.error("Failed to save country: {} to Postgres OR Neo4j. Rolling backing transactions. Error: {}", countryToBeCreated.getName(), e);
+            throw new RuntimeException("Failed to save country: " + countryToBeCreated.getName() + " to Postgres OR Neo4j. Rolling backing transactions.", e);
         }
         
     }
