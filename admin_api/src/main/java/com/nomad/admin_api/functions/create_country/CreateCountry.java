@@ -72,6 +72,5 @@ public class CreateCountry {
             log.error("Failed to save country: {} to Postgres OR Neo4j. Rolling backing transactions. Error: {}", countryToBeCreated.getName(), e);
             throw new RuntimeException("Failed to save country: " + countryToBeCreated.getName() + " to Postgres OR Neo4j. Rolling backing transactions.", e);
         }
-        
     }
 }

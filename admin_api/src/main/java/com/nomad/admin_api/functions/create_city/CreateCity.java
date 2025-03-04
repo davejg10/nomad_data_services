@@ -21,7 +21,6 @@ import com.nomad.admin_api.domain.CityDTO;
 import com.nomad.admin_api.domain.SqlCity;
 import com.nomad.admin_api.domain.SqlCountry;
 import com.nomad.library.domain.City;
-import com.nomad.library.domain.Country;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -55,7 +54,7 @@ public class CreateCity {
                 log.info("createCity function hit. Request body is {}", cityToBeCreated);
 
                 createAndSyncCity(cityToBeCreated);
-                
+
                 return request.createResponseBuilder(HttpStatus.OK).body("Successfully created City " + cityToBeCreated.name() + " in PostgreSQl flexible server & synced to Neo4j.").build();
 
             } catch (Exception  e) {
@@ -66,7 +65,10 @@ public class CreateCity {
     }
 
     // This ensures the transaction is rolled back if we fail to sync the Country to the neo4j db
-    @Transactional
+    @Transactional(
+        value = "chainedTransactionManager",
+        rollbackFor = {Exception.class}
+    )
     public void createAndSyncCity(CityDTO cityToBeCreated) {
         try {
             SqlCountry citiesCountry = countryRepository.findByName(cityToBeCreated.countryName()).get();
