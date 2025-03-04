@@ -60,7 +60,10 @@ public class CreateCountry {
     }
 
     // This ensures the transaction is rolled back if we fail to sync the Country to the neo4j db
-    @Transactional
+    @Transactional(
+        value = "chainedTransactionManager",
+        rollbackFor = {Exception.class}
+    )
     public void createAndSyncCountry(SqlCountry countryToBeCreated) {
         try {
             SqlCountry country = countryRepository.save(countryToBeCreated);
