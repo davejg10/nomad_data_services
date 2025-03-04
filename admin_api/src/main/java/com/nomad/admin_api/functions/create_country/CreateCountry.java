@@ -54,7 +54,7 @@ public class CreateCountry {
 
             } catch (Exception  e) {
                 log.error("There was an issue saving the country {} in the Postgres Flexible server. Likely a bad requst. Message; {}", e.getMessage());
-                return request.createResponseBuilder(HttpStatus.BANDWIDTH_LIMIT_EXCEEDED).body("Issue creating Country. Issue: " + e.getMessage()).build();
+                return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Issue creating Country. Issue: " + e.getMessage()).build();
             }
         }
     }

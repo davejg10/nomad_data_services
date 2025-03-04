@@ -54,6 +54,7 @@ public class CreateCity {
                 CityDTO cityToBeCreated = objectMapper.readValue(request.getBody().get(), CityDTO.class);
                 log.info("createCity function hit. Request body is {}", cityToBeCreated);
 
+                createAndSyncCity(cityToBeCreated);
                 
                 return request.createResponseBuilder(HttpStatus.OK).body("Successfully created City " + cityToBeCreated.name() + " in PostgreSQl flexible server & synced to Neo4j.").build();
 
