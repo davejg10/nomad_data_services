@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 
 import com.nomad.admin_api.Neo4jRepository;
 import com.nomad.admin_api.domain.CityDTO;
-import com.nomad.library.domain.Neo4jCity;
-import com.nomad.library.domain.SqlCity;
-import com.nomad.library.domain.SqlCountry;
+import com.nomad.library.domain.neo4j.Neo4jCity;
+import com.nomad.library.domain.sql.SqlCity;
+import com.nomad.library.domain.sql.SqlCountry;
 import com.nomad.library.exceptions.Neo4jGenericException;
 import com.nomad.library.repositories.SqlCityRepository;
 import com.nomad.library.repositories.SqlCountryRepository;
@@ -32,9 +32,12 @@ public class CreateCityHandler implements Consumer<CityDTO> {
     public void accept(CityDTO cityToBeCreated) {
         SqlCity sqlCity = null;
         try {
+            log.info("in accept");
             SqlCountry citiesCountry = sqlCountryRepository.findByName(cityToBeCreated.countryName()).get();
-            sqlCity = SqlCity.of(cityToBeCreated.name(), cityToBeCreated.description(), citiesCountry.getId());
-            
+            log.info("Country found: {}", citiesCountry);
+            sqlCity = SqlCity.of(cityToBeCreated.name(), cityToBeCreated.description(), cityToBeCreated.cityMetrics(), citiesCountry.getId());
+            log.info("city to be saved: {}", sqlCity);
+
             sqlCity = sqlCityRepository.save(sqlCity);
 
             log.info("Created city in PostgreSQL flexible server with id: {}, and name: {}", sqlCity.getId(), sqlCity.getName());

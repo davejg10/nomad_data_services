@@ -1,4 +1,4 @@
-package com.nomad.library.domain;
+package com.nomad.library.domain.sql;
 
 import java.util.UUID;
 

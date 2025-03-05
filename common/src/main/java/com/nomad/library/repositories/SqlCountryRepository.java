@@ -7,7 +7,8 @@ import java.util.UUID;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import com.nomad.library.domain.SqlCountry;
+import com.nomad.library.domain.sql.SqlCountry;
+
 
 @Repository
 public interface SqlCountryRepository extends CrudRepository<SqlCountry, UUID> {

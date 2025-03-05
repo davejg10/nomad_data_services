@@ -1,3 +1,5 @@
 package com.nomad.admin_api.domain;
 
-public record CityDTO(String name, String description, String countryName) {}
+import com.nomad.library.domain.CityMetrics;
+
+public record CityDTO(String name, String description, CityMetrics cityMetrics, String countryName) {}

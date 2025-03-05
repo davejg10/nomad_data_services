@@ -1,11 +1,12 @@
 package com.nomad.job_orchestrator;
 
-import com.nomad.library.domain.Neo4jCity;
-import com.nomad.library.domain.Neo4jCountry;
-import com.nomad.library.domain.SqlCity;
-import com.nomad.library.domain.SqlCountry;
+import com.nomad.library.domain.neo4j.Neo4jCity;
+import com.nomad.library.domain.neo4j.Neo4jCountry;
+import com.nomad.library.domain.sql.SqlCity;
+import com.nomad.library.domain.sql.SqlCountry;
 import com.nomad.library.exceptions.Neo4jGenericException;
 import com.nomad.library.repositories.Neo4jCommonRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.job_orchestrator.domain.PotentialRoute;
 
 import lombok.extern.log4j.Log4j2;
@@ -19,8 +20,8 @@ import java.util.*;
 @Log4j2
 public class Neo4jRepository extends Neo4jCommonRepository {
 
-    public Neo4jRepository(Neo4jClient neo4jClient, Neo4jMappingContext schema) {
-        super(neo4jClient, schema);
+    public Neo4jRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jMappingContext schema) {
+        super(neo4jClient, objectMapper, schema);
     }
 
     public List<PotentialRoute> routeDiscoveryGivenCountry(String countryName) {
