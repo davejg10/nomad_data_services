@@ -2,6 +2,10 @@ package com.nomad.library.domain.sql;
 
 import java.util.UUID;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import org.springframework.context.annotation.Profile;
+
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.nomad.library.domain.CityMetrics;
 import com.nomad.library.domain.neo4j.CityMetricsSerializer;
@@ -30,8 +34,9 @@ public class SqlCity {
     private String name;
 
     private String description;
-    
-    @Column(name = "city_metrics", columnDefinition = "TEXT")
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "city_metrics", columnDefinition = "jsonb")
     @JsonSerialize(using = CityMetricsSerializer.class) // Conversion TO JSON String (called by mapifyCity())
     @Convert(converter = CityMetricsConverter.class) // Used to convert to/from Postgres
     private CityMetrics cityMetrics;
