@@ -11,6 +11,9 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 @TestConfiguration
 public class Neo4jTestConfiguration {
 

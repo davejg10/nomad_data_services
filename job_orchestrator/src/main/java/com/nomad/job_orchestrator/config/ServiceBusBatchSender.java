@@ -13,10 +13,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.library.messages.ScraperJob;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import lombok.extern.log4j.Log4j2;
 
 @Service
+@ConditionalOnProperty(name="disableInTest", havingValue="true", matchIfMissing=true) // This just means we dont load the class in testing. For testing we provider our own Neo4jClient using a test-harness
 @Log4j2
 public class ServiceBusBatchSender {
 

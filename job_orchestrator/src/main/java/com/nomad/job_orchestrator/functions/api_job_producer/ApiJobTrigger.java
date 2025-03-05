@@ -32,6 +32,9 @@ public class ApiJobTrigger {
     @Autowired
     private ObjectMapper objectMapper;
 
+    /*
+     * This Azure Function acts as a HTTP endpoints to queue scraping jobs. The nomad_backend is the only client.
+     */
     @FunctionName("apiJobProducer")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,

@@ -1,12 +1,5 @@
 package com.nomad.admin_api;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.BiFunction;
-
-import org.neo4j.driver.types.MapAccessor;
-import org.neo4j.driver.types.TypeSystem;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 import org.springframework.stereotype.Repository;
@@ -16,21 +9,16 @@ import com.nomad.library.domain.Neo4jCountry;
 import com.nomad.library.domain.SqlCity;
 import com.nomad.library.domain.SqlCountry;
 import com.nomad.library.exceptions.Neo4jGenericException;
+import com.nomad.library.repositories.Neo4jCommonRepository;
 
 import lombok.extern.log4j.Log4j2;
 
 @Repository
 @Log4j2
-public class Neo4jRepository {
-
-    private Neo4jClient neo4jClient;
-    private final BiFunction<TypeSystem, MapAccessor, Neo4jCity> cityMapper;
-    private final BiFunction<TypeSystem, MapAccessor, Neo4jCountry> countryMapper;
+public class Neo4jRepository extends Neo4jCommonRepository {
 
     public Neo4jRepository(Neo4jClient neo4jClient, Neo4jMappingContext schema) {
-        this.neo4jClient = neo4jClient;
-        this.cityMapper = schema.getRequiredMappingFunctionFor(Neo4jCity.class);
-        this.countryMapper = schema.getRequiredMappingFunctionFor(Neo4jCountry.class);
+        super(neo4jClient, schema);
     }
 
     public Neo4jCountry syncCountry(SqlCountry country) throws Neo4jGenericException {
@@ -87,38 +75,5 @@ public class Neo4jRepository {
         }
     }
 
-    public Set<Neo4jCity> findAllCities() {
-        Collection<Neo4jCity> allCities = neo4jClient
-            .query("""
-                MATCH (city:City)
-                OPTIONAL MATCH (city)-[ofCountry:OF_COUNTRY]->(country)
-                OPTIONAL MATCH (city)-[route:ROUTE]->(t)
-                OPTIONAL MATCH (t) -[targetCityCountryRel:OF_COUNTRY]-> (targetCityCountry:Country)
-                RETURN city, ofCountry, country, collect(route) as routes, collect(t) as targetCity, collect(targetCityCountryRel) as targetCityCountryRel, collect(targetCityCountry) as targetCityCountry
-            """)
-            .fetchAs(Neo4jCity.class)
-            .mappedBy((typeSystem, record) -> {
-                Neo4jCity fetchedCity = cityMapper.apply(typeSystem, record.get("city").asNode());
-                Neo4jCountry fetchedCitiesCountry = countryMapper.apply(typeSystem, record.get("country").asNode());
-
-                return new Neo4jCity(fetchedCity.getId(), fetchedCity.getName(), fetchedCitiesCountry);
-            })
-            .all();
-        return new HashSet<>(allCities);
-    }
-
-    public Set<Neo4jCountry> findAllCountries() {
-        Collection<Neo4jCountry> allCountries = neo4jClient
-                .query("""
-                    MATCH(country:Country) RETURN country
-                """)
-                .fetchAs(Neo4jCountry.class)
-                .mappedBy((typeSystem, record) -> {
-                    Neo4jCountry fetchedCountry = countryMapper.apply(typeSystem, record.get("country").asNode());
-
-                    return new Neo4jCountry(fetchedCountry.getId(), fetchedCountry.getName());
-                })
-                .all();
-        return new HashSet<>(allCountries);
-    }
+    
 }

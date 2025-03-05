@@ -20,16 +20,20 @@ import java.util.List;
 public class CronJobTrigger {
 
     @Autowired
-    private CronJobProcessor cronJobProcessor;
+    private CronJobHandler cronJobHandler;
 
     @Autowired 
     private ServiceBusBatchSender serviceBusBatchSender;
 
+    /*
+     * This Azure Function is scheduled to queue scraping jobs at various intervals. These are posted to the same
+     * queue as apiJobTrigger Function.
+     */
     @FunctionName("cronJobProducer")
     public void execute(@TimerTrigger(name = "keepAliveTrigger", schedule = "0 */10 * * *") String timerInfo,
                         ExecutionContext context) throws StreamReadException, DatabindException, IOException {
 
-        List<ScraperJob> scraperJobs = cronJobProcessor.generateScraperJobs();
+        List<ScraperJob> scraperJobs = cronJobHandler.generateScraperJobs();
         serviceBusBatchSender.sendBatch(scraperJobs);           
     }
 }

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.nomad.library.messages.ScraperJob;
 import com.nomad.library.messages.ScraperJobType;
-import com.nomad.job_orchestrator.CityRepository;
+import com.nomad.job_orchestrator.Neo4jRepository;
 import com.nomad.job_orchestrator.domain.PotentialRoute;
 
 import lombok.extern.log4j.Log4j2;
@@ -19,11 +19,11 @@ import java.util.List;
 
 @Service
 @Log4j2
-public class CronJobProcessor {
+public class CronJobHandler {
 
-    private final CityRepository cityRepository;
+    private final Neo4jRepository cityRepository;
 
-    public CronJobProcessor(CityRepository cityRepository) {
+    public CronJobHandler(Neo4jRepository cityRepository) {
         this.cityRepository = cityRepository;
     }
 

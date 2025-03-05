@@ -17,6 +17,7 @@
 	<properties>
 		<start-class>com.nomad.job_orchestrator.JobOrchestratorApplication</start-class>
 		<version.spring.cloud>2024.0.0</version.spring.cloud>
+		<version.nomad.common>0.0.1-SNAPSHOT</version.nomad.common>
 		<!-- Plugins -->
 		<functionResourceGroup>rg-dev-uks-nomad-02</functionResourceGroup>
 		<functionAppName>fa-dev-uks-nomad-02-job-orchestrator</functionAppName>
@@ -39,8 +40,16 @@
 		<dependency>
 			<groupId>com.nomad.library</groupId>
 			<artifactId>common</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>    
+			<version>${version.nomad.common}</version>
+		</dependency>
+		<!-- This brings in our Neo4jTestConfigurationClass but only when testing  -->
+		<dependency> 
+			<groupId>com.nomad.library</groupId>
+			<artifactId>common</artifactId>
+			<version>${version.nomad.common}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>   
 		
 		<!-- Used to create Azure Functions -->
 		<dependency>

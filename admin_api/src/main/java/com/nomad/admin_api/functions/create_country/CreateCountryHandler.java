@@ -2,9 +2,7 @@ package com.nomad.admin_api.functions.create_country;
 
 import java.util.function.Consumer;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.nomad.admin_api.Neo4jRepository;
 import com.nomad.library.domain.Neo4jCountry;

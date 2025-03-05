@@ -1,0 +1,11 @@
+{
+    "id": "9e88733d-e0b1-4c18-ad4f-c26a40e5cbe3",
+    "name": "CityA",
+    "routes": {
+        "targetCity": "CityB",
+        "popularity": 3,
+        "time": 4.0,
+        "cost": 12.99,
+        "transportType": "FLIGHT"
+    }
+}

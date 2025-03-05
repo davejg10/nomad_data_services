@@ -51,7 +51,7 @@ public class CreateCityHandlerTest {
         createCityHandler.accept(cityDTO);
         
         Set<SqlCity> sqlCities = sqlCityRepository.findAll();
-        Set<Neo4jCity> neo4jCities = neo4jRepository.findAllCities();
+        Set<Neo4jCity> neo4jCities = neo4jRepository.findAllCitiesMapCountry();
 
         log.info(neo4jCities);
         
