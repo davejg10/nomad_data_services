@@ -23,12 +23,12 @@ public class ProcessedQueueTrigger {
     /*
      * This Azure Function reads messages from the Queue that the scapers post to. See payload.json for an example message.
      */
-    @FunctionName("processedQueueConsumer")
-    public void execute(@ServiceBusQueueTrigger(name = "msg", queueName = sb_processed_queue_name, connection = "nomadservicebus") String scraperResponseString,
+    @FunctionName("processedQueueConsumerTry")
+    public void execute(@ServiceBusQueueTrigger(name = "msg", queueName = sb_processed_queue_name, connection = "nomadservicebus") String message,
                         ExecutionContext context) throws JsonProcessingException {
 
-        log.info("processedQueueConsumer Azure Function. Triggered with following message {} Service Bus Queue : {}", scraperResponseString, sb_processed_queue_name);
-        processedQueueHandler.accept(scraperResponseString);
+        log.info("processedQueueConsumer Azure Function. Triggered with following message {} Service Bus Queue : {}", message, sb_processed_queue_name);
+        processedQueueHandler.accept(message);
     }
 
 }
