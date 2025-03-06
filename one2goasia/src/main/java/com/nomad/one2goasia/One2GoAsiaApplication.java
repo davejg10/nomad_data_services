@@ -9,10 +9,11 @@ import lombok.extern.log4j.Log4j2;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
 @Log4j2
-@SpringBootApplication
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
 @ComponentScan({"com.nomad.library.config", "com.nomad.one2goasia"})
 public class One2GoAsiaApplication {
 
