@@ -17,9 +17,7 @@ import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.microsoft.azure.functions.annotation.ServiceBusQueueOutput;
-import com.nomad.job_orchestrator.domain.HttpRouteRequest;
-import com.nomad.library.messages.ScraperJob;
-import com.nomad.library.messages.ScraperJobType;
+import com.nomad.library.messages.ScraperRequest;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -32,23 +30,31 @@ public class ApiJobTrigger {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private ApiJobHandler apiJobHandler;
+
     /*
      * This Azure Function acts as a HTTP endpoints to queue scraping jobs. The nomad_backend is the only client.
      */
     @FunctionName("apiJobProducer")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
-        @ServiceBusQueueOutput(name = "message", queueName = sb_pre_processed_queue_name, connection = "nomadservicebus") OutputBinding<ScraperJob> message) throws JsonMappingException, JsonProcessingException  {
+        @ServiceBusQueueOutput(name = "message", queueName = sb_pre_processed_queue_name, connection = "nomadservicebus") OutputBinding<ScraperRequest> message) throws JsonMappingException, JsonProcessingException  {
         
         if (!request.getBody().isPresent()) {
             log.info("Unable to read request body. Is empty");
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Unable to read request body.").build();
         } else {
-            HttpRouteRequest routeRequest = objectMapper.readValue(request.getBody().get(), HttpRouteRequest.class);
-            log.info("apiJobProducer function hit. Request body is {}", routeRequest);
-            ScraperJob scraperJob = new ScraperJob("httpTrigger", ScraperJobType.ROUTE_DISCOVERY, routeRequest.sourceCity(), routeRequest.destinationCity(), routeRequest.searchDate());
-            message.setValue(scraperJob);
-            return request.createResponseBuilder(HttpStatus.OK).body("Successfully added job to queue.").build();
+            String requestString = request.getBody().get();
+            log.info("apiJobProducer function hit. Request body is {}", requestString);
+            
+            Optional<ScraperRequest> scraperRequest = apiJobHandler.apply(requestString);
+
+            if (scraperRequest.isPresent()) {
+                message.setValue(scraperRequest.get());
+                return request.createResponseBuilder(HttpStatus.OK).body("Successfully added scraper request to queue.").build(); 
+            }
+            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("There was an issue mapping your request to a CityDTO.").build();
         }
     }
 }

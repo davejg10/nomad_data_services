@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 
 import org.springframework.stereotype.Component;
 
-import com.nomad.admin_api.Neo4jRepository;
+import com.nomad.admin_api.Neo4jCityRepository;
 import com.nomad.admin_api.domain.CityDTO;
 import com.nomad.library.domain.neo4j.Neo4jCity;
 import com.nomad.library.domain.sql.SqlCity;
@@ -21,28 +21,25 @@ public class CreateCityHandler implements Consumer<CityDTO> {
 
     private SqlCountryRepository sqlCountryRepository;
     private SqlCityRepository sqlCityRepository;
-    private Neo4jRepository neo4jRepository;
+    private Neo4jCityRepository neo4jCityRepository;
 
-    public CreateCityHandler(SqlCountryRepository sqlCountryRepository, SqlCityRepository sqlCityRepository, Neo4jRepository neo4jRepository) {
+    public CreateCityHandler(SqlCountryRepository sqlCountryRepository, SqlCityRepository sqlCityRepository, Neo4jCityRepository neo4jCityRepository) {
         this.sqlCountryRepository = sqlCountryRepository;
         this.sqlCityRepository = sqlCityRepository;
-        this.neo4jRepository = neo4jRepository;
+        this.neo4jCityRepository = neo4jCityRepository;
     }
     
     public void accept(CityDTO cityToBeCreated) {
         SqlCity sqlCity = null;
         try {
-            log.info("in accept");
             SqlCountry citiesCountry = sqlCountryRepository.findByName(cityToBeCreated.countryName()).get();
-            log.info("Country found: {}", citiesCountry);
             sqlCity = SqlCity.of(cityToBeCreated.name(), cityToBeCreated.description(), cityToBeCreated.cityMetrics(), citiesCountry.getId());
-            log.info("city to be saved: {}", sqlCity);
 
             sqlCity = sqlCityRepository.save(sqlCity);
 
             log.info("Created city in PostgreSQL flexible server with id: {}, and name: {}", sqlCity.getId(), sqlCity.getName());
 
-            Neo4jCity neo4jCity = neo4jRepository.syncCity(sqlCity);
+            Neo4jCity neo4jCity = neo4jCityRepository.syncCity(sqlCity);
 
             log.info("Synced city to Neo4j database with id {}, and name: {}", neo4jCity.getId(), neo4jCity.getName());
 

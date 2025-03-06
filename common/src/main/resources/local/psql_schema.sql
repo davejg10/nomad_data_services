@@ -1,10 +1,10 @@
-CREATE TABLE country (
+CREATE TABLE IF NOT EXISTS country (
     id UUID DEFAULT (UUID()) PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT
 );
 
-CREATE TABLE city (
+CREATE TABLE IF NOT EXISTS city (
     id UUID DEFAULT (UUID()) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT,

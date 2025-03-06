@@ -14,21 +14,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Neo4jTestGenerator {
     
-    public static CityMetrics cityMetrics() {
-        double min = 0.0;
-        double max = 10.0;
-        double sailing = ThreadLocalRandom.current().nextDouble(min, max);
-        double food = ThreadLocalRandom.current().nextDouble(min, max);
-        double nightlife = ThreadLocalRandom.current().nextDouble(min, max);
-
-        CityMetrics cityMetrics = new CityMetrics(
-            new CityMetric(CityCriteria.SAILING, sailing),
-            new CityMetric(CityCriteria.FOOD, food),
-            new CityMetric(CityCriteria.NIGHTLIFE, nightlife)
-        );
-        return cityMetrics;
-    }
-
     public static Neo4jRoute neo4jRoute(Neo4jCity targetCity) {
         double min = 0.0;
         double popularity = ThreadLocalRandom.current().nextDouble(min, 10.0);
@@ -47,6 +32,6 @@ public class Neo4jTestGenerator {
 
     public static Neo4jCity neo4jCityNoRoutes(String cityName, Neo4jCountry country) {
 
-        return new Neo4jCity(UUID.randomUUID().toString(), cityName, cityMetrics(), Set.of(), country);
+        return new Neo4jCity(UUID.randomUUID().toString(), cityName, GenericTestGenerator.cityMetrics(), Set.of(), country);
     }
 }

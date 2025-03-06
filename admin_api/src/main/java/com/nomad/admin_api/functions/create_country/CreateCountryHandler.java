@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 
 import org.springframework.stereotype.Component;
 
-import com.nomad.admin_api.Neo4jRepository;
+import com.nomad.admin_api.Neo4jCountryRepository;
 import com.nomad.library.domain.neo4j.Neo4jCountry;
 import com.nomad.library.domain.sql.SqlCountry;
 import com.nomad.library.exceptions.Neo4jGenericException;
@@ -17,11 +17,11 @@ import lombok.extern.log4j.Log4j2;
 public class CreateCountryHandler implements Consumer<SqlCountry> {
 
     private SqlCountryRepository sqlCountryRepository;
-    private Neo4jRepository neo4jRepository;
+    private Neo4jCountryRepository neo4jCountryRepository;
 
-    public CreateCountryHandler(SqlCountryRepository sqlCountryRepository, Neo4jRepository neo4jRepository) {
+    public CreateCountryHandler(SqlCountryRepository sqlCountryRepository, Neo4jCountryRepository neo4jCountryRepository) {
         this.sqlCountryRepository = sqlCountryRepository;
-        this.neo4jRepository = neo4jRepository;
+        this.neo4jCountryRepository = neo4jCountryRepository;
     }
  
     public void accept(SqlCountry countryToBeCreated) {
@@ -30,7 +30,7 @@ public class CreateCountryHandler implements Consumer<SqlCountry> {
             sqlCountry = sqlCountryRepository.save(countryToBeCreated);
             log.info("Created country in PostgreSQL flexible server with id: {}, and name: {}", sqlCountry.getId(), sqlCountry.getName());
 
-            Neo4jCountry neo4jCountry = neo4jRepository.syncCountry(sqlCountry);
+            Neo4jCountry neo4jCountry = neo4jCountryRepository.syncCountry(sqlCountry);
             log.info("Synced country to Neo4j database with id {}, and name: {}", neo4jCountry.getId(), neo4jCountry.getName());
         } catch (Neo4jGenericException e) {
             log.error("Failed to sync country: {} to Neo4j. Rolling backing transactions. Error: {}", countryToBeCreated.getName(), e);

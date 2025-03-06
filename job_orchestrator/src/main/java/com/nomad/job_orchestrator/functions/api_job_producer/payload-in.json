@@ -1,0 +1,19 @@
+{
+    "sourceCity": {
+        "id": "d637fdf7-d4d8-4bbb-a0d7-218b87d86442",
+        "name": "CityA",
+        "country": {
+            "id": "77a22371-dc2c-4429-b20d-09672276ac1e",
+            "name": "CountryA"
+        }
+    },
+    "targetCity": {
+        "id": "9ef0a8a7-fab9-4c7d-8040-194ba1e3a726",
+        "name": "CityB",
+        "country": {
+            "id": "77a22371-dc2c-4429-b20d-09672276ac1e",
+            "name": "CountryA"
+        }
+    },
+    "searchDate": "2025-03-10"
+}

@@ -11,7 +11,9 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.nomad.library.domain.CityMetrics;
 import com.nomad.library.domain.TransportType;
@@ -29,7 +31,7 @@ public class Neo4jCity {
     @Getter private final String name;
 
     @JsonSerialize(using = CityMetricsSerializer.class) // Conversion TO Neo4j.Value (called by mapifyCity())
-    @ConvertWith(converterRef = "cityMetricsDeserializer") // Conversion TO CityMetrics (when being read)
+    @ConvertWith(converterRef = "cityMetricsDeserializer") // Conversion TO CityMetrics (when being read) (requires a bean in context with name cityMetricsDeserializer)
     @Getter private final CityMetrics cityMetrics;
 
     @Relationship(type = "ROUTE", direction = Relationship.Direction.OUTGOING)
@@ -38,8 +40,7 @@ public class Neo4jCity {
     @Relationship(type = "OF_COUNTRY", direction = Relationship.Direction.OUTGOING)
     @Getter private final Neo4jCountry country;
 
-    @JsonCreator
-    // This is used by Spring Data for object mapping
+    @JsonCreator // This is used by Spring Data for object mapping
     public Neo4jCity(String id, String name, CityMetrics cityMetrics, Set<Neo4jRoute> routes, Neo4jCountry country) {
         this.id = id;
         this.name = name;

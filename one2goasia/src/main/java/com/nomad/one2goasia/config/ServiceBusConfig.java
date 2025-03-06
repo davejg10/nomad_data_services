@@ -5,11 +5,17 @@ import com.azure.identity.ManagedIdentityCredentialBuilder;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nomad.library.connectors.ServiceBusBatchSender;
+import com.nomad.library.messages.ScraperResponse;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
+@Profile("!local")
 public class ServiceBusConfig {
 
     @Value("${sb_processed_queue_name}")
@@ -46,5 +52,10 @@ public class ServiceBusConfig {
                 .queueName(PRE_PROCESSED_QUEUE_NAME)
                 .buildClient();
         return receiver;
+    }
+
+    @Bean 
+    public ServiceBusBatchSender<ScraperResponse> serviceBusBatchSender(ServiceBusSenderClient sender, ObjectMapper objectMapper) {
+        return new ServiceBusBatchSender<ScraperResponse>(sender, objectMapper);
     }
 }

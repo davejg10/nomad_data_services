@@ -14,6 +14,10 @@
     <version>0.0.1-SNAPSHOT</version>
     <description>A module that contains common domain logic</description>
 
+    <properties>
+        <version.jackson.jsr310>2.15.0</version.jackson.jsr310>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -31,7 +35,19 @@
         	<groupId>org.springframework.boot</groupId>
         	<artifactId>spring-boot-starter-data-jpa</artifactId>
     	</dependency>
-       
+
+        <!-- Service Bus dependencies -->
+        <dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-messaging-servicebus</artifactId>
+		</dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${version.jackson.jsr310}</version>
+        </dependency>
+
     </dependencies>
 
     <build>

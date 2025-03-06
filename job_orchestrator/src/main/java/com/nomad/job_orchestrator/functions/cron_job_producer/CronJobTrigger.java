@@ -9,31 +9,43 @@ import com.microsoft.azure.functions.annotation.TimerTrigger;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import com.nomad.library.messages.ScraperJob;
-import com.nomad.job_orchestrator.config.ServiceBusBatchSender;
+
+import com.nomad.library.connectors.ServiceBusBatchSender;
+import com.nomad.library.messages.ScraperRequest;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Log4j2
 @Component
 public class CronJobTrigger {
 
+    private static final String cronJobConfigFile = "jobs-config.yml";
+    private final String cronTriggerSchedule = "0 */5 * * * *";
+
     @Autowired
     private CronJobHandler cronJobHandler;
 
     @Autowired 
-    private ServiceBusBatchSender serviceBusBatchSender;
+    private ServiceBusBatchSender<ScraperRequest> serviceBusBatchSender;
 
     /*
      * This Azure Function is scheduled to queue scraping jobs at various intervals. These are posted to the same
      * queue as apiJobTrigger Function.
      */
     @FunctionName("cronJobProducer")
-    public void execute(@TimerTrigger(name = "keepAliveTrigger", schedule = "0 */10 * * *") String timerInfo,
+    public void execute(@TimerTrigger(name = "keepAliveTrigger", schedule = cronTriggerSchedule) String timerInfo,
                         ExecutionContext context) throws StreamReadException, DatabindException, IOException {
+        
+        LocalDateTime now = LocalDateTime.now();
 
-        List<ScraperJob> scraperJobs = cronJobHandler.generateScraperJobs();
-        serviceBusBatchSender.sendBatch(scraperJobs);           
+        CronJobs cronJobs = cronJobHandler.readCronJobs(cronJobConfigFile);
+        List<CronJob> filteredCronJobs = cronJobHandler.filterCronJobs(now, cronTriggerSchedule, cronJobs);
+
+        for(CronJob filteredCronJob : filteredCronJobs) {
+            List<ScraperRequest> scraperRequests = cronJobHandler.createScraperRequests(filteredCronJob);
+            serviceBusBatchSender.sendBatch(scraperRequests);           
+        }
     }
 }
