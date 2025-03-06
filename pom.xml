@@ -74,12 +74,14 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Used for mocking Postgres repository -->
+		<!-- Used for Application insights in cloud -->
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>runtime</scope>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>applicationinsights-runtime-attach</artifactId>
+			<version>3.7.0</version>
 		</dependency>
+
+		
 
 		<!-- Used for mocking Neo4j repository. Creates an in-memory db	-->
 		<dependency>

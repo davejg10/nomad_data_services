@@ -67,6 +67,13 @@
 			<artifactId>spring-cloud-azure-starter-jdbc-postgresql</artifactId>
 		</dependency>
 
+		<!-- Used for mocking Postgres repository locally-->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- Required for passwordless sign in of postgres -->
 		<dependency>
 			<groupId>com.azure</groupId>
