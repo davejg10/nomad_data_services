@@ -38,7 +38,7 @@ jobs:
       - name: 'Restore Project Dependencies Using Mvn'
         shell: bash
         run: |
-          mvn clean package -pl job_orchestrator -am
+          c
 
       - name: Azure CLI Login
         uses: azure/login@v2

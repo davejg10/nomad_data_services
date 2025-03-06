@@ -5,6 +5,10 @@
             <PatternLayout
                     pattern="%style{%d{ISO8601}}{black} %highlight{%-5level }[%style{%t}{bright,blue}] %style{%C{1.}}{bright,yellow}: %msg%n%throwable" disableAnsi="false"/>
         </Console>
+        <!--Required due to; https://learn.microsoft.com/en-us/azure/azure-monitor/app/monitor-functions#log4j -->
+        <Filters> 
+            <ThresholdFilter level="ALL" onMatch="DENY" onMismatch="NEUTRAL"/>
+        </Filters>
     </Appenders>
 
     <Loggers>
