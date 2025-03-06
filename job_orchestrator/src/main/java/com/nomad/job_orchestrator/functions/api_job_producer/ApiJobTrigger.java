@@ -28,9 +28,6 @@ public class ApiJobTrigger {
     private final String sb_pre_processed_queue_name = "nomad_pre_processed";
 
     @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
     private ApiJobHandler apiJobHandler;
 
     /*

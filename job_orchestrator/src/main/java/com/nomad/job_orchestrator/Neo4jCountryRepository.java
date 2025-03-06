@@ -8,8 +8,6 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
-
 @Repository
 @Log4j2
 public class Neo4jCountryRepository extends Neo4jCommonCountryRepository {

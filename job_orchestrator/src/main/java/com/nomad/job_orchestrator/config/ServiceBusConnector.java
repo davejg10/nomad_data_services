@@ -23,12 +23,13 @@ public class ServiceBusConnector {
     @Value("${nomadservicebus__fullyQualifiedNamespace}")
     private String FQDN_NAMESPACE;
 
-    // This is the client id of the User Assigned Identity assigned to the Azure Containerapp job
+    // This is the client id of the User Assigned Identity assigned to the Azure Function App
     @Value("${AZURE_CLIENT_ID}")
     private String AZURE_CLIENT_ID;
-
+    
     @Bean
     public ServiceBusSenderClient client() {
+        // TokenCredential credential = new DefaultAzureCredentialBuilder().build();
         TokenCredential credential = new ManagedIdentityCredentialBuilder().clientId(AZURE_CLIENT_ID).build();
 
         ServiceBusSenderClient sender = new ServiceBusClientBuilder()
