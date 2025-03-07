@@ -41,7 +41,7 @@ jobs:
           FUNCTION_APP_NAME: fa-${{ github.event.inputs.environment }}-uks-nomad-02-job-orchestrator
           FUNCTION_APP_RG_NAME: rg-${{ github.event.inputs.environment }}-uks-nomad-02
         run: |
-          mvn clean package -pl job_orchestrator -am -DfunctionAppName=$FUNCTION_APP_NAME -DfunctionResourceGroup=$FUNCTION_APP_RG_NAME
+          mvn clean package -pl job_orchestrator -am -DfunctionAppName="fa-dev-uks-nomad-02-job-orchestrator" -DfunctionResourceGroup="rg-dev-uks-nomad-02"
 
       - name: Azure CLI Login
         uses: azure/login@v2
