@@ -50,7 +50,6 @@ jobs:
           az acr build \
             --registry ${{ env.ACR_SERVER_NAME }} \
             --image "${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" \
-            --build-arg build_version=${{ env.TAG }} \
             --build-arg MODULE_TO_BUILD=${{ env.REPOSITORY_NAME }} .
 
           # Also tag with latest
