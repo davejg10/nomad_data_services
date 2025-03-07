@@ -18,13 +18,12 @@
 		<start-class>com.nomad.job_orchestrator.JobOrchestratorApplication</start-class>
 		<version.spring.cloud>2024.0.0</version.spring.cloud>
 		<version.nomad.common>0.0.1-SNAPSHOT</version.nomad.common>
-		<version.org.quartz>2.5.0</version.org.quartz>
 		<!-- Plugins -->
-		<functionResourceGroup>${env.FUNCTION_APP_RG_NAME}</functionResourceGroup>
-		<!-- <functionResourceGroup>rg-dev-uks-nomad-02</functionResourceGroup> -->
+		<!-- <functionResourceGroup>${env.FUNCTION_APP_RG_NAME}</functionResourceGroup> -->
+		<functionResourceGroup>rg-dev-uks-nomad-02</functionResourceGroup>
 
-		<functionAppName>${env.FUNCTION_APP_NAME}</functionAppName>
-		<!-- <functionAppName>fa-dev-uks-nomad-02-job-orchestrator</functionAppName> -->
+		<!-- <functionAppName>${env.FUNCTION_APP_NAME}</functionAppName> -->
+		<functionAppName>fa-dev-uks-nomad-02-job-orchestrator</functionAppName>
 
 	</properties>
 
