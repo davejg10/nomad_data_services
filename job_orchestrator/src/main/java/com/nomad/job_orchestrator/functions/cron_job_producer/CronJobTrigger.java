@@ -22,7 +22,7 @@ import java.util.List;
 public class CronJobTrigger {
 
     private static final String cronJobConfigFile = "jobs-config.yml";
-    private final String cronTriggerSchedule = "0 */5 * * * *";
+    private final String cronTriggerSchedule = "0 */30 * * * *";
 
     @Autowired
     private CronJobHandler cronJobHandler;
