@@ -1,6 +1,7 @@
 package com.nomad.one2goasia.config;
 
 import com.azure.core.credential.TokenCredential;
+import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.identity.ManagedIdentityCredentialBuilder;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.ServiceBusReceiverClient;
@@ -15,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile("!local")
+@Profile("!maven")
 public class ServiceBusConfig {
 
     @Value("${sb_processed_queue_name}")
@@ -26,13 +27,18 @@ public class ServiceBusConfig {
     private String FQDN_NAMESPACE;
 
     // This is the client id of the User Assigned Identity assigned to the Azure Containerapp job
-    @Value("${AZURE_CLIENT_ID}")
+    @Value("${AZURE_CLIENT_ID:null}")
     private String AZURE_CLIENT_ID;
 
     @Bean
     public ServiceBusSenderClient clientSender() {
         // Must pass the client id if using a User Assigned Identity
-        TokenCredential credential = new ManagedIdentityCredentialBuilder().clientId(AZURE_CLIENT_ID).build();
+        TokenCredential credential = null;
+        if (AZURE_CLIENT_ID != "null") {
+            credential = new ManagedIdentityCredentialBuilder().clientId(AZURE_CLIENT_ID).build();
+        } else {
+            credential = new DefaultAzureCredentialBuilder().build();
+        }
 
         ServiceBusSenderClient sender = new ServiceBusClientBuilder()
                 .credential(FQDN_NAMESPACE, credential)
@@ -44,8 +50,13 @@ public class ServiceBusConfig {
 
     @Bean
     public ServiceBusReceiverClient clientReciever() {
-        TokenCredential credential = new ManagedIdentityCredentialBuilder().clientId(AZURE_CLIENT_ID).build();
-
+        TokenCredential credential = null;
+        if (AZURE_CLIENT_ID != "null") {
+            credential = new ManagedIdentityCredentialBuilder().clientId(AZURE_CLIENT_ID).build();
+        } else {
+            credential = new DefaultAzureCredentialBuilder().build();
+        }
+        
         ServiceBusReceiverClient receiver = new ServiceBusClientBuilder()
                 .credential(FQDN_NAMESPACE, credential)
                 .receiver()

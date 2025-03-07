@@ -19,12 +19,8 @@
 		<version.spring.cloud>2024.0.0</version.spring.cloud>
 		<version.nomad.common>0.0.1-SNAPSHOT</version.nomad.common>
 		<!-- Plugins -->
-		<!-- <functionResourceGroup>${env.FUNCTION_APP_RG_NAME}</functionResourceGroup> -->
-		<functionResourceGroup>rg-dev-uks-nomad-02</functionResourceGroup>
-
-		<!-- <functionAppName>${env.FUNCTION_APP_NAME}</functionAppName> -->
-		<functionAppName>fa-dev-uks-nomad-02-job-orchestrator</functionAppName>
-
+		<functionResourceGroup>${env.FUNCTION_APP_RG_NAME}</functionResourceGroup>
+		<functionAppName>${env.FUNCTION_APP_NAME}</functionAppName>
 	</properties>
 
 	<dependencyManagement>
@@ -114,15 +110,6 @@
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<argLine>-Dspring.profiles.active=maven</argLine>
-				</configuration>
-			</plugin>
-
 		</plugins>
 	</build>
 
