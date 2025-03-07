@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.neo4j.core.Neo4jClient;
 
 @Log4j2
-@Profile("!local")
+@Profile("cloud")
 @Configuration
 public class Neo4jConnector {
 
