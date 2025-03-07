@@ -36,9 +36,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: 'Restore Project Dependencies Using Mvn'
-        shell: bash
-        env:
-          
+        shell: bash          
         run: |
           mvn clean package -pl job_orchestrator -am
 
