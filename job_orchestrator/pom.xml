@@ -19,8 +19,8 @@
 		<version.spring.cloud>2024.0.0</version.spring.cloud>
 		<version.nomad.common>0.0.1-SNAPSHOT</version.nomad.common>
 		<!-- Plugins -->
-		<functionResourceGroup>default</functionResourceGroup>
-		<functionAppName>default</functionAppName>
+		<!-- <functionResourceGroup>default</functionResourceGroup> -->
+		<!-- <functionAppName>default</functionAppName> -->
 	</properties>
 
 	<dependencyManagement>
