@@ -11,11 +11,11 @@ import lombok.ToString;
 public class ScraperRequest extends ScraperMessage {
     
     @JsonCreator
-    public ScraperRequest(@JsonProperty("scraperRequestSource") final String scraperRequestSource,
-                          @JsonProperty("type") final ScraperRequestType type,
-                          @JsonProperty("sourceCity") final CityDTO sourceCity,
-                          @JsonProperty("targetCity") final CityDTO targetCity,
-                          @JsonProperty("searchDate") final LocalDate searchDate) {
+    public ScraperRequest(@JsonProperty("scraperRequestSource") String scraperRequestSource,
+                          @JsonProperty("type") ScraperRequestType type,
+                          @JsonProperty("sourceCity") CityDTO sourceCity,
+                          @JsonProperty("targetCity") CityDTO targetCity,
+                          @JsonProperty("searchDate") LocalDate searchDate) {
         super(scraperRequestSource, type, sourceCity, targetCity, searchDate);
     }
     

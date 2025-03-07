@@ -2,6 +2,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "java",
+      "name": "JobOrchestratorApplication",
+      "request": "launch",
+      "mainClass": "com.nomad.job_orchestrator.JobOrchestratorApplication",
+      "projectName": "job_orchestrator"
+    },
+    {
       "name": "Attach to Java Functions",
       "type": "java",
       "request": "attach",

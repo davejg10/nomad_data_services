@@ -19,8 +19,8 @@
         <version.postgresql.driver>42.7.5</version.postgresql.driver>
 		<version.nomad.common>0.0.1-SNAPSHOT</version.nomad.common>
 		<!-- Plugins -->
-		<functionResourceGroup>rg-dev-uks-nomad-02</functionResourceGroup>
-		<functionAppName>fa-dev-uks-nomad-02-admin-api</functionAppName>
+		<functionResourceGroup>${env.function_app_rg_name}</functionResourceGroup>
+		<functionAppName>${env.function_app_name}</functionAppName>
 	</properties>
 
 	<dependencyManagement>

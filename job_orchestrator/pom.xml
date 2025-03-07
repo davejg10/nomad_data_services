@@ -20,8 +20,12 @@
 		<version.nomad.common>0.0.1-SNAPSHOT</version.nomad.common>
 		<version.org.quartz>2.5.0</version.org.quartz>
 		<!-- Plugins -->
-		<functionResourceGroup>rg-dev-uks-nomad-02</functionResourceGroup>
-		<functionAppName>fa-dev-uks-nomad-02-job-orchestrator</functionAppName>
+		<functionResourceGroup>${env.FUNCTION_APP_RG_NAME}</functionResourceGroup>
+		<!-- <functionResourceGroup>rg-dev-uks-nomad-02</functionResourceGroup> -->
+
+		<functionAppName>${env.FUNCTION_APP_NAME}</functionAppName>
+		<!-- <functionAppName>fa-dev-uks-nomad-02-job-orchestrator</functionAppName> -->
+
 	</properties>
 
 	<dependencyManagement>

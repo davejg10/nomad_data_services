@@ -30,28 +30,37 @@ public class ApiJobTrigger {
     @Autowired
     private ApiJobHandler apiJobHandler;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     /*
      * This Azure Function acts as a HTTP endpoints to queue scraping jobs. The nomad_backend is the only client.
      */
     @FunctionName("apiJobProducer")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
-        @ServiceBusQueueOutput(name = "message", queueName = sb_pre_processed_queue_name, connection = "nomadservicebus") OutputBinding<ScraperRequest> message) throws JsonMappingException, JsonProcessingException  {
-        
-        if (!request.getBody().isPresent()) {
-            log.info("Unable to read request body. Is empty");
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Unable to read request body.").build();
-        } else {
-            String requestString = request.getBody().get();
-            log.info("apiJobProducer function hit. Request body is {}", requestString);
-            
-            Optional<ScraperRequest> scraperRequest = apiJobHandler.apply(requestString);
-
-            if (scraperRequest.isPresent()) {
-                message.setValue(scraperRequest.get());
-                return request.createResponseBuilder(HttpStatus.OK).body("Successfully added scraper request to queue.").build(); 
+        @ServiceBusQueueOutput(name = "message", queueName = sb_pre_processed_queue_name, connection = "nomadservicebus") OutputBinding<String> message) throws JsonMappingException, JsonProcessingException  {
+        try {
+            if (!request.getBody().isPresent()) {
+                log.info("Unable to read request body. Is empty");
+                return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Unable to read request body.").build();
+            } else {
+                String requestString = request.getBody().get();
+                log.info("apiJobProducer function hit. Request body is {}", requestString);
+                
+                Optional<ScraperRequest> scraperRequest = apiJobHandler.apply(requestString);
+                
+                if (scraperRequest.isPresent()) {
+                    String serviceBusMessage = objectMapper.writeValueAsString(scraperRequest.get());
+                    message.setValue(serviceBusMessage);
+                    return request.createResponseBuilder(HttpStatus.OK).body("Successfully added scraper request to queue.").build(); 
+                }
+                return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("There was an issue mapping your request to a CityDTO.").build();
             }
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("There was an issue mapping your request to a CityDTO.").build();
+        } catch (Exception e) {
+            log.error("There was an error in the apiJobProducer. Probably a mapping issue. Error: {}", e.getMessage());
+            return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("An exception was thrown when trying to queue the job. Error: " + e.getMessage()).build();
         }
+        
     }
 }
