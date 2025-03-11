@@ -48,7 +48,7 @@ jobs:
       - name: 'Restore Project Dependencies Using Mvn'
         shell: bash
         run: |
-          mvn clean package -pl ${{ env.REPOSITORY_NAME }} -am
+          mvn clean install -pl ${{ env.REPOSITORY_NAME }} -am
 
       - name: ACR build & push image
         run: |
