@@ -19,6 +19,7 @@ public class One2GoAsiaApplication {
 		Environment environment = SpringApplication.run(One2GoAsiaApplication.class, args).getEnvironment();
 
 		String profile = environment.getProperty("spring.profiles.active", "local");
+		log.info("David the profile is {}", profile);
 
 		if (!profile.equals("local")) {
 			log.info("Attaching application insights");
