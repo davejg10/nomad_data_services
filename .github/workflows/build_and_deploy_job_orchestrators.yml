@@ -1,6 +1,6 @@
 
-name: deploy-admin-api-azure-functions
-run-name: Deploy Admin-Api Azure Functions
+name: deploy-${{ github.event.inputs.function_app_suffix }}-function-app
+run-name: Deploy ${{ github.event.inputs.function_app_suffix }} Function App
 
 on:
   workflow_dispatch:
@@ -10,11 +10,16 @@ on:
         description: Environment
         options:
           - dev
+      function_app_suffix:
+        type: choice
+        description: Which Function APp
+        options:
+          - admin-api
+          - job-orchestrator
 
 env:
   POM_XML_DIRECTORY: '.'
   JAVA_VERSION: '17'
-  MODULE_DIR: ./job_orchestrator
 
 permissions:
   id-token: write
@@ -22,13 +27,19 @@ permissions:
 jobs:
   build-and-deploy:
     env:
-      FUNCTION_APP_NAME: fa-${{ github.event.inputs.environment }}-uks-nomad-02-job-orchestrator
+      FUNCTION_APP_NAME: fa-${{ github.event.inputs.environment }}-uks-nomad-02-${{ github.event.inputs.function_app_suffix }}
       FUNCTION_APP_RG_NAME: rg-${{ github.event.inputs.environment }}-uks-nomad-02
     runs-on: ubuntu-latest
     environment: dev
     steps:
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@v3
+
+      - name: Underscore module dir
+        run: |
+          MODULE_DIR="${{ github.event.inputs.function_app_suffix }}"
+          MODULE_DIR=${FUNCTION_APP_NAME//-/_}
+          echo "MODULE_DIR=$MODULE_DIR" >> $GITHUB_ENV
 
       - name: Setup Java Sdk ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v1
@@ -38,7 +49,7 @@ jobs:
       - name: Mvn clean package
         shell: bash          
         run: |
-          mvn clean package -pl job_orchestrator -am -DfunctionAppName=$FUNCTION_APP_NAME -DfunctionResourceGroup=$FUNCTION_APP_RG_NAME
+          mvn clean package -pl $MODULE_DIR -am -DfunctionAppName=$FUNCTION_APP_NAME -DfunctionResourceGroup=$FUNCTION_APP_RG_NAME
 
       - name: Azure CLI Login
         uses: azure/login@v2
