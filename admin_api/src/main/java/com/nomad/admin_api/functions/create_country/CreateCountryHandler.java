@@ -1,7 +1,9 @@
 package com.nomad.admin_api.functions.create_country;
 
+import java.sql.SQLException;
 import java.util.function.Consumer;
 
+import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.springframework.stereotype.Component;
 
 import com.nomad.admin_api.Neo4jCountryRepository;
@@ -14,7 +16,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Component
-public class CreateCountryHandler implements Consumer<SqlCountry> {
+public class CreateCountryHandler {
 
     private SqlCountryRepository sqlCountryRepository;
     private Neo4jCountryRepository neo4jCountryRepository;
@@ -24,7 +26,7 @@ public class CreateCountryHandler implements Consumer<SqlCountry> {
         this.neo4jCountryRepository = neo4jCountryRepository;
     }
  
-    public void accept(SqlCountry countryToBeCreated) {
+    public void createAndSyncCountry(SqlCountry countryToBeCreated) {
         SqlCountry sqlCountry = null;
         try {
             sqlCountry = sqlCountryRepository.save(countryToBeCreated);
@@ -35,10 +37,9 @@ public class CreateCountryHandler implements Consumer<SqlCountry> {
         } catch (Neo4jGenericException e) {
             log.error("Failed to sync country: {} to Neo4j. Rolling backing transactions. Error: {}", countryToBeCreated.getName(), e);
             sqlCountryRepository.delete(countryToBeCreated);
-            throw new RuntimeException("Failed to save country: " + countryToBeCreated.getName() + " to Postgres OR Neo4j.", e);
-
+            throw new RuntimeException("Failed to save country to Neo4j: " + countryToBeCreated.getName() + " Error: " + e.getMessage(), e);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to save country: " + countryToBeCreated.getName() + " to Postgres OR Neo4j.", e);
+            throw new RuntimeException("Failed to save country to Postgres " + countryToBeCreated.getName() + " Error: " + e.getMessage(), e);
         }
     }
 }

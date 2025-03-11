@@ -1,6 +1,7 @@
 package com.nomad.admin_api.functions.create_country;
 
 import java.util.Optional;
+import java.util.logging.Level;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.nomad.data_library.domain.sql.SqlCountry;
+import com.nomad.data_library.exceptions.Neo4jGenericException;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -42,8 +44,7 @@ public class CreateCountryTrigger {
                 SqlCountry countryToBeCreated = objectMapper.readValue(request.getBody().get(), SqlCountry.class);
                 log.info("createCountry function hit. Request body is {}", countryToBeCreated);
             
-                // createAndSyncCountry(countryToBeCreated);
-                createCountryHandler.accept(countryToBeCreated);
+                createCountryHandler.createAndSyncCountry(countryToBeCreated);
 
                 return request.createResponseBuilder(HttpStatus.OK).body("Successfully created Country " + countryToBeCreated.getName() + " in PostgreSQl flexible server & synced to Neo4j.").build();
 
@@ -51,7 +52,7 @@ public class CreateCountryTrigger {
                 log.error("An error was thrown when trying to map message to SqlCountry. Error: {}", e);
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Json mapping error. Please ensure you have the correct payload. Issue: " + e.getMessage()).build();
             } catch (Exception  e) {
-                log.error("There was an issue saving the country {} in the Postgres Flexible server. Likely a bad requst. Message; {}", e.getMessage());
+                context.getLogger().log(Level.SEVERE, "There was an issue saving the country in the Postgres Flexible server. Likely a bad requst. Exception; {}" + e.getMessage(), e);
                 context.getLogger().warning("Error in createCountry function. Error " + e.getMessage());
                 return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue creating Country. Issue: " + e.getMessage()).build();
             }
