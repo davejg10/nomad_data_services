@@ -38,7 +38,7 @@ public class CreateCountryHandlerTest {
 
         SqlCountry countryToBeCreated = SqlCountry.of("CountryA", "A description of countryA");
 
-        createCountryHandler.createAndSyncCountry(countryToBeCreated);
+        createCountryHandler.accept(countryToBeCreated);
         
         Set<SqlCountry> sqlCountries = sqlCountryRepository.findAll();
         Set<Neo4jCountry> neo4jCountries = neo4jCountryRepository.findAllCountries();

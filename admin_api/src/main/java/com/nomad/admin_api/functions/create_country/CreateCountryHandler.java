@@ -1,9 +1,7 @@
 package com.nomad.admin_api.functions.create_country;
 
-import java.sql.SQLException;
 import java.util.function.Consumer;
 
-import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.springframework.stereotype.Component;
 
 import com.nomad.admin_api.Neo4jCountryRepository;
@@ -16,7 +14,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Component
-public class CreateCountryHandler {
+public class CreateCountryHandler implements Consumer<SqlCountry> {
 
     private SqlCountryRepository sqlCountryRepository;
     private Neo4jCountryRepository neo4jCountryRepository;
@@ -26,7 +24,7 @@ public class CreateCountryHandler {
         this.neo4jCountryRepository = neo4jCountryRepository;
     }
  
-    public void createAndSyncCountry(SqlCountry countryToBeCreated) {
+    public void accept(SqlCountry countryToBeCreated) {
         SqlCountry sqlCountry = null;
         try {
             sqlCountry = sqlCountryRepository.save(countryToBeCreated);

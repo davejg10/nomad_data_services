@@ -40,7 +40,7 @@ public class CreateCountryHandlerMockNeo4jTest {
         Mockito.when(neo4jCountryRepository.syncCountry(Mockito.any(SqlCountry.class))).thenThrow(new Neo4jGenericException(""));
         
         try {
-            createCountryHandler.createAndSyncCountry(countryToBeCreated);
+            createCountryHandler.accept(countryToBeCreated);
         } catch(Exception e) {
             // we dont care
         }
