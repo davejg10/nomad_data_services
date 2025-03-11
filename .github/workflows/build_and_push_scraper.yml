@@ -1,4 +1,4 @@
-name: deploy-${{ github.events.inputs.scraper }}-container-app-job
+name: deploy-container-app-job
 run-name: Deploy ${{ github.events.inputs.scraper }} Container App Job
 
 on:

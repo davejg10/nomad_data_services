@@ -1,5 +1,5 @@
 
-name: deploy-${{ github.event.inputs.function_app_suffix }}-function-app
+name: deploy-function-app
 run-name: Deploy ${{ github.event.inputs.function_app_suffix }} Function App
 
 on:
