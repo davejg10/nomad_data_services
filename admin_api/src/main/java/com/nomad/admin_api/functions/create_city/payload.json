@@ -1,0 +1,19 @@
+{
+    "name": "CityA",
+    "description": "Example description",
+    "cityMetrics": {
+        "sailing": {
+            "criteria": "SAILING",
+            "metric": "4.0"
+        },
+        "food": {
+            "criteria": "FOOD",
+            "metric": "8.0"
+        },
+        "nightlife": {
+            "criteria": "NIGHTLIFE",
+            "metric": 4.0
+        }
+    },
+    "countryName": "CountryA"
+}

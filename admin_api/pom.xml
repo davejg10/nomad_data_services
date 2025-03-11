@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+          <groupId>com.nomad.multi</groupId>
+          <artifactId>data-services</artifactId>
+          <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>admin_api</artifactId>
+
+    <properties>
+		<start-class>com.nomad.admin_api.AdminApiApplication</start-class>
+		<version.spring.cloud>2024.0.0</version.spring.cloud>
+        <version.postgresql.driver>42.7.5</version.postgresql.driver>
+		<!-- Plugins -->
+		<!-- These two properties will either be overridden in the command line via passing -DfunctionResourceGroup="x" or they will fallback to default values -->
+		<functionResourceGroup>${functionResourceGroup.default}</functionResourceGroup>
+		<functionAppName>${functionAppName.default}</functionAppName>
+		<functionAppName.default>rg-dev-uks-nomad-02</functionAppName.default>
+		<functionResourceGroup.default>fa-dev-uks-nomad-02-admin-api</functionResourceGroup.default>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- Used for spring-cloud-function-adapter-azure below -->
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${version.spring.cloud}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+    <dependencies>
+		<dependency>
+			<groupId>com.nomad.multi</groupId>
+			<artifactId>data_library</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<!-- This brings in our Neo4jTestConfigurationClass but only when testing  -->
+		<dependency> 
+			<groupId>com.nomad.multi</groupId>
+			<artifactId>data_library</artifactId>
+			<version>${project.version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		
+		<!-- Used to create Azure Functions -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-function-adapter-azure</artifactId>
+		</dependency>
+
+		<!-- Used for mocking Neo4j repository. Creates an in-memory db	-->
+		<dependency>
+			<groupId>org.neo4j.test</groupId>
+			<artifactId>neo4j-harness</artifactId>
+			<version>5.26.0</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-nop</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+    </dependencies>
+
+    <build>
+		<plugins>
+			<plugin>
+				<!-- Azure Functions Maven Plugin to package the Azure Function -->
+				<groupId>com.microsoft.azure</groupId>
+				<artifactId>azure-functions-maven-plugin</artifactId>
+				<version>1.37.0</version>
+				<configuration>
+					<funcPort>7071</funcPort>
+					<resourceGroup>${functionResourceGroup}</resourceGroup>
+					<appName>${functionAppName}</appName>
+					<hostJson>${project.basedir}/host.json</hostJson>
+                    <localSettingsJson>${project.basedir}/local.settings.json</localSettingsJson>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>package</goal> <!-- This makes it trigger during 'mvn package' -->
+						</goals>
+					</execution>
+            	</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>

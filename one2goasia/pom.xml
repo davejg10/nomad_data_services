@@ -6,20 +6,16 @@
 	<parent>
 		<groupId>com.nomad.multi</groupId>
 		<artifactId>data-services</artifactId>
-		<version>1.0</version>
+		<version>1.0-SNAPSHOT</version>
 	</parent>
 
-	<groupId>com.nomad.scraper</groupId>
 	<artifactId>one2goasia</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>one2goasia</name>
-	<description>A webscraper that reads from an Azure Service Bus and scrapes the one2goasia site</description>
 
 	<dependencies>
 		<dependency>
-			<groupId>com.nomad.library</groupId>
-			<artifactId>common</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<groupId>com.nomad.multi</groupId>
+			<artifactId>scraping_library</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
  		<!-- For web scraping -->
@@ -30,6 +26,12 @@
 			<version>1.49.0</version> 
 		</dependency>
 
+		<!-- Used for Application insights in cloud -->
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>applicationinsights-runtime-attach</artifactId>
+			<version>3.7.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

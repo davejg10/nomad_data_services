@@ -1,0 +1,68 @@
+
+name: deploy-${{ github.event.inputs.function_app_suffix }}-function-app
+run-name: Deploy ${{ github.event.inputs.function_app_suffix }} Function App
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: Environment
+        options:
+          - dev
+      function_app_suffix:
+        type: choice
+        description: Which Function APp
+        options:
+          - admin-api
+          - job-orchestrator
+
+env:
+  POM_XML_DIRECTORY: '.'
+  JAVA_VERSION: '17'
+
+permissions:
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    env:
+      FUNCTION_APP_NAME: fa-${{ github.event.inputs.environment }}-uks-nomad-02-${{ github.event.inputs.function_app_suffix }}
+      FUNCTION_APP_RG_NAME: rg-${{ github.event.inputs.environment }}-uks-nomad-02
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v3
+
+      - name: Underscore module dir
+        run: |
+          MODULE_DIR="${{ github.event.inputs.function_app_suffix }}"
+          MODULE_DIR=${FUNCTION_APP_NAME//-/_}
+          echo "MODULE_DIR=$MODULE_DIR" >> $GITHUB_ENV
+
+      - name: Setup Java Sdk ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Mvn clean package
+        shell: bash          
+        run: |
+          mvn clean package -pl $MODULE_DIR -am -DfunctionAppName=$FUNCTION_APP_NAME -DfunctionResourceGroup=$FUNCTION_APP_RG_NAME
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: 'Run Azure Functions Action'
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ env.FUNCTION_APP_NAME }}
+          package: '${{ env.MODULE_DIR }}/target/azure-functions/${{ env.FUNCTION_APP_NAME }}' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
+          sku: flexconsumption
+          respect-pom-xml: true
+          

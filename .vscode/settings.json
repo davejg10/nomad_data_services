@@ -1,0 +1,8 @@
+{
+    "azureFunctions.projectSubpath": "admin_api",
+    "azureFunctions.javaBuildTool": "maven",
+    "azureFunctions.deploySubpath": "admin_api/target/azure-functions/fa-dev-uks-nomad-02-admin-api",
+    "azureFunctions.projectLanguage": "Java",
+    "azureFunctions.projectRuntime": "~4",
+    "azureFunctions.preDeployTask": "package (functions)"
+}
