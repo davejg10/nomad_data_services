@@ -1,6 +1,7 @@
 package com.nomad.job_orchestrator.functions.api_job_producer;
 
 import java.util.Optional;
+import java.util.logging.Level;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpMethod;
 import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
@@ -39,7 +41,8 @@ public class ApiJobTrigger {
     @FunctionName("apiJobProducer")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
-        @ServiceBusQueueOutput(name = "message", queueName = sb_pre_processed_queue_name, connection = "nomadservicebus") OutputBinding<String> message) throws JsonMappingException, JsonProcessingException  {
+        @ServiceBusQueueOutput(name = "message", queueName = sb_pre_processed_queue_name, connection = "nomadservicebus") OutputBinding<String> message,
+        ExecutionContext context) throws JsonMappingException, JsonProcessingException  {
         try {
             if (!request.getBody().isPresent()) {
                 log.info("Unable to read request body. Is empty");
@@ -55,10 +58,11 @@ public class ApiJobTrigger {
                     message.setValue(serviceBusMessage);
                     return request.createResponseBuilder(HttpStatus.OK).body("Successfully added scraper request to queue.").build(); 
                 }
+                context.getLogger().log(Level.SEVERE, "There was an error when trying to map the request to a CityDTO.");
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("There was an issue mapping your request to a CityDTO.").build();
             }
         } catch (Exception e) {
-            log.error("There was an error in the apiJobProducer. Probably a mapping issue. Error: {}", e.getMessage());
+            context.getLogger().log(Level.SEVERE, "There was an error in the apiJobProducer. Probably a mapping issue. Exception: {}" + e.getMessage(), e);
             return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("An exception was thrown when trying to queue the job. Error: " + e.getMessage()).build();
         }
         

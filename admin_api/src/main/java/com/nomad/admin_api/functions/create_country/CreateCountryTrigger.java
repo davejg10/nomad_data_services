@@ -43,7 +43,7 @@ public class CreateCountryTrigger {
                 SqlCountry countryToBeCreated = objectMapper.readValue(request.getBody().get(), SqlCountry.class);
                 log.info("createCountry function hit. Request body is {}", countryToBeCreated);
             
-                createCountryHandler.createAndSyncCountry(countryToBeCreated);
+                createCountryHandler.accept(countryToBeCreated);
 
                 return request.createResponseBuilder(HttpStatus.OK).body("Successfully created Country " + countryToBeCreated.getName() + " in PostgreSQl flexible server & synced to Neo4j.").build();
 

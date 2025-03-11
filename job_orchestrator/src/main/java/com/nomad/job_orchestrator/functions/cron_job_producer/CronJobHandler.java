@@ -1,6 +1,5 @@
 package com.nomad.job_orchestrator.functions.cron_job_producer;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.nomad.scraping_library.domain.ScraperRequest;
@@ -38,7 +37,7 @@ public class CronJobHandler {
         try {
             allCronJobs = mapper.readValue(resource.getInputStream(), CronJobs.class);
         } catch (IOException e) {
-            log.error("Error when trying to read {} file. Error: {}", fileName, e.getMessage());
+            log.error("Error when trying to read " + fileName + " file. Error: {}" + e.getMessage());
             throw new RuntimeException(e);
         } 
 
