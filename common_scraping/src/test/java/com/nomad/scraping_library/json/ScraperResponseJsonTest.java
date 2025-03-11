@@ -1,22 +1,21 @@
-package com.nomad.library.json;
+package com.nomad.scraping_library.json;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.nomad.library.config.AppConfig;
-import com.nomad.library.domain.TransportType;
-import com.nomad.library.messages.CityDTO;
-import com.nomad.library.messages.RouteDTO;
-import com.nomad.library.messages.ScraperRequestType;
-import com.nomad.library.messages.ScraperResponse;
+import com.nomad.scraping_library.config.AppConfig;
+import com.nomad.scraping_library.domain.CityDTO;
+import com.nomad.scraping_library.domain.RouteDTO;
+import com.nomad.scraping_library.domain.ScraperRequestType;
+import com.nomad.scraping_library.domain.ScraperResponse;
+import com.nomad.scraping_library.domain.TransportType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.log4j.Log4j2;

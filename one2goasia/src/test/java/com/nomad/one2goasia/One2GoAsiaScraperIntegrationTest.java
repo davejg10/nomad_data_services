@@ -3,7 +3,6 @@ package com.nomad.one2goasia;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -13,9 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nomad.library.config.AppConfig;
-import com.nomad.library.messages.ScraperRequest;
-import com.nomad.library.messages.ScraperResponse;
+import com.nomad.scraping_library.domain.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperResponse;
+import com.nomad.scraping_library.config.AppConfig;
 
 import lombok.extern.log4j.Log4j2;
 

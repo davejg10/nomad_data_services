@@ -6,16 +6,29 @@
     <parent>
           <groupId>com.nomad.multi</groupId>
           <artifactId>data-services</artifactId>
-          <version>1.0</version>
+          <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.nomad.multi</groupId>
-    <artifactId>common_scraping</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>scraping_library</artifactId>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <version.jackson.jsr310>2.15.0</version.jackson.jsr310>
     </properties>
+
+    <dependencies>
+        <!-- Service Bus dependencies -->
+        <dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-messaging-servicebus</artifactId>
+		</dependency>
+
+        <!-- Allows us to serialize/deserialize DataTime objects. See AppConfig.java -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${version.jackson.jsr310}</version>
+        </dependency>
+    </dependencies>
+
 
 </project>

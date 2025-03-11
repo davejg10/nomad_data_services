@@ -8,26 +8,20 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nomad.library.config.AppConfig;
-import com.nomad.library.messages.CityDTO;
-import com.nomad.library.messages.ScraperRequest;
-import com.nomad.library.messages.ScraperRequestType;
+import com.nomad.scraping_library.domain.CityDTO;
+import com.nomad.scraping_library.domain.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperRequestType;
+import com.nomad.scraping_library.config.AppConfig;
 
-import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @SpringBootTest(classes = {AppConfig.class, ApiJobHandler.class})
 public class ApiJobHandlerTest {
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private ApiJobHandler apiJobHandler;

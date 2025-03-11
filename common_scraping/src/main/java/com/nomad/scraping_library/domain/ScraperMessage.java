@@ -1,4 +1,4 @@
-package com.nomad.library.messages;
+package com.nomad.scraping_library.domain;
 
 import java.time.LocalDate;
 

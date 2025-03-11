@@ -6,17 +6,10 @@
     <parent>
       <groupId>com.nomad.multi</groupId>
       <artifactId>data-services</artifactId>
-      <version>1.0</version>
+      <version>1.0-SNAPSHOT</version>
     </parent>
 	  
-    <groupId>com.nomad.library</groupId>
     <artifactId>common</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <description>A module that contains common domain logic</description>
-
-    <properties>
-        <version.jackson.jsr310>2.15.0</version.jackson.jsr310>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -36,24 +29,44 @@
         	<artifactId>spring-boot-starter-data-jpa</artifactId>
     	</dependency>
 
-        <!-- Service Bus dependencies -->
         <dependency>
-			<groupId>com.azure</groupId>
-			<artifactId>azure-messaging-servicebus</artifactId>
+			<groupId>com.azure.spring</groupId>
+			<artifactId>spring-cloud-azure-starter-jdbc-postgresql</artifactId>
 		</dependency>
 
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>${version.jackson.jsr310}</version>
-        </dependency>
+        <!-- Used for mocking Postgres repository locally-->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 
+        <!-- Required for passwordless sign in of postgres -->
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-identity-extensions</artifactId>
+			<version>1.1.21</version>
+		</dependency>
+
+        <!-- Used for mocking Neo4j repository. Creates an in-memory db	-->
+		<dependency>
+			<groupId>org.neo4j.test</groupId>
+			<artifactId>neo4j-harness</artifactId>
+			<version>5.26.0</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-nop</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <!-- This creates an additional artifact containing your test classes. -->
+                <!-- This creates an additional artifact containing your test classes. i.e our custom Neo4jTestGenerator.java -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.2.0</version>

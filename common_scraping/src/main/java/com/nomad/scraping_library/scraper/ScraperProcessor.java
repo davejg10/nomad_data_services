@@ -1,4 +1,4 @@
-package com.nomad.library.scraper;
+package com.nomad.scraping_library.scraper;
 
 import java.time.Duration;
 import java.util.Iterator;
@@ -13,10 +13,10 @@ import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.nomad.library.connectors.ServiceBusBatchSender;
-import com.nomad.library.exceptions.NoRoutesFoundException;
-import com.nomad.library.messages.ScraperRequest;
-import com.nomad.library.messages.ScraperResponse;
+import com.nomad.scraping_library.connectors.ServiceBusBatchSender;
+import com.nomad.scraping_library.domain.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperResponse;
+import com.nomad.scraping_library.exceptions.NoRoutesFoundException;
 
 import lombok.extern.log4j.Log4j2;
 

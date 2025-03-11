@@ -8,10 +8,11 @@ import com.microsoft.azure.functions.annotation.TimerTrigger;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.nomad.library.connectors.ServiceBusBatchSender;
-import com.nomad.library.messages.ScraperRequest;
+import com.nomad.scraping_library.connectors.ServiceBusBatchSender;
+import com.nomad.scraping_library.domain.ScraperRequest;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -21,12 +22,12 @@ import java.util.List;
 @Component
 public class CronJobTrigger {
 
-    private static final String cronJobConfigFile = "jobs-config.yml";
+    @Value("${CRON_JOB_CONFIG_FILE}")
+    private String CRON_JOB_CONFIG_FILE;
     
     // Note that no matter the cron schedule on the jobs within jobs-config, the maximumum frequency with 
     // which they can be called is down to this cron schedule. 
-    private final String cronTriggerSchedule = "0 */1 * * * *";
-
+    private final String cronTriggerSchedule = "0 */10 * * * *";
 
     @Autowired
     private CronJobHandler cronJobHandler;
@@ -40,16 +41,23 @@ public class CronJobTrigger {
      */
     @FunctionName("cronJobProducer")
     public void execute(@TimerTrigger(name = "keepAliveTrigger", schedule = cronTriggerSchedule) String timerInfo,
-                        ExecutionContext context) throws StreamReadException, DatabindException, IOException {
+                        ExecutionContext context) throws StreamReadException, DatabindException, IOException, InterruptedException {
         
         LocalDateTime now = LocalDateTime.now();
 
-        CronJobs cronJobs = cronJobHandler.readCronJobs(cronJobConfigFile);
+        CronJobs cronJobs = cronJobHandler.readCronJobs(CRON_JOB_CONFIG_FILE);
         List<CronJob> filteredCronJobs = cronJobHandler.filterCronJobs(now, cronTriggerSchedule, cronJobs);
 
         for(CronJob filteredCronJob : filteredCronJobs) {
             List<ScraperRequest> scraperRequests = cronJobHandler.createScraperRequests(filteredCronJob);
-            serviceBusBatchSender.sendBatch(scraperRequests);           
+
+            if (scraperRequests.size() > 0) 
+                serviceBusBatchSender.sendBatch(scraperRequests);           
         }
+
+        int sleep = 2000;
+        log.info("Going to sleep for {} before closing connection", sleep);
+        Thread.sleep(sleep); //ServiceBus connection close
+        serviceBusBatchSender.getSenderClient().close();
     }
 }

@@ -17,7 +17,7 @@ import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.microsoft.azure.functions.annotation.ServiceBusQueueOutput;
-import com.nomad.library.messages.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperRequest;
 
 import lombok.extern.log4j.Log4j2;
 

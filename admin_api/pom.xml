@@ -3,21 +3,19 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
           <groupId>com.nomad.multi</groupId>
           <artifactId>data-services</artifactId>
-          <version>1.0</version>
+          <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.nomad.admin_api</groupId>
     <artifactId>admin_api</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
 
     <properties>
 		<start-class>com.nomad.admin_api.AdminApiApplication</start-class>
 		<version.spring.cloud>2024.0.0</version.spring.cloud>
         <version.postgresql.driver>42.7.5</version.postgresql.driver>
-		<version.nomad.common>0.0.1-SNAPSHOT</version.nomad.common>
 		<!-- Plugins -->
 		<!-- These two properties will either be overridden in the command line via passing -DfunctionResourceGroup="x" or they will fallback to default values -->
 		<functionResourceGroup>${functionResourceGroup.default}</functionResourceGroup>
@@ -41,15 +39,15 @@
 
     <dependencies>
 		<dependency>
-			<groupId>com.nomad.library</groupId>
+			<groupId>com.nomad.multi</groupId>
 			<artifactId>common</artifactId>
-			<version>${version.nomad.common}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<!-- This brings in our Neo4jTestConfigurationClass but only when testing  -->
 		<dependency> 
-			<groupId>com.nomad.library</groupId>
+			<groupId>com.nomad.multi</groupId>
 			<artifactId>common</artifactId>
-			<version>${version.nomad.common}</version>
+			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
@@ -59,31 +57,20 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-function-adapter-azure</artifactId>
 		</dependency>
-		
-        <dependency>
-        	<groupId>org.springframework.boot</groupId>
-        	<artifactId>spring-boot-starter-data-jpa</artifactId>
-    	</dependency>
 
+		<!-- Used for mocking Neo4j repository. Creates an in-memory db	-->
 		<dependency>
-			<groupId>com.azure.spring</groupId>
-			<artifactId>spring-cloud-azure-starter-jdbc-postgresql</artifactId>
+			<groupId>org.neo4j.test</groupId>
+			<artifactId>neo4j-harness</artifactId>
+			<version>5.26.0</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-nop</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-
-		<!-- Used for mocking Postgres repository locally-->
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
-		<!-- Required for passwordless sign in of postgres -->
-		<dependency>
-			<groupId>com.azure</groupId>
-			<artifactId>azure-identity-extensions</artifactId>
-			<version>1.1.21</version>
-		</dependency>
-
     </dependencies>
 
     <build>
@@ -94,6 +81,7 @@
 				<artifactId>azure-functions-maven-plugin</artifactId>
 				<version>1.37.0</version>
 				<configuration>
+					<funcPort>7071</funcPort>
 					<resourceGroup>${functionResourceGroup}</resourceGroup>
 					<appName>${functionAppName}</appName>
 					<hostJson>${project.basedir}/host.json</hostJson>

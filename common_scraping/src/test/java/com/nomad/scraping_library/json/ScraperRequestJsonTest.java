@@ -1,4 +1,4 @@
-package com.nomad.library.json;
+package com.nomad.scraping_library.json;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.nomad.library.config.AppConfig;
-import com.nomad.library.messages.CityDTO;
-import com.nomad.library.messages.ScraperRequest;
-import com.nomad.library.messages.ScraperRequestType;
+import com.nomad.scraping_library.config.AppConfig;
+import com.nomad.scraping_library.domain.CityDTO;
+import com.nomad.scraping_library.domain.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperRequestType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.log4j.Log4j2;

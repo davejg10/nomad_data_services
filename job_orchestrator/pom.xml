@@ -6,18 +6,14 @@
 	<parent>
 		<groupId>com.nomad.multi</groupId>
 		<artifactId>data-services</artifactId>
-		<version>1.0</version>
+		<version>1.0-SNAPSHOT</version>
 	</parent>
 
-	<groupId>com.nomad.job_orchestrator</groupId>
 	<artifactId>job_orchestrator</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<description>Deployed to Azure Function to create web scraping jobs</description>
 
 	<properties>
 		<start-class>com.nomad.job_orchestrator.JobOrchestratorApplication</start-class>
 		<version.spring.cloud>2024.0.0</version.spring.cloud>
-		<version.nomad.common>0.0.1-SNAPSHOT</version.nomad.common>
 		<!-- Plugins -->
 		<functionResourceGroup>${functionResourceGroup.default}</functionResourceGroup>
 		<functionAppName>${functionAppName.default}</functionAppName>
@@ -41,28 +37,28 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.nomad.library</groupId>
+			<groupId>com.nomad.multi</groupId>
 			<artifactId>common</artifactId>
-			<version>${version.nomad.common}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<!-- This brings in our Neo4jTestConfigurationClass but only when testing  -->
 		<dependency> 
-			<groupId>com.nomad.library</groupId>
+			<groupId>com.nomad.multi</groupId>
 			<artifactId>common</artifactId>
-			<version>${version.nomad.common}</version>
+			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
-		</dependency>  
+		</dependency>
+		<dependency>
+			<groupId>com.nomad.multi</groupId>
+			<artifactId>scraping_library</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		
 		<!-- Used to create Azure Functions -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-function-adapter-azure</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-neo4j</artifactId>
 		</dependency>
 
 		<!-- Used to read YML file -->
@@ -71,14 +67,19 @@
 			<artifactId>jackson-dataformat-yaml</artifactId>
 		</dependency>
 
-		<!-- Used for mocking Postgres repository locally-->
+		<!-- Used for mocking Neo4j repository. Creates an in-memory db	-->
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>runtime</scope>
+			<groupId>org.neo4j.test</groupId>
+			<artifactId>neo4j-harness</artifactId>
+			<version>5.26.0</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-nop</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-
-		
 
 	</dependencies>
 
@@ -90,6 +91,7 @@
 				<artifactId>azure-functions-maven-plugin</artifactId>
 				<version>1.37.0</version>
 				<configuration>
+					<funcPort>7072</funcPort>
 					<resourceGroup>${functionResourceGroup}</resourceGroup>
 					<appName>${functionAppName}</appName>
 					<hostJson>${project.basedir}/host.json</hostJson>

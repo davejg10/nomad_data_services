@@ -1,12 +1,11 @@
-package com.nomad.library.messages;
+package com.nomad.scraping_library.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 
-import com.nomad.library.domain.TransportType;
-import com.nomad.library.exceptions.ScrapingDataSchemaException;
+import com.nomad.scraping_library.exceptions.ScrapingDataSchemaException;
 
 import lombok.extern.log4j.Log4j2;
 

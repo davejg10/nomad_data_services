@@ -50,9 +50,29 @@ Azure Functions are currently tested manually by following the approach shown in
 ## Spring profiles
 
 ## admin_api
-
+Command to build 
+```
+[from root]
+mvn clean package -pl admin_api -am -DskipTests
+cd admin_api
+mvn azure-functions:run
+```
 ## common
 
 ## job_orchestrator
-
+Command to build 
+```
+[from root]
+mvn clean package -pl job_orchestrator -am -DskipTests
+cd job_orchestrator
+mvn azure-functions:run
+```
 ## one2goasia
+
+Command to build 
+```
+[from root]
+mvn clean install -pl one2goasia -am -DskipTests
+cd one2goasia
+mvn spring-boot:run
+```

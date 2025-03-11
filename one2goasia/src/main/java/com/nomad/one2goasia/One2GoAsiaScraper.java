@@ -2,11 +2,11 @@ package com.nomad.one2goasia;
 
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.LoadState;
-import com.nomad.library.domain.TransportType;
-import com.nomad.library.messages.RouteDTO;
-import com.nomad.library.messages.ScraperRequest;
-import com.nomad.library.messages.ScraperResponse;
-import com.nomad.library.scraper.WebScraperInterface;
+import com.nomad.scraping_library.domain.TransportType;
+import com.nomad.scraping_library.domain.RouteDTO;
+import com.nomad.scraping_library.domain.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperResponse;
+import com.nomad.scraping_library.scraper.WebScraperInterface;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;

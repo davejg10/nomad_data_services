@@ -20,12 +20,13 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.nomad.job_orchestrator.Neo4jCityRepository;
 import com.nomad.job_orchestrator.Neo4jCountryRepository;
 import com.nomad.library.Neo4jTestGenerator;
-import com.nomad.library.connectors.ServiceBusBatchSender;
 import com.nomad.library.domain.neo4j.Neo4jCity;
 import com.nomad.library.domain.neo4j.Neo4jCountry;
 import com.nomad.library.exceptions.Neo4jGenericException;
-import com.nomad.library.messages.ScraperRequest;
-import com.nomad.library.messages.ScraperRequestType;
+
+import com.nomad.scraping_library.connectors.ServiceBusBatchSender;
+import com.nomad.scraping_library.domain.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperRequestType;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;

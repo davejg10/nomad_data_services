@@ -1,4 +1,4 @@
-package com.nomad.library.config;
+package com.nomad.scraping_library.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

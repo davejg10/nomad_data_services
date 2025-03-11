@@ -4,7 +4,7 @@ package com.nomad.job_orchestrator.functions.cron_job_producer;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.nomad.library.messages.ScraperRequestType;
+import com.nomad.scraping_library.domain.ScraperRequestType;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

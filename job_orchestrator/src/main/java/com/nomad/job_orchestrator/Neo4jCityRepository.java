@@ -4,8 +4,11 @@ import com.nomad.job_orchestrator.domain.CityPair;
 import com.nomad.library.domain.neo4j.Neo4jCity;
 import com.nomad.library.domain.neo4j.Neo4jCountry;
 import com.nomad.library.exceptions.Neo4jGenericException;
-import com.nomad.library.messages.CityDTO;
 import com.nomad.library.repositories.Neo4jCommonCityRepository;
+
+import com.nomad.scraping_library.domain.CityDTO;
+
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.log4j.Log4j2;

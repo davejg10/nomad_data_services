@@ -6,8 +6,8 @@ import com.azure.identity.ManagedIdentityCredentialBuilder;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nomad.library.connectors.ServiceBusBatchSender;
-import com.nomad.library.messages.ScraperRequest;
+import com.nomad.scraping_library.connectors.ServiceBusBatchSender;
+import com.nomad.scraping_library.domain.ScraperRequest;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

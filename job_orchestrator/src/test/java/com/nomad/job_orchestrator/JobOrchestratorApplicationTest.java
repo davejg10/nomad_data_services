@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import com.nomad.library.connectors.ServiceBusBatchSender;
-import com.nomad.library.messages.ScraperRequest;
+import com.nomad.scraping_library.connectors.ServiceBusBatchSender;
+import com.nomad.scraping_library.domain.ScraperRequest;
 
 
 @SpringBootTest

@@ -1,6 +1,5 @@
 package com.nomad.library;
 
-import org.junit.jupiter.api.AfterAll;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
@@ -9,12 +8,8 @@ import org.neo4j.harness.Neo4jBuilders;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.neo4j.core.Neo4jClient;
-import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nomad.library.repositories.Neo4jCommonCountryRepository;
 
 import lombok.extern.log4j.Log4j2;
 

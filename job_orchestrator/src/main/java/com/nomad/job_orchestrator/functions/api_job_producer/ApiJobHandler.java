@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nomad.library.messages.CityDTO;
-import com.nomad.library.messages.ScraperRequest;
-import com.nomad.library.messages.ScraperRequestType;
+import com.nomad.scraping_library.domain.CityDTO;
+import com.nomad.scraping_library.domain.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperRequestType;
 
 import lombok.extern.log4j.Log4j2;
 

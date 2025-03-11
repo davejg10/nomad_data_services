@@ -1,4 +1,4 @@
-package com.nomad.library.connectors;
+package com.nomad.scraping_library.connectors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import com.azure.messaging.servicebus.ServiceBusMessageBatch;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nomad.library.messages.ScraperMessage;
+import com.nomad.scraping_library.domain.ScraperMessage;
 
 import lombok.extern.log4j.Log4j2;
 

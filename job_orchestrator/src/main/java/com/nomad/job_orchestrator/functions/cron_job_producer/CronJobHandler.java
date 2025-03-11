@@ -3,8 +3,8 @@ package com.nomad.job_orchestrator.functions.cron_job_producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.nomad.library.messages.ScraperRequest;
-import com.nomad.library.messages.ScraperRequestType;
+import com.nomad.scraping_library.domain.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperRequestType;
 import com.nomad.job_orchestrator.Neo4jCityRepository;
 import com.nomad.job_orchestrator.domain.CityPair;
 

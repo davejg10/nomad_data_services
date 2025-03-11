@@ -1,4 +1,4 @@
-package com.nomad.library.exceptions;
+package com.nomad.scraping_library.exceptions;
 
 public class NoRoutesFoundException extends Exception {
 
