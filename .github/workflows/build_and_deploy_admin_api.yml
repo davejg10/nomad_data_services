@@ -34,10 +34,10 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
 
-      - name: 'Restore Project Dependencies Using Mvn'
+      - name: Mvn clean package
         shell: bash
         run: |
-          mvn clean package -pl job_orchestrator -am
+          mvn clean package -pl job_orchestrator -am -DfunctionAppName=$FUNCTION_APP_NAME -DfunctionResourceGroup=$FUNCTION_APP_RG_NAME
 
       - name: Azure CLI Login
         uses: azure/login@v2
@@ -46,19 +46,11 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Fetch Function-App publish-profile
-        id: fetch_profile
-        run: |
-          PUBLISH_PROFILE=$(az rest -m POST --header "Accept=application/json" -u "https://management.azure.com/subscriptions/${{ vars.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.FUNCTION_APP_RG_NAME }}/providers/Microsoft.Web/sites/${{ env.FUNCTION_APP_NAME }}/publishxml?api-version=2024-04-01" )
-          echo "::add-mask::$PUBLISH_PROFILE"
-          echo "PUBLISH_PROFILE=$PUBLISH_PROFILE" >> $GITHUB_ENV
-
       - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ env.FUNCTION_APP_NAME }}
-          package: '${{ env.MODULE_DIR }}/${{ env.POM_XML_DIRECTORY }}' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
-          publish-profile: ${{ env.PUBLISH_PROFILE }}
+          package: '${{ env.MODULE_DIR }}/target/azure-functions/${{ env.FUNCTION_APP_NAME }}' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
           sku: flexconsumption
           respect-pom-xml: true
           

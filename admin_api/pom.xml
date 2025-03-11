@@ -19,8 +19,11 @@
         <version.postgresql.driver>42.7.5</version.postgresql.driver>
 		<version.nomad.common>0.0.1-SNAPSHOT</version.nomad.common>
 		<!-- Plugins -->
-		<functionResourceGroup>${env.function_app_rg_name}</functionResourceGroup>
-		<functionAppName>${env.function_app_name}</functionAppName>
+		<!-- These two properties will either be overridden in the command line via passing -DfunctionResourceGroup="x" or they will fallback to default values -->
+		<functionResourceGroup>${functionResourceGroup.default}</functionResourceGroup>
+		<functionAppName>${functionAppName.default}</functionAppName>
+		<functionAppName.default>rg-dev-uks-nomad-02</functionAppName.default>
+		<functionResourceGroup.default>fa-dev-uks-nomad-02-admin-api</functionResourceGroup.default>
 	</properties>
 
 	<dependencyManagement>

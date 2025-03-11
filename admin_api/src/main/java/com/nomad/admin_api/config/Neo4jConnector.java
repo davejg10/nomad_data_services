@@ -25,7 +25,7 @@ public class Neo4jConnector {
     private String neo4j_user;
     @Value("${neo4j_password_key}")
     private String neo4j_password_key;
-    @Value("${azure_client_id}")
+    @Value("${AZURE_CLIENT_ID}")
     private String AZURE_CLIENT_ID;
 
     @Bean
