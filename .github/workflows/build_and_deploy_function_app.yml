@@ -38,7 +38,7 @@ jobs:
       - name: Underscore module dir
         run: |
           MODULE_DIR="${{ github.event.inputs.function_app_suffix }}"
-          MODULE_DIR=${FUNCTION_APP_NAME//-/_}
+          MODULE_DIR=${MODULE_DIR//-/_}
           echo "MODULE_DIR=$MODULE_DIR" >> $GITHUB_ENV
 
       - name: Setup Java Sdk ${{ env.JAVA_VERSION }}
