@@ -1,5 +1,5 @@
 name: deploy-container-app-job
-run-name: Deploy ${{ github.events.inputs.scraper }} Container App Job
+run-name: Deploy ${{ github.event.inputs.scraper }} Container App Job
 
 on:
   workflow_dispatch:
@@ -18,7 +18,7 @@ on:
 env:
   ACR_SERVER_NAME: acrglbuksdevopsutils.azurecr.io
   NAMESPACE_NAME: nomad-data
-  REPOSITORY_NAME: ${{ github.events.inputs.scraper }}
+  REPOSITORY_NAME: ${{ github.event.inputs.scraper }}
   TAG: ${{ github.run_id }}
   JAVA_VERSION: '17'
 
