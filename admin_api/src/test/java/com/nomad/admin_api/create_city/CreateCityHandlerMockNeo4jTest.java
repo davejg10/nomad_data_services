@@ -15,19 +15,19 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.nomad.admin_api.Neo4jCityRepository;
 import com.nomad.admin_api.domain.CityDTO;
 import com.nomad.admin_api.functions.create_city.CreateCityHandler;
-import com.nomad.library.GenericTestGenerator;
-import com.nomad.library.domain.sql.SqlCity;
-import com.nomad.library.domain.sql.SqlCountry;
-import com.nomad.library.exceptions.Neo4jGenericException;
-import com.nomad.library.repositories.SqlCityRepository;
-import com.nomad.library.repositories.SqlCountryRepository;
+import com.nomad.data_library.GenericTestGenerator;
+import com.nomad.data_library.domain.sql.SqlCity;
+import com.nomad.data_library.domain.sql.SqlCountry;
+import com.nomad.data_library.exceptions.Neo4jGenericException;
+import com.nomad.data_library.repositories.SqlCityRepository;
+import com.nomad.data_library.repositories.SqlCountryRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @SpringBootTest
-@Import({com.nomad.library.Neo4jTestConfiguration.class})
+@Import({com.nomad.data_library.Neo4jTestConfiguration.class})
 @Transactional
 public class CreateCityHandlerMockNeo4jTest {
 

@@ -16,8 +16,8 @@
 // import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 // import com.azure.messaging.servicebus.ServiceBusSenderClient;
 // import com.fasterxml.jackson.databind.ObjectMapper;
-// import com.nomad.library.connectors.ServiceBusBatchSender;
-// import com.nomad.library.messages.ScraperResponse;
+// import com.nomad.data_library.connectors.ServiceBusBatchSender;
+// import com.nomad.data_library.messages.ScraperResponse;
 
 // @SpringBootTest
 // @Import(ServiceBusBatchMock.class)

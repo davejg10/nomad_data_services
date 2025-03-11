@@ -5,10 +5,10 @@ import java.util.function.Consumer;
 import org.springframework.stereotype.Component;
 
 import com.nomad.admin_api.Neo4jCountryRepository;
-import com.nomad.library.domain.neo4j.Neo4jCountry;
-import com.nomad.library.domain.sql.SqlCountry;
-import com.nomad.library.exceptions.Neo4jGenericException;
-import com.nomad.library.repositories.SqlCountryRepository;
+import com.nomad.data_library.domain.neo4j.Neo4jCountry;
+import com.nomad.data_library.domain.sql.SqlCountry;
+import com.nomad.data_library.exceptions.Neo4jGenericException;
+import com.nomad.data_library.repositories.SqlCountryRepository;
 
 import lombok.extern.log4j.Log4j2;
 

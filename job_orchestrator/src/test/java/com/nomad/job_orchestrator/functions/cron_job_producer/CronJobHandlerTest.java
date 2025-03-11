@@ -19,10 +19,10 @@ import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.nomad.job_orchestrator.Neo4jCityRepository;
 import com.nomad.job_orchestrator.Neo4jCountryRepository;
-import com.nomad.library.Neo4jTestGenerator;
-import com.nomad.library.domain.neo4j.Neo4jCity;
-import com.nomad.library.domain.neo4j.Neo4jCountry;
-import com.nomad.library.exceptions.Neo4jGenericException;
+import com.nomad.data_library.Neo4jTestGenerator;
+import com.nomad.data_library.domain.neo4j.Neo4jCity;
+import com.nomad.data_library.domain.neo4j.Neo4jCountry;
+import com.nomad.data_library.exceptions.Neo4jGenericException;
 
 import com.nomad.scraping_library.connectors.ServiceBusBatchSender;
 import com.nomad.scraping_library.domain.ScraperRequest;
@@ -33,7 +33,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @SpringBootTest
-@Import({com.nomad.library.Neo4jTestConfiguration.class})
+@Import({com.nomad.data_library.Neo4jTestConfiguration.class})
 @Transactional  // Ensures test changes do not persist
 public class CronJobHandlerTest {
 
@@ -50,9 +50,9 @@ public class CronJobHandlerTest {
     private CronJobHandler cronJobHandler;
 
     @Test
-    public void readCronJobs_shouldReturnAListOfAllCronJobs() throws StreamReadException, DatabindException, IOException {
+    public void readCronJobs_whenGivenCloudConfig_shouldReturnAListOfAllCronJobs() throws StreamReadException, DatabindException, IOException {
 
-        String jobConfigFileName = "jobs-config.yml";
+        String jobConfigFileName = "jobs-config-cloud.yml";
 
         CronJobs cronJobs = cronJobHandler.readCronJobs(jobConfigFileName);
 

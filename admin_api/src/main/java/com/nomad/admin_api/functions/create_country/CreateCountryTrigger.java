@@ -15,7 +15,7 @@ import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
-import com.nomad.library.domain.sql.SqlCountry;
+import com.nomad.data_library.domain.sql.SqlCountry;
 
 import lombok.extern.log4j.Log4j2;
 

@@ -1,10 +1,10 @@
 package com.nomad.job_orchestrator;
 
 import com.nomad.job_orchestrator.domain.CityPair;
-import com.nomad.library.domain.neo4j.Neo4jCity;
-import com.nomad.library.domain.neo4j.Neo4jCountry;
-import com.nomad.library.exceptions.Neo4jGenericException;
-import com.nomad.library.repositories.Neo4jCommonCityRepository;
+import com.nomad.data_library.domain.neo4j.Neo4jCity;
+import com.nomad.data_library.domain.neo4j.Neo4jCountry;
+import com.nomad.data_library.exceptions.Neo4jGenericException;
+import com.nomad.data_library.repositories.Neo4jCommonCityRepository;
 
 import com.nomad.scraping_library.domain.CityDTO;
 

@@ -7,11 +7,11 @@ import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nomad.library.domain.neo4j.Neo4jCity;
-import com.nomad.library.domain.neo4j.Neo4jCountry;
-import com.nomad.library.domain.sql.SqlCity;
-import com.nomad.library.exceptions.Neo4jGenericException;
-import com.nomad.library.repositories.Neo4jCommonCityRepository;
+import com.nomad.data_library.domain.neo4j.Neo4jCity;
+import com.nomad.data_library.domain.neo4j.Neo4jCountry;
+import com.nomad.data_library.domain.sql.SqlCity;
+import com.nomad.data_library.exceptions.Neo4jGenericException;
+import com.nomad.data_library.repositories.Neo4jCommonCityRepository;
 
 import lombok.extern.log4j.Log4j2;
 

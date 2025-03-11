@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "CRON_JOB_CONFIG_FILE",
+    "type": "java.lang.String",
+    "description": "The file that the cronJobTrigger Azure Function reads its Cron jobs from"
+  },
+  {
+    "name": "nomadservicebus__fullyQualifiedNamespace",
+    "type": "java.lang.String",
+    "description": "The FQDN of the Azure Service Bus namespace that the scraping requests/response are posted to. This defaults locally to the sandbox SBMS"
+  }
+]}

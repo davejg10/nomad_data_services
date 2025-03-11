@@ -7,9 +7,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@EntityScan(basePackages = {"com.nomad.library.domain"})
-@EnableJpaRepositories({"com.nomad.library.repositories"})
-@ComponentScan({"com.nomad.library.config", "com.nomad.admin_api"})
+@EntityScan(basePackages = {"com.nomad.data_library.domain"})
+@EnableJpaRepositories({"com.nomad.data_library.repositories"})
+@ComponentScan({"com.nomad.data_library.config", "com.nomad.admin_api"})
 public class AdminApiApplication {
     
     public static void main(String[] args) {

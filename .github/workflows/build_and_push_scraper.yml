@@ -1,0 +1,62 @@
+name: deploy-${{ github.events.inputs.scraper }}-container-app-job
+run-name: Deploy ${{ github.events.inputs.scraper }} Container App Job
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: Environment
+        options:
+          - dev
+      scraper:
+        type: choice
+        description: Scraper to deploy
+        options:
+          - one2goasia
+
+env:
+  ACR_SERVER_NAME: acrglbuksdevopsutils.azurecr.io
+  NAMESPACE_NAME: nomad-data
+  REPOSITORY_NAME: ${{ github.events.inputs.scraper }}
+  TAG: ${{ github.run_id }}
+  JAVA_VERSION: '17'
+
+permissions:
+  id-token: write
+
+jobs:
+  aca_build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v3
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      
+      - name: Setup Java Sdk ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+      
+      - name: 'Restore Project Dependencies Using Mvn'
+        shell: bash
+        run: |
+          mvn clean package -pl ${{ env.REPOSITORY_NAME }} -am
+
+      - name: ACR build & push image
+        run: |
+          az acr build \
+            --registry ${{ env.ACR_SERVER_NAME }} \
+            --image "${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" \
+            --build-arg MODULE_TO_BUILD=${{ env.REPOSITORY_NAME }} .
+
+          # Also tag with latest
+          az acr import --name ${{ env.ACR_SERVER_NAME }} --source "${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" --image ${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:latest --force
+

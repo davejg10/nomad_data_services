@@ -38,13 +38,13 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.nomad.multi</groupId>
-			<artifactId>common</artifactId>
+			<artifactId>data_library</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<!-- This brings in our Neo4jTestConfigurationClass but only when testing  -->
 		<dependency> 
 			<groupId>com.nomad.multi</groupId>
-			<artifactId>common</artifactId>
+			<artifactId>data_library</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>

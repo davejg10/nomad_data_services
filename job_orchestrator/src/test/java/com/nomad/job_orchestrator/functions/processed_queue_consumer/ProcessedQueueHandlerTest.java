@@ -18,10 +18,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.job_orchestrator.Neo4jCityRepository;
-import com.nomad.library.Neo4jTestGenerator;
-import com.nomad.library.domain.neo4j.Neo4jCity;
-import com.nomad.library.domain.neo4j.Neo4jCountry;
-import com.nomad.library.exceptions.Neo4jGenericException;
+import com.nomad.data_library.Neo4jTestGenerator;
+import com.nomad.data_library.domain.neo4j.Neo4jCity;
+import com.nomad.data_library.domain.neo4j.Neo4jCountry;
+import com.nomad.data_library.exceptions.Neo4jGenericException;
 
 import com.nomad.scraping_library.connectors.ServiceBusBatchSender;
 import com.nomad.scraping_library.domain.TransportType;
@@ -36,7 +36,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @SpringBootTest
-@Import({com.nomad.library.Neo4jTestConfiguration.class})
+@Import({com.nomad.data_library.Neo4jTestConfiguration.class})
 @Transactional  // Ensures test changes do not persist
 public class ProcessedQueueHandlerTest {
 

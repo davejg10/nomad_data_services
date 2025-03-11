@@ -1,6 +1,6 @@
 package com.nomad.admin_api.config;
 
-import com.nomad.library.connectors.Neo4jConfig;
+import com.nomad.data_library.connectors.Neo4jConfig;
 
 import lombok.extern.log4j.Log4j2;
 

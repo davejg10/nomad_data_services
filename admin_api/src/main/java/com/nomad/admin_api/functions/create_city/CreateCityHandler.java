@@ -6,12 +6,12 @@ import org.springframework.stereotype.Component;
 
 import com.nomad.admin_api.Neo4jCityRepository;
 import com.nomad.admin_api.domain.CityDTO;
-import com.nomad.library.domain.neo4j.Neo4jCity;
-import com.nomad.library.domain.sql.SqlCity;
-import com.nomad.library.domain.sql.SqlCountry;
-import com.nomad.library.exceptions.Neo4jGenericException;
-import com.nomad.library.repositories.SqlCityRepository;
-import com.nomad.library.repositories.SqlCountryRepository;
+import com.nomad.data_library.domain.neo4j.Neo4jCity;
+import com.nomad.data_library.domain.sql.SqlCity;
+import com.nomad.data_library.domain.sql.SqlCountry;
+import com.nomad.data_library.exceptions.Neo4jGenericException;
+import com.nomad.data_library.repositories.SqlCityRepository;
+import com.nomad.data_library.repositories.SqlCountryRepository;
 
 import lombok.extern.log4j.Log4j2;
 

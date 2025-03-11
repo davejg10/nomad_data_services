@@ -1,6 +1,6 @@
 package com.nomad.job_orchestrator;
 
-import com.nomad.library.repositories.Neo4jCommonCountryRepository;
+import com.nomad.data_library.repositories.Neo4jCommonCountryRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.log4j.Log4j2;
