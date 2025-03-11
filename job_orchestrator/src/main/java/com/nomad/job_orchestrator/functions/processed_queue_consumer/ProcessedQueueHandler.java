@@ -31,7 +31,6 @@ public class ProcessedQueueHandler implements Consumer<String> {
         try {
             ScraperResponse scraperResponse = objectMapper.readValue(scraperResponseString, ScraperResponse.class);
             Map<String, Object> cityAsMap = objectMapper.convertValue(scraperResponse,  Map.class);
-            log.info("Message recieved: {}", scraperResponse.getScraperRequestSource());
             // neo4jRepository.saveCityDTOWithDepth0(cityAsMap);
 
         } catch (JsonProcessingException e) {

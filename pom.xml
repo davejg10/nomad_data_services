@@ -24,6 +24,8 @@
         <module>one2goasia</module>
         <module>job_orchestrator</module>
         <module>admin_api</module>
+        <module>common-scraping</module>
+        <module>common_scraping</module>
     </modules>
 
     <properties>
@@ -72,13 +74,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-		</dependency>
-
-		<!-- Used for Application insights in cloud -->
-		<dependency>
-			<groupId>com.microsoft.azure</groupId>
-			<artifactId>applicationinsights-runtime-attach</artifactId>
-			<version>3.7.0</version>
 		</dependency>
 
 		<!-- Used for mocking Neo4j repository. Creates an in-memory db	-->

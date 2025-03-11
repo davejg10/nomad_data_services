@@ -13,7 +13,7 @@ public class AppConfig {
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.registerModule(new JavaTimeModule()); // Required so we can serialize/deseiralize LocalDate
         objectMapper.setDateFormat(new StdDateFormat());
         return objectMapper;
     }

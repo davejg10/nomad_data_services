@@ -2,8 +2,7 @@
 <Configuration>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout
-                    pattern="%style{%d{ISO8601}}{black} %highlight{%-5level }[%style{%t}{bright,blue}] %style{%C{1.}}{bright,yellow}: %msg%n%throwable" disableAnsi="false"/>
+            <PatternLayout pattern="%style{%d{ISO8601}}{black} %highlight{%-5level }[%style{%t}{bright,blue}] %style{%C{1.}}{bright,yellow}: %msg%n%throwable" disableAnsi="false"/>
         </Console>
         <RollingFile name="RollingFile"
                      fileName="/logs/spring-boot-logger-log4j2.log"
@@ -35,8 +34,5 @@
             <AppenderRef ref="Console" />
         </Root>
 
-        <Logger name="nomad.co.uk" level="trace" additivity="false">
-            <AppenderRef ref="Console" />
-        </Logger>
     </Loggers>
 </Configuration>

@@ -6,12 +6,12 @@
   },
   "functionTimeout": "00:10:00",
   "logging": {
-    "fileLoggingMode": "debugOnly",
-    "logLevel": {
-      "default": "Warning",
-      "Host.Aggregator": "Information",
-      "Host.Results": "Information",
-      "Function": "Information"
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "excludedTypes": "Dependency;Event;Request"
+      },
+      "enableLiveMetricsFilters": true
     }
   }
 }

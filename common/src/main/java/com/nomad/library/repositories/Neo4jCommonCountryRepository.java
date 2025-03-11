@@ -11,12 +11,10 @@ import org.neo4j.driver.types.TypeSystem;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
-import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.library.domain.neo4j.Neo4jCity;
 import com.nomad.library.domain.neo4j.Neo4jCountry;
-import com.nomad.library.domain.sql.SqlCountry;
 import com.nomad.library.exceptions.Neo4jGenericException;
 
 import lombok.extern.log4j.Log4j2;
