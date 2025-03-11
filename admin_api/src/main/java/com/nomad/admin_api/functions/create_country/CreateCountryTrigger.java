@@ -52,6 +52,7 @@ public class CreateCountryTrigger {
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Json mapping error. Please ensure you have the correct payload. Issue: " + e.getMessage()).build();
             } catch (Exception  e) {
                 log.error("There was an issue saving the country {} in the Postgres Flexible server. Likely a bad requst. Message; {}", e.getMessage());
+                context.getLogger().warning("Error in createCountry function. Error " + e.getMessage());
                 return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue creating Country. Issue: " + e.getMessage()).build();
             }
         }
