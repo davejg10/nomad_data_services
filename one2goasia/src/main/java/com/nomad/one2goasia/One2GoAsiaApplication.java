@@ -1,9 +1,5 @@
 package com.nomad.one2goasia;
 
-import org.springframework.core.env.Environment;
-
-import com.microsoft.applicationinsights.attach.ApplicationInsights;
-
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.boot.SpringApplication;

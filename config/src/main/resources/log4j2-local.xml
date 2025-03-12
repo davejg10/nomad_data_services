@@ -5,33 +5,25 @@
             <PatternLayout
                     pattern="%highlight{%-5level }[%style{%X{correlationId}}{bright,blue}] %style{%C{1.}}{bright,yellow}: %msg%n%throwable" disableAnsi="false"/>
         </Console>
-        <ApplicationInsightsAppender  name="AIAppender">
-            <InstrumentationKey>52c31484-0b48-4b47-8bc0-16aa9bf3bffd</InstrumentationKey>
-        </ApplicationInsightsAppender >
-        
     </Appenders>
     
     <Loggers>
         <!-- LOG everything at INFO level -->
         <Root level="info">
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="AIAppender"/>
         </Root>
 
         <!-- Suppress excessive Azure SDK logs -->
         <Logger name="com.azure" level="warn" additivity="false">
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="AIAppender"/>
         </Logger>
 
         <Logger name="com.azure.messaging.servicebus" level="warn" additivity="false">
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="AIAppender"/>
         </Logger>
 
         <Logger name="com.azure.core.util.logging.LoggingEventBuilder" level="warn" additivity="false">
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="AIAppender"/>
         </Logger>
     </Loggers>
 </Configuration>
