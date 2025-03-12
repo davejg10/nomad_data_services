@@ -39,7 +39,7 @@ public class CronJobTrigger {
     @Autowired 
     private ServiceBusBatchSender<ScraperRequest> serviceBusBatchSender;
 
-    /*
+    /*  
      * This Azure Function is scheduled to queue scraping jobs at various intervals. These are posted to the same
      * queue as apiJobTrigger Function.
      */

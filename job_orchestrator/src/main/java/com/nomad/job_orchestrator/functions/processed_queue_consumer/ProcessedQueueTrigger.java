@@ -33,6 +33,8 @@ public class ProcessedQueueTrigger {
     @Autowired
     private ProcessedQueueHandler processedQueueHandler;
 
+    @Autowired
+    private TelemetryClient telemetryClient;
     /*
      * This Azure Function reads messages from the Queue that the scapers post to. See payload.json for an example message.
      */
@@ -43,7 +45,6 @@ public class ProcessedQueueTrigger {
         try {
             ThreadContext.put("correlationId", correlationId);
 
-            TelemetryClient telemetryClient = new TelemetryClient();
             telemetryClient.getContext().getOperation().setId(correlationId);
             telemetryClient.trackEvent("MessageProcessed", Map.of("correlationId", correlationId), null);
 

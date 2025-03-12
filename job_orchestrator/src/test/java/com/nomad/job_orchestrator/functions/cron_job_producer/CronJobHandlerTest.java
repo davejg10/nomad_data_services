@@ -20,6 +20,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
+import com.microsoft.applicationinsights.TelemetryClient;
 import com.nomad.job_orchestrator.Neo4jCityRepository;
 import com.nomad.job_orchestrator.Neo4jCountryRepository;
 import com.nomad.job_orchestrator.config.ServiceBusConnector;
@@ -46,6 +47,8 @@ public class CronJobHandlerTest {
     private ServiceBusBatchSender<ScraperRequest> serviceBusBatchSender;
     @MockitoBean
     private ServiceBusSenderClient serviceBusSenderClient;
+    @MockitoBean
+    private TelemetryClient telemetryClient;
     
     @Autowired
     private Neo4jCityRepository cityRepository;
