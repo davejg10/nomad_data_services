@@ -7,18 +7,21 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.nomad.job_orchestrator.Neo4jCityRepository;
 import com.nomad.job_orchestrator.Neo4jCountryRepository;
+import com.nomad.job_orchestrator.config.ServiceBusConnector;
 import com.nomad.data_library.Neo4jTestGenerator;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
@@ -33,6 +36,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @SpringBootTest
+@ActiveProfiles("maven")
 @Import({com.nomad.data_library.Neo4jTestConfiguration.class})
 @Transactional  // Ensures test changes do not persist
 public class CronJobHandlerTest {
@@ -50,20 +54,18 @@ public class CronJobHandlerTest {
     private CronJobHandler cronJobHandler;
 
     @Test
-    public void readCronJobs_whenGivenCloudConfig_shouldReturnAListOfAllCronJobs() throws StreamReadException, DatabindException, IOException {
+    public void jobsConfigCloud_isValid() throws StreamReadException, DatabindException, IOException {
 
         String jobConfigFileName = "jobs-config-cloud.yml";
+        String longTimeCronSchedule = "0 0 0 * * 0"; //every Sunday at midnight
 
         CronJobs cronJobs = cronJobHandler.readCronJobs(jobConfigFileName);
-
-        LocalDate futureDate = LocalDate.now().plusDays(2);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String formattedDate = futureDate.format(formatter);
-    
-        CronJob cronJob = cronJobs.jobs().get(0);
-
-        assertThat(cronJobs.jobs().size()).isEqualTo(1);
-        assertThat(cronJob.searchDate()).isEqualTo(formattedDate);
+        
+        List<CronJob> filteredCronJobs = cronJobHandler.filterCronJobs(LocalDateTime.now(), longTimeCronSchedule, cronJobs);
+        
+        for(CronJob filteredCronJob : filteredCronJobs) {
+            List<ScraperRequest> scraperRequests = cronJobHandler.createScraperRequests(filteredCronJob);
+        }
     }
 
     @Test

@@ -45,24 +45,28 @@ public class ApiJobTrigger {
         ExecutionContext context) throws JsonMappingException, JsonProcessingException  {
         try {
             if (!request.getBody().isPresent()) {
+                
                 log.info("Unable to read request body. Is empty");
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Unable to read request body.").build();
             } else {
+
                 String requestString = request.getBody().get();
                 log.info("apiJobProducer function hit. Request body is {}", requestString);
+
+                HttpScraperRequest routeRequest = objectMapper.readValue(requestString, HttpScraperRequest.class);
+
+                ScraperRequest scraperRequest = apiJobHandler.apply(routeRequest);
                 
-                Optional<ScraperRequest> scraperRequest = apiJobHandler.apply(requestString);
-                
-                if (scraperRequest.isPresent()) {
-                    String serviceBusMessage = objectMapper.writeValueAsString(scraperRequest.get());
-                    message.setValue(serviceBusMessage);
-                    return request.createResponseBuilder(HttpStatus.OK).body("Successfully added scraper request to queue.").build(); 
-                }
-                context.getLogger().log(Level.SEVERE, "There was an error when trying to map the request to a CityDTO.");
-                return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("There was an issue mapping your request to a CityDTO.").build();
+                String serviceBusMessage = objectMapper.writeValueAsString(scraperRequest);
+                message.setValue(serviceBusMessage);
+                String route = routeRequest.sourceCity().name() + " -> " + routeRequest.targetCity().name();
+                return request.createResponseBuilder(HttpStatus.OK).body("Successfully added scraper request for route " + route + ", to " + sb_pre_processed_queue_name + " queue.").build(); 
             }
+        } catch (JsonProcessingException e) {
+            context.getLogger().log(Level.SEVERE, "A JsonProcessingException exception was thrown when trying to either serialize/desirialize. Exception: " + e.getMessage(), e);
+            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("A JsonProcessingException exception was thrown when trying to either serialize/desirialize. Error: " + e.getMessage()).build();
         } catch (Exception e) {
-            context.getLogger().log(Level.SEVERE, "There was an error in the apiJobProducer. Probably a mapping issue. Exception: {}" + e.getMessage(), e);
+            context.getLogger().log(Level.SEVERE, "There was an error in the apiJobProducer. Exception: {}" + e.getMessage(), e);
             return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("An exception was thrown when trying to queue the job. Error: " + e.getMessage()).build();
         }
         

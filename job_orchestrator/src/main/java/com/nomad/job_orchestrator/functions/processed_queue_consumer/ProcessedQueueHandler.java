@@ -27,17 +27,9 @@ public class ProcessedQueueHandler implements Consumer<String> {
     }
 
     public void accept(String scraperResponseString) {
-
-        try {
-            ScraperResponse scraperResponse = objectMapper.readValue(scraperResponseString, ScraperResponse.class);
-            Map<String, Object> cityAsMap = objectMapper.convertValue(scraperResponse,  Map.class);
-            // neo4jRepository.saveCityDTOWithDepth0(cityAsMap);
-
-        } catch (JsonProcessingException e) {
-            log.error("Error when trying to map message to CityDTO. Error: {}", e.getMessage());
-            throw new RuntimeException(e);
-        }
-
+            
+        // neo4jRepository.saveCityDTOWithDepth0(cityAsMap);
+        
     }
 
     // Duration duration;

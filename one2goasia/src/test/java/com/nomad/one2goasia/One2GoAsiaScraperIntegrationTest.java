@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -19,6 +20,7 @@ import com.nomad.scraping_library.config.AppConfig;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
+@ActiveProfiles("maven")
 @SpringBootTest(classes = {One2GoAsiaScraper.class, AppConfig.class})
 public class One2GoAsiaScraperIntegrationTest {
 
