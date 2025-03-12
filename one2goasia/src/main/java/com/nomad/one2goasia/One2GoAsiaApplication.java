@@ -18,6 +18,8 @@ public class One2GoAsiaApplication {
 	public static void main(String[] args) {
 		Environment environment = SpringApplication.run(One2GoAsiaApplication.class, args).getEnvironment();
 
+		log.info("in the main method");
+
 		String profile = environment.getProperty("spring.profiles.active", "local");
 
 		if (!profile.equals("local")) {
