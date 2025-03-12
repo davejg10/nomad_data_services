@@ -112,12 +112,24 @@ public class One2GoAsiaScraper implements WebScraperInterface {
             if (index != 0 && TransportType.to12GoAsiaList().contains(line)) {
                 RouteDTO route;
                 try {
+                    if (tempLine.get(3).contains("Any time")) {
+                        log.warn("Ignoring route as contains Any Time for depart");
+                        tempLine.clear();
+                        tempLine.add(line);
+                        continue;
+                    }
+                    String transportType = tempLine.get(0);
+                    String operator = tempLine.get(1);
+                    String depart = tempLine.get(3);
+                    String arrive = tempLine.get(4);
+                    String cost = tempLine.get(5);
+                    log.info("transportType: {}, operator: {}, depart: {}, arrive: {}, cost: {}", transportType, operator, depart, arrive, cost);
                     route = RouteDTO.createWithSchema(
-                            tempLine.get(0),
-                            tempLine.get(1), // operator
-                            tempLine.get(3), // departure
-                            tempLine.get(4), // arrival
-                            tempLine.get(5).length() <= 6 ? Double.parseDouble(tempLine.get(5).substring(1)) : 1000.0, //cost
+                            transportType,
+                            operator,
+                            depart,
+                            arrive,
+                            cost.length() <= 6 ? Double.parseDouble(cost.substring(1)) : 1000.0,
                             searchDate
                     );
                     routes.add(route);
@@ -127,9 +139,6 @@ public class One2GoAsiaScraper implements WebScraperInterface {
                 tempLine.clear();
             }
             tempLine.add(line);
-        }
-        for (RouteDTO routeobj : routes) {
-            log.info(routeobj);
         }
         return routes;
     }
