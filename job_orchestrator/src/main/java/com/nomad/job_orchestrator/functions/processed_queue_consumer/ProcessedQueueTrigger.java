@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.annotation.BindingName;
 import com.microsoft.azure.functions.annotation.FunctionName;
@@ -41,6 +42,11 @@ public class ProcessedQueueTrigger {
                         ExecutionContext context) throws JsonProcessingException {
         try {
             ThreadContext.put("correlationId", correlationId);
+
+            TelemetryClient telemetryClient = new TelemetryClient();
+            telemetryClient.getContext().getOperation().setId(correlationId);
+            telemetryClient.trackEvent("MessageProcessed", Map.of("correlationId", correlationId), null);
+
             ScraperResponse scraperResponse = objectMapper.readValue(message, ScraperResponse.class);
             log.info("someThing weird");
 

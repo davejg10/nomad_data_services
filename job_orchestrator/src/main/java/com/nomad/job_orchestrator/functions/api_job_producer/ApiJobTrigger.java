@@ -58,7 +58,7 @@ public class ApiJobTrigger {
         
         TelemetryClient telemetryClient = new TelemetryClient();
         telemetryClient.getContext().getOperation().setId(correlationId);
-        telemetryClient.trackEvent("MessageProcessed", Map.of("correlationId", correlationId), null);
+        telemetryClient.trackEvent("MessageCreated", Map.of("correlationId", correlationId), null);
 
         try {
             if (!request.getBody().isPresent()) {
