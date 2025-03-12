@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
 
 @Log4j2
 @Component
@@ -44,8 +43,7 @@ public class CronJobTrigger {
      * queue as apiJobTrigger Function.
      */
     @FunctionName("cronJobProducer")
-    public void execute(@TimerTrigger(name = "keepAliveTrigger", schedule = cronTriggerSchedule) String timerInfo,
-                        ExecutionContext context) throws StreamReadException, DatabindException, IOException, InterruptedException {
+    public void execute(@TimerTrigger(name = "keepAliveTrigger", schedule = cronTriggerSchedule) String timerInfo) throws StreamReadException, DatabindException, IOException, InterruptedException {
         try {
             String correlationId = UUID.randomUUID().toString();
             ThreadContext.put("correlationId", correlationId);
@@ -61,7 +59,7 @@ public class CronJobTrigger {
             }
     
         } catch (Exception e) {
-            context.getLogger().log(Level.SEVERE, "An  exception was thrown when to create ScraperRequests within the cronJobProducer. Exception: " + e.getMessage(), e);
+            log.error("An exception was thrown when trying to create ScraperRequests within the cronJobProducer.", e);
         } finally {
             ThreadContext.clearAll();
         }

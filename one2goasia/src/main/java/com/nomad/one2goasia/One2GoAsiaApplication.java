@@ -16,23 +16,7 @@ import org.springframework.context.annotation.ComponentScan;
 public class One2GoAsiaApplication {
 
 	public static void main(String[] args) {
-		
-		ApplicationInsights.attach();
-		log.info("in the main method");
-		System.out.println("in the old printa");
     	SpringApplication.run(One2GoAsiaApplication.class, args);
-
-		// Environment environment = SpringApplication.run(One2GoAsiaApplication.class, args).getEnvironment();
-
-		
-
-		// String profile = environment.getProperty("spring.profiles.active", "local");
-
-		// if (!profile.equals("local")) {
-		// 	log.info("Attaching application insights");
-		// 	// Note; the application insights connection string is set as `APPLICATIONINSIGHTS_CONNECTION_STRING` environment variable.
-		// 	ApplicationInsights.attach();
-		// }
 	}
 
 }

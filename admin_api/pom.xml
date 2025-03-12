@@ -40,6 +40,11 @@
     <dependencies>
 		<dependency>
 			<groupId>com.nomad.multi</groupId>
+			<artifactId>config</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.nomad.multi</groupId>
 			<artifactId>data_library</artifactId>
 			<version>${project.version}</version>
 		</dependency>

@@ -17,6 +17,11 @@
 			<artifactId>scraping_library</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.nomad.multi</groupId>
+			<artifactId>config</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
  		<!-- For web scraping -->
 		<dependency>
@@ -24,13 +29,6 @@
 			<artifactId>playwright</artifactId>
 			<!-- This version should be same version as used in Dockerfile, else it will reinstall browsers. -->
 			<version>1.49.0</version> 
-		</dependency>
-
-		<!-- Used for Application insights in cloud -->
-		<dependency>
-			<groupId>com.microsoft.azure</groupId>
-			<artifactId>applicationinsights-runtime-attach</artifactId>
-			<version>3.7.0</version>
 		</dependency>
 	</dependencies>
 

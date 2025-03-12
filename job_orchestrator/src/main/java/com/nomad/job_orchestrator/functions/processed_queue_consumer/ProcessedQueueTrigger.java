@@ -33,28 +33,22 @@ public class ProcessedQueueTrigger {
     @Autowired
     private ProcessedQueueHandler processedQueueHandler;
 
-    @Autowired
-    private TelemetryClient telemetryClient;
     /*
      * This Azure Function reads messages from the Queue that the scapers post to. See payload.json for an example message.
      */
     @FunctionName("processedQueueConsumer")
     public void execute(@ServiceBusQueueTrigger(name = "msg", queueName = sb_processed_queue_name, connection = "nomadservicebus") String message,
-                        @BindingName("CorrelationId") String correlationId,
-                        ExecutionContext context) throws JsonProcessingException {
+                        @BindingName("CorrelationId") String correlationId) throws JsonProcessingException {
         try {
             ThreadContext.put("correlationId", correlationId);
 
-            telemetryClient.getContext().getOperation().setId(correlationId);
-            telemetryClient.trackEvent("MessageProcessed", Map.of("correlationId", correlationId), null);
-
             ScraperResponse scraperResponse = objectMapper.readValue(message, ScraperResponse.class);
-            log.info("someThing weird");
+            log.info("And now we're back with scraperResponse: {}", scraperResponse);
 
             processedQueueHandler.accept(scraperResponse);
 
         } catch (Exception e) {
-            context.getLogger().log(Level.SEVERE, "An exception was thrown when trying to either serialize/desirialize. Message: " + message + ", Exception: " + e.getMessage(), e);
+            log.error("An exception was thrown when trying to either serialize/desirialize. Message: {}", message, e);
         } finally {
             ThreadContext.clearAll();
         }
