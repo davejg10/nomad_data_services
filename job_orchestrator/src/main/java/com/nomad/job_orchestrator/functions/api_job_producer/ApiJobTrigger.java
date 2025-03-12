@@ -44,6 +44,9 @@ public class ApiJobTrigger {
     @Autowired
     private ServiceBusSenderClient sender;
 
+    @Autowired
+    private TelemetryClient telemetryClient;
+
     /*
      * This Azure Function acts as a HTTP endpoints to queue scraping jobs. The nomad_backend is the only client.
      */
@@ -55,11 +58,9 @@ public class ApiJobTrigger {
         String correlationId = UUID.randomUUID().toString();
         ThreadContext.put("correlationId", correlationId);
 
-        
-        TelemetryClient telemetryClient = new TelemetryClient();
         telemetryClient.getContext().getOperation().setId(correlationId);
         telemetryClient.trackEvent("MessageCreated", Map.of("correlationId", correlationId), null);
-
+        // telemetryClient.trackTrace(null);
         try {
             if (!request.getBody().isPresent()) {
                 
