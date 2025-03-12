@@ -49,6 +49,7 @@ jobs:
       - name: Mvn clean package
         shell: bash          
         run: |
+          mvn clean install -DskipTests
           mvn clean package -pl $MODULE_DIR -am -DfunctionAppName=$FUNCTION_APP_NAME -DfunctionResourceGroup=$FUNCTION_APP_RG_NAME
 
       - name: Azure CLI Login
