@@ -13,5 +13,10 @@
     },
     "contextMap": {
       "$resolver": "mdc"
+    },
+    "exception": {
+        "$resolver": "exception",
+        "field": "stackTrace",
+        "stringified": true
     }
   }

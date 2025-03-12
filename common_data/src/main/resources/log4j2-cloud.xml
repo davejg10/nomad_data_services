@@ -3,8 +3,9 @@
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <JsonTemplateLayout eventTemplateUri="classpath:log-layout.json"/>
-
         </Console>
+        <ApplicationInsightsAppender name="aiAppender" />
+
     </Appenders>
 
     <Loggers>

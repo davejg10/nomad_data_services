@@ -58,6 +58,7 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
 
                 if (iterator.hasNext()) {
                     ServiceBusReceivedMessage message = iterator.next();
+                    
                     log.info("Started processing message: {}", message.getMessageId());
 
                     try {

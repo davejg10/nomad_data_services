@@ -1,7 +1,9 @@
 package com.nomad.admin_api.functions.create_country;
 
+import java.util.UUID;
 import java.util.function.Consumer;
 
+import org.apache.logging.log4j.ThreadContext;
 import org.springframework.stereotype.Component;
 
 import com.nomad.admin_api.Neo4jCountryRepository;
@@ -37,6 +39,7 @@ public class CreateCountryHandler implements Consumer<SqlCountry> {
             sqlCountryRepository.delete(countryToBeCreated);
             throw new RuntimeException("Failed to save country to Neo4j: " + countryToBeCreated.getName() + " Error: " + e.getMessage(), e);
         } catch (Exception e) {
+            log.error("some error with postgres", e);
             throw new RuntimeException("Failed to save country to Postgres " + countryToBeCreated.getName() + " Error: " + e.getMessage(), e);
         }
     }

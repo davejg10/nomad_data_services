@@ -1,11 +1,14 @@
 package com.nomad.job_orchestrator.functions.api_job_producer;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Level;
 
+import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.azure.messaging.servicebus.ServiceBusMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,8 +44,12 @@ public class ApiJobTrigger {
     @FunctionName("apiJobProducer")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
-        @ServiceBusQueueOutput(name = "message", queueName = sb_pre_processed_queue_name, connection = "nomadservicebus") OutputBinding<String> message,
+        @ServiceBusQueueOutput(name = "message", queueName = sb_pre_processed_queue_name, connection = "nomadservicebus") OutputBinding<ServiceBusMessage> message,
         ExecutionContext context) throws JsonMappingException, JsonProcessingException  {
+        
+        String traceId = UUID.randomUUID().toString();
+        ThreadContext.put("traceId", traceId);
+
         try {
             if (!request.getBody().isPresent()) {
                 
@@ -58,7 +65,10 @@ public class ApiJobTrigger {
                 ScraperRequest scraperRequest = apiJobHandler.apply(routeRequest);
                 
                 String serviceBusMessage = objectMapper.writeValueAsString(scraperRequest);
-                message.setValue(serviceBusMessage);
+                ServiceBusMessage output = new ServiceBusMessage(serviceBusMessage);
+                output.setMessageId(traceId);
+                message.setValue(output);
+                
                 String route = routeRequest.sourceCity().name() + " -> " + routeRequest.targetCity().name();
                 return request.createResponseBuilder(HttpStatus.OK).body("Successfully added scraper request for route " + route + ", to " + sb_pre_processed_queue_name + " queue.").build(); 
             }
@@ -68,6 +78,8 @@ public class ApiJobTrigger {
         } catch (Exception e) {
             context.getLogger().log(Level.SEVERE, "There was an error in the apiJobProducer. Exception: {}" + e.getMessage(), e);
             return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("An exception was thrown when trying to queue the job. Error: " + e.getMessage()).build();
+        } finally {
+            ThreadContext.clearAll();
         }
         
     }
