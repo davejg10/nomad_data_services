@@ -16,7 +16,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Component
 @Log4j2
-public class ProcessedQueueHandler implements Consumer<String> {
+public class ProcessedQueueHandler implements Consumer<ScraperResponse> {
     
     private ObjectMapper objectMapper;
     private Neo4jCityRepository neo4jRepository;
@@ -26,7 +26,10 @@ public class ProcessedQueueHandler implements Consumer<String> {
         this.objectMapper = objectMapper;
     }
 
-    public void accept(String scraperResponseString) {
+    public void accept(ScraperResponse scraperResponse) {
+
+        Map<String, Object> cityAsMap = objectMapper.convertValue(scraperResponse,  Map.class);
+
             
         // neo4jRepository.saveCityDTOWithDepth0(cityAsMap);
         

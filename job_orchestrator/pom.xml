@@ -67,6 +67,12 @@
 			<artifactId>jackson-dataformat-yaml</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>applicationinsights-logging-log4j2</artifactId>
+			<version>2.6.4</version>
+		</dependency>
+
 		<!-- Used for mocking Neo4j repository. Creates an in-memory db	-->
 		<dependency>
 			<groupId>org.neo4j.test</groupId>

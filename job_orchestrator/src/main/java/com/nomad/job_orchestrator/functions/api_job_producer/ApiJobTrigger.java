@@ -1,5 +1,6 @@
 package com.nomad.job_orchestrator.functions.api_job_producer;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -9,9 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.azure.messaging.servicebus.ServiceBusMessage;
+import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpMethod;
 import com.microsoft.azure.functions.HttpRequestMessage;
@@ -38,17 +41,24 @@ public class ApiJobTrigger {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private ServiceBusSenderClient sender;
+
     /*
      * This Azure Function acts as a HTTP endpoints to queue scraping jobs. The nomad_backend is the only client.
      */
     @FunctionName("apiJobProducer")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
-        @ServiceBusQueueOutput(name = "message", queueName = sb_pre_processed_queue_name, connection = "nomadservicebus") OutputBinding<ServiceBusMessage> message,
         ExecutionContext context) throws JsonMappingException, JsonProcessingException  {
         
-        String traceId = UUID.randomUUID().toString();
-        ThreadContext.put("traceId", traceId);
+        String correlationId = UUID.randomUUID().toString();
+        ThreadContext.put("correlationId", correlationId);
+
+        
+        TelemetryClient telemetryClient = new TelemetryClient();
+        telemetryClient.getContext().getOperation().setId(correlationId);
+        telemetryClient.trackEvent("MessageProcessed", Map.of("correlationId", correlationId), null);
 
         try {
             if (!request.getBody().isPresent()) {
@@ -66,9 +76,9 @@ public class ApiJobTrigger {
                 
                 String serviceBusMessage = objectMapper.writeValueAsString(scraperRequest);
                 ServiceBusMessage output = new ServiceBusMessage(serviceBusMessage);
-                output.setMessageId(traceId);
-                message.setValue(output);
-                
+                output.setCorrelationId(correlationId);
+                sender.sendMessage(output);
+
                 String route = routeRequest.sourceCity().name() + " -> " + routeRequest.targetCity().name();
                 return request.createResponseBuilder(HttpStatus.OK).body("Successfully added scraper request for route " + route + ", to " + sb_pre_processed_queue_name + " queue.").build(); 
             }

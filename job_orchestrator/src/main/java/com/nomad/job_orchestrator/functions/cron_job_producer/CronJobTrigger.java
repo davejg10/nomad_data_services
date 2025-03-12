@@ -6,6 +6,7 @@ import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.TimerTrigger;
 
+import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import lombok.extern.log4j.Log4j2;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 
 @Log4j2
@@ -45,6 +47,8 @@ public class CronJobTrigger {
     public void execute(@TimerTrigger(name = "keepAliveTrigger", schedule = cronTriggerSchedule) String timerInfo,
                         ExecutionContext context) throws StreamReadException, DatabindException, IOException, InterruptedException {
         try {
+            String correlationId = UUID.randomUUID().toString();
+            ThreadContext.put("correlationId", correlationId);
 
             CronJobs cronJobs = cronJobHandler.readCronJobs(CRON_JOB_CONFIG_FILE);
             List<CronJob> filteredCronJobs = cronJobHandler.filterCronJobs(LocalDateTime.now(), cronTriggerSchedule, cronJobs);
@@ -53,15 +57,13 @@ public class CronJobTrigger {
                 List<ScraperRequest> scraperRequests = cronJobHandler.createScraperRequests(filteredCronJob);
     
                 if (scraperRequests.size() > 0) 
-                    serviceBusBatchSender.sendBatch(scraperRequests);           
+                    serviceBusBatchSender.sendBatch(scraperRequests, correlationId);           
             }
     
-            int sleep = 2000;
-            log.info("Going to sleep for {} before closing connection", sleep);
-            Thread.sleep(sleep); //ServiceBus connection close
-            serviceBusBatchSender.getSenderClient().close();
         } catch (Exception e) {
             context.getLogger().log(Level.SEVERE, "An  exception was thrown when to create ScraperRequests within the cronJobProducer. Exception: " + e.getMessage(), e);
+        } finally {
+            ThreadContext.clearAll();
         }
         
     }

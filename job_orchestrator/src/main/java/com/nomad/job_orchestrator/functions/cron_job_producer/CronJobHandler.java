@@ -54,7 +54,7 @@ public class CronJobHandler {
             LocalDateTime nextCronJobScheduleAdjusted = nextcronJobSchedule.minusSeconds(20); // handles divisibility/equality issues
             LocalDateTime nextFunctionSchedule = CronExpression.parse(cronTriggerSchedule).next(now);
             
-            log.info("CronJob with id: {}, is next schedule for: {}, nextFunctionSchedule is :{}", cronJob.id(), nextCronJobScheduleAdjusted, nextFunctionSchedule);
+            log.info("CronJob with id: {}, is next scheduled for: {}, nextFunctionSchedule is: {}", cronJob.id(), nextCronJobScheduleAdjusted, nextFunctionSchedule);
             if (nextCronJobScheduleAdjusted.isBefore(nextFunctionSchedule)) {
                 log.info("Adding CronJob with id: {} to filtered CronJob list", cronJob.id());
 
@@ -74,7 +74,9 @@ public class CronJobHandler {
                 List<CityPair> cityPairs = cityRepository.routeDiscoveryGivenCountry(filteredCronJob.countryName());
 
                 for (CityPair cityPair : cityPairs) {
-                    scraperRequests.add(new ScraperRequest("cronTrigger-" + filteredCronJob.id(), ScraperRequestType.ROUTE_DISCOVERY, cityPair.sourceCity(), cityPair.targetCity(), filteredCronJob.searchDate()));
+                    ScraperRequest scraperRequest = new ScraperRequest("cronTrigger-" + filteredCronJob.id(), ScraperRequestType.ROUTE_DISCOVERY, cityPair.sourceCity(), cityPair.targetCity(), filteredCronJob.searchDate());
+                    log.info("Scraper request created. Request is: {}", scraperRequest);
+                    scraperRequests.add(scraperRequest);
                 }
         }
 
