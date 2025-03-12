@@ -110,7 +110,7 @@ public class One2GoAsiaScraper implements WebScraperInterface {
         for(int index = 0; index < lineList.size(); index++) {
             String line = lineList.get(index);
             if (index != 0 && TransportType.to12GoAsiaList().contains(line)) {
-                RouteDTO route;
+                String transportType = null, operator = null, depart = null, arrive = null, cost = null;
                 try {
                     if (tempLine.get(3).contains("Any time")) {
                         log.warn("Ignoring route as contains Any Time for depart");
@@ -118,13 +118,12 @@ public class One2GoAsiaScraper implements WebScraperInterface {
                         tempLine.add(line);
                         continue;
                     }
-                    String transportType = tempLine.get(0);
-                    String operator = tempLine.get(1);
-                    String depart = tempLine.get(3);
-                    String arrive = tempLine.get(4);
-                    String cost = tempLine.get(5);
-                    log.info("transportType: {}, operator: {}, depart: {}, arrive: {}, cost: {}", transportType, operator, depart, arrive, cost);
-                    route = RouteDTO.createWithSchema(
+                    transportType = tempLine.get(0);
+                    operator = tempLine.get(1);
+                    depart = tempLine.get(3);
+                    arrive = tempLine.get(4);
+                    cost = tempLine.get(5);
+                    RouteDTO route = RouteDTO.createWithSchema(
                             transportType,
                             operator,
                             depart,
@@ -134,6 +133,7 @@ public class One2GoAsiaScraper implements WebScraperInterface {
                     );
                     routes.add(route);
                 } catch (Exception e) {
+                    log.info("transportType: {}, operator: {}, depart: {}, arrive: {}, cost: {}", transportType, operator, depart, arrive, cost);
                     log.error("Issue when trying to map scraped data to RouteDTO object. Error: {}", e.getMessage());
                 }
                 tempLine.clear();

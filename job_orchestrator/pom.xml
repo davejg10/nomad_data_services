@@ -17,8 +17,8 @@
 		<!-- Plugins -->
 		<functionResourceGroup>${functionResourceGroup.default}</functionResourceGroup>
 		<functionAppName>${functionAppName.default}</functionAppName>
-		<functionAppName.default>rg-dev-uks-nomad-02</functionAppName.default>
-		<functionResourceGroup.default>fa-dev-uks-nomad-02-job-orchestrator</functionResourceGroup.default>
+		<functionAppName.default>fa-dev-uks-nomad-02-job-orchestrator</functionAppName.default>
+		<functionResourceGroup.default>rg-dev-uks-nomad-02</functionResourceGroup.default>
 
 	</properties>
 

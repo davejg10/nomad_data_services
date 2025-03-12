@@ -36,15 +36,13 @@ public class ProcessedQueueTrigger {
                         ExecutionContext context) throws JsonProcessingException {
 
         try {
-            log.info("processedQueueConsumer Azure Function. Triggered with following message {} Service Bus Queue : {}", message, sb_processed_queue_name);
-
             ScraperResponse scraperResponse = objectMapper.readValue(message, ScraperResponse.class);
             Map<String, Object> cityAsMap = objectMapper.convertValue(scraperResponse,  Map.class);
 
             processedQueueHandler.accept(message);
 
         } catch (JsonProcessingException e) {
-            context.getLogger().log(Level.SEVERE, "A JsonProcessingException exception was thrown when trying to either serialize/desirialize. Exception: " + e.getMessage(), e);
+            context.getLogger().log(Level.SEVERE, "A JsonProcessingException exception was thrown when trying to either serialize/desirialize. Message: " + message + ", Exception: " + e.getMessage(), e);
         }
     }
 

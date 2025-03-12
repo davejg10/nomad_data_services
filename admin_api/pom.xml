@@ -20,8 +20,8 @@
 		<!-- These two properties will either be overridden in the command line via passing -DfunctionResourceGroup="x" or they will fallback to default values -->
 		<functionResourceGroup>${functionResourceGroup.default}</functionResourceGroup>
 		<functionAppName>${functionAppName.default}</functionAppName>
-		<functionAppName.default>rg-dev-uks-nomad-02</functionAppName.default>
-		<functionResourceGroup.default>fa-dev-uks-nomad-02-admin-api</functionResourceGroup.default>
+		<functionAppName.default>fa-dev-uks-nomad-02-admin-api</functionAppName.default>
+		<functionResourceGroup.default>rg-dev-uks-nomad-02</functionResourceGroup.default>
 	</properties>
 
 	<dependencyManagement>
