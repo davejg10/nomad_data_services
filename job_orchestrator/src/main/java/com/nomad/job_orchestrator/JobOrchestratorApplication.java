@@ -7,10 +7,9 @@ import org.springframework.context.annotation.ComponentScan;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-// @EntityScan(basePackages = {"com.nomad.data_library.domain"})
+@EntityScan(basePackages = {"com.nomad.data_library.domain"})
 // @EnableJpaRepositories({"com.nomad.data_library.repositories"})
 @SpringBootApplication
-// @ComponentScan({"com.nomad.data_library.config", "com.nomad.scraping_library.config", "com.nomad.job_orchestrator"})
 @ComponentScan({"com.nomad.data_library.config", "com.nomad.scraping_library.config", "com.nomad.job_orchestrator"})
 public class JobOrchestratorApplication {
 
