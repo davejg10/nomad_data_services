@@ -18,24 +18,22 @@ public class Neo4jCountry {
 
     @Id @Getter private final String id;
     @Getter private final String name;
-    @Getter private final String description;
 
     @Relationship(type = "HAS_CITY", direction = Relationship.Direction.OUTGOING)
     private final Set<Neo4jCity> cities;
 
-    public static Neo4jCountry of(String name, String description, Set<Neo4jCity> cities) {
-        return new Neo4jCountry(null, name, description, Set.copyOf(cities));
+    public static Neo4jCountry of(String name, Set<Neo4jCity> cities) {
+        return new Neo4jCountry(null, name, Set.copyOf(cities));
     }
 
-    public Neo4jCountry(String id, String name, String description, Set<Neo4jCity> cities) {
+    public Neo4jCountry(String id, String name, Set<Neo4jCity> cities) {
         this.id = id;
         this.name = name;
-        this.description = description;
         this.cities = cities;
     }
 
     public Neo4jCountry withId(String id) {
-        return new Neo4jCountry(id, this.name, this.description, this.cities);
+        return new Neo4jCountry(id, this.name, this.cities);
     }
 
     // Ensure mutable field 'cities' remains immutable
@@ -48,12 +46,12 @@ public class Neo4jCountry {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Neo4jCountry country = (Neo4jCountry) o;
-        return Objects.equals(id, country.id) && Objects.equals(name, country.name) && Objects.equals(description, country.description) && Objects.equals(cities, country.cities);
+        return Objects.equals(id, country.id) && Objects.equals(name, country.name) && Objects.equals(cities, country.cities);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, cities);
+        return Objects.hash(id, name, cities);
     }
 
     @Override
@@ -61,7 +59,6 @@ public class Neo4jCountry {
         return "Neo4jCountry{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
                 ", cities=" + cities +
                 '}';
     }

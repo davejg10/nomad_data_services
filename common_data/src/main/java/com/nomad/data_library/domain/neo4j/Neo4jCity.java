@@ -11,9 +11,7 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.nomad.data_library.domain.CityMetrics;
 import com.nomad.data_library.domain.TransportType;
@@ -68,12 +66,12 @@ public class Neo4jCity {
     }
 
     public Neo4jCity addRoute(Neo4jRoute route) {
-        return addRoute(route.getTargetCity(), route.getPopularity(), route.getTime(), route.getCost(), route.getTransportType());
+        return addRoute(route.getId(), route.getTargetCity(), route.getPopularity(), route.getTime(), route.getCost(), route.getTransportType());
     }
 
-    public Neo4jCity addRoute(Neo4jCity targetCity, double popularity, double time, double cost, TransportType transportType) {
+    public Neo4jCity addRoute(String id, Neo4jCity targetCity, double popularity, double time, double cost, TransportType transportType) {
         Set<Neo4jRoute> existingRoutes = getRoutes();
-        Neo4jRoute routeToAdd = Neo4jRoute.of(targetCity, popularity, time, cost, transportType);
+        Neo4jRoute routeToAdd = new Neo4jRoute(id, targetCity, popularity, time, cost, transportType);
         log.info("Adding route: {}", routeToAdd);
 
         Optional<Neo4jRoute> route = existingRoutes.stream()

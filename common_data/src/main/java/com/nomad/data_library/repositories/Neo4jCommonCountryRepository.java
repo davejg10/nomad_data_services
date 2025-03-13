@@ -21,7 +21,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Configuration
-public abstract class Neo4jCommonCountryRepository {
+public class Neo4jCommonCountryRepository {
 
     protected Neo4jClient neo4jClient;
     protected final ObjectMapper objectMapper;
@@ -66,7 +66,7 @@ public abstract class Neo4jCommonCountryRepository {
                         });
                     }
 
-                    return new Neo4jCountry(fetchedCountry.getId(), fetchedCountry.getName(), fetchedCountry.getDescription(), cities);
+                    return new Neo4jCountry(fetchedCountry.getId(), fetchedCountry.getName(), cities);
                 })
                 .first();
         return country;
@@ -81,7 +81,7 @@ public abstract class Neo4jCommonCountryRepository {
                 .mappedBy((typeSystem, record) -> {
                     Neo4jCountry fetchedCountry = countryMapper.apply(typeSystem, record.get("country").asNode());
 
-                    return new Neo4jCountry(fetchedCountry.getId(), fetchedCountry.getName(), fetchedCountry.getDescription(), Set.of());
+                    return new Neo4jCountry(fetchedCountry.getId(), fetchedCountry.getName(), Set.of());
                 })
                 .all();
         return new HashSet<>(allCountries);

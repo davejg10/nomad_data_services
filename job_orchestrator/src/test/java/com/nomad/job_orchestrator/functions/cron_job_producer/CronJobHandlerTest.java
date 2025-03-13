@@ -10,8 +10,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.nomad.data_library.config.Neo4jConfig;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -25,6 +28,7 @@ import com.nomad.job_orchestrator.Neo4jCityRepository;
 import com.nomad.job_orchestrator.Neo4jCountryRepository;
 import com.nomad.job_orchestrator.config.ServiceBusConnector;
 import com.nomad.data_library.Neo4jTestGenerator;
+import com.nomad.data_library.TestConfig;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
 import com.nomad.data_library.exceptions.Neo4jGenericException;
@@ -37,7 +41,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-@SpringBootTest
+@DataNeo4jTest
 @ActiveProfiles("maven")
 @Import({com.nomad.data_library.Neo4jTestConfiguration.class})
 @Transactional  // Ensures test changes do not persist
@@ -47,7 +51,7 @@ public class CronJobHandlerTest {
     private ServiceBusBatchSender<ScraperRequest> serviceBusBatchSender;
     @MockitoBean
     private ServiceBusSenderClient serviceBusSenderClient;
-    
+
     @Autowired
     private Neo4jCityRepository cityRepository;
 
@@ -56,9 +60,6 @@ public class CronJobHandlerTest {
 
     @Autowired
     private CronJobHandler cronJobHandler;
-
-    @MockitoBean
-    private TelemetryClient telemetryClient;
 
     @Test
     public void jobsConfigCloud_isValid() throws StreamReadException, DatabindException, IOException {

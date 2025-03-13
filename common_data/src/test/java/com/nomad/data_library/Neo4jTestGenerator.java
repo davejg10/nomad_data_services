@@ -27,7 +27,7 @@ public class Neo4jTestGenerator {
 
     public static Neo4jCountry neo4jCountryNoCities(String countryName) {
 
-        return new Neo4jCountry(UUID.randomUUID().toString(), countryName, "some desc", Set.of());
+        return new Neo4jCountry(UUID.randomUUID().toString(), countryName, Set.of());
     }
 
     public static Neo4jCity neo4jCityNoRoutes(String cityName, Neo4jCountry country) {
