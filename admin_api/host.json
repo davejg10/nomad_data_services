@@ -6,10 +6,16 @@
   },
   "functionTimeout": "00:10:00",
   "logging": {
+    "logLevel": {
+      "Function": "Warning",
+      "Host.Results": "Warning",
+      "Host.Aggregator": "Warning",
+      "Function.processedQueueConsumer.Console": "Information"
+    },
     "applicationInsights": {
       "samplingSettings": {
         "isEnabled": true,
-        "excludedTypes": "Dependency;Event;Request"
+        "maxTelemetryItemsPerSecond" : 4
       },
       "enableLiveMetricsFilters": true
     }

@@ -1,9 +1,7 @@
 package com.nomad.admin_api.functions.create_country;
 
-import java.util.UUID;
 import java.util.function.Consumer;
 
-import org.apache.logging.log4j.ThreadContext;
 import org.springframework.stereotype.Component;
 
 import com.nomad.admin_api.Neo4jCountryRepository;

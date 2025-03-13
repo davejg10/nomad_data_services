@@ -12,6 +12,7 @@ import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpMethod;
 import com.microsoft.azure.functions.HttpRequestMessage;
@@ -39,6 +40,9 @@ public class ApiJobTrigger {
     @Autowired
     private ServiceBusSenderClient sender;
 
+    @Autowired
+    private TelemetryClient telemetryClient;
+
     /*
      * This Azure Function acts as a HTTP endpoints to queue scraping jobs. The nomad_backend is the only client.
      */
@@ -49,7 +53,10 @@ public class ApiJobTrigger {
         
         String correlationId = UUID.randomUUID().toString();
         ThreadContext.put("correlationId", correlationId);
-
+        
+        telemetryClient.getContext().getOperation().setId(correlationId);
+        telemetryClient.trackEvent("MessageCreated", Map.of("correlationId", correlationId), null);
+        telemetryClient.trackTrace("some custom trace this wont work di");
         try {
             if (!request.getBody().isPresent()) {
                 

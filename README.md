@@ -46,6 +46,17 @@ At the moment the Unit tests use an in memory neo4j database & in memory postgre
 
 Azure Functions are currently tested manually by following the approach shown in `Local Development` above.
 
+## Log tracing
+
+In order to trace a log you can use the following query. (Where x is the value of the correlationId)
+```
+union 
+    AppTraces  // Include multiple tables if needed
+| extend logData = parse_json(Message)
+| where logData.contextMap.correlationId == "x"
+   or Properties .correlationId == "x"
+
+```
 
 ## Spring profiles
 
