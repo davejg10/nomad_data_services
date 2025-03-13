@@ -49,8 +49,7 @@ jobs:
       - name: Mvn clean package
         shell: bash          
         run: |
-          mvn clean package -pl $MODULE_DIR -am
-          # mvn clean package -pl $MODULE_DIR -am -DfunctionAppName=$FUNCTION_APP_NAME -DfunctionResourceGroup=$FUNCTION_APP_RG_NAME
+          mvn clean package -pl $MODULE_DIR -am -DfunctionAppName=$FUNCTION_APP_NAME -DfunctionResourceGroup=$FUNCTION_APP_RG_NAME
 
       - name: Azure CLI Login
         uses: azure/login@v2
@@ -63,8 +62,7 @@ jobs:
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ env.FUNCTION_APP_NAME }}
-          # package: '${{ env.MODULE_DIR }}/target/azure-functions/${{ env.FUNCTION_APP_NAME }}' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
-          package: '${{ env.MODULE_DIR }}/.' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
+          package: '${{ env.MODULE_DIR }}/target/azure-functions/${{ env.FUNCTION_APP_NAME }}' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
           sku: flexconsumption
           respect-pom-xml: true
           
