@@ -34,9 +34,11 @@ public class CreateCountryTrigger {
 
     @FunctionName("createCountry")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
-        HttpRequestMessage<Optional<String>> request, ExecutionContext context) throws Exception {
-            
-        ThreadContext.put("correlationID", UUID.randomUUID().toString());
+        HttpRequestMessage<Optional<String>> request, 
+        ExecutionContext context) throws Exception {
+        
+        String correlationId = UUID.randomUUID().toString();
+        ThreadContext.put("correlationID", correlationId);
 
         try {
             if (!request.getBody().isPresent()) {
@@ -54,9 +56,11 @@ public class CreateCountryTrigger {
     
                 } catch(JsonMappingException e) {    
                     log.error("An error was thrown when trying to map message to SqlCountry.", e);
+                    context.getLogger().log(Level.SEVERE, "An error was thrown when trying to map message to SqlCountry. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
                     return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Json mapping error. Please ensure you have the correct payload. Issue: " + e.getMessage()).build();
                 } catch (Exception e) {
                     log.error("There was an issue saving the country in the Postgres Flexible server. Likely a bad requst.", e);
+                    context.getLogger().log(Level.SEVERE, "There was an issue saving the country in the Postgres Flexible server. Likely a bad requst. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
                     return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue creating Country. Issue: " + e.getMessage()).build();
                 }
             }

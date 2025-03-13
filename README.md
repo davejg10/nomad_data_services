@@ -51,10 +51,10 @@ Azure Functions are currently tested manually by following the approach shown in
 In order to trace a log you can use the following query. (Where x is the value of the correlationId)
 ```
 union 
-    AppTraces  // Include multiple tables if needed
+    AppTraces
 | extend logData = parse_json(Message)
 | where logData.contextMap.correlationId == "x"
-   or Properties .correlationId == "x"
+   or Properties.correlationId == "x"
 
 ```
 

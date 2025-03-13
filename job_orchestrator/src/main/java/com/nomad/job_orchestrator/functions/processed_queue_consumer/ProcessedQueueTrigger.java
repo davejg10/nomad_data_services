@@ -1,11 +1,14 @@
 package com.nomad.job_orchestrator.functions.processed_queue_consumer;
 
+import java.util.logging.Level;
+
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.annotation.BindingName;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.ServiceBusQueueTrigger;
@@ -30,17 +33,18 @@ public class ProcessedQueueTrigger {
      */
     @FunctionName("processedQueueConsumer")
     public void execute(@ServiceBusQueueTrigger(name = "msg", queueName = sb_processed_queue_name, connection = "nomadservicebus") String message,
-                        @BindingName("CorrelationId") String correlationId) throws JsonProcessingException {
+                        @BindingName("CorrelationId") String correlationId,
+                        ExecutionContext context) throws JsonProcessingException {
         try {
             ThreadContext.put("correlationId", correlationId);
 
             ScraperResponse scraperResponse = objectMapper.readValue(message, ScraperResponse.class);
-            log.info("And now we're back with scraperResponse: {}", scraperResponse);
 
             processedQueueHandler.accept(scraperResponse);
 
         } catch (Exception e) {
             log.error("An exception was thrown when trying to either serialize/desirialize. Message: {}", message, e);
+            context.getLogger().log(Level.SEVERE, "An exception was thrown when trying to either serialize/desirialize. CorrelationId " + correlationId + " Exception: " + e.getMessage(), e);
         } finally {
             ThreadContext.clearAll();
         }

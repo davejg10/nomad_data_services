@@ -3,6 +3,7 @@ package com.nomad.job_orchestrator.functions.api_job_producer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,9 +83,11 @@ public class ApiJobTrigger {
             }
         } catch (JsonProcessingException e) {
             log.error("A JsonProcessingException exception was thrown when trying to either serialize/desirialize.", e);
+            context.getLogger().log(Level.SEVERE, "A JsonProcessingException exception was thrown when trying to either serialize/desirialize. CorrelationId " + correlationId + " Exception: " + e.getMessage(), e);
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("A JsonProcessingException exception was thrown when trying to either serialize/desirialize. Error: " + e.getMessage()).build();
         } catch (Exception e) {
             log.error("There was an error in the apiJobProducer.", e);
+            context.getLogger().log(Level.SEVERE, "There was an error in the apiJobProducer. CorrelationId " + correlationId + " Exception: " + e.getMessage(), e);
             return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("An exception was thrown when trying to queue the job. Error: " + e.getMessage()).build();
         } finally {
             ThreadContext.clearAll();

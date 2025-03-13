@@ -1,41 +1,40 @@
-name: Maven deploy common_data library
-run-name: Maven deploy common_data library
+name: Unit test - CI
+run-name: (CI - ${{ github.ref_name }}) - Unit testing
 
 on:
   workflow_dispatch:
-  # pull_request:
-  #   branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-# permissions:
-#   checks: write
+permissions:
+  checks: write
+
+env:
+  JAVA_VERSION: 17
 
 jobs:
-  maven-deploy:
+  ci-unit-testing:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-        settings-path: ${{ github.workspace }} # location for the settings.xml file
+      - name: Setup Java Sdk ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
 
+      - name: Maven Verify
+        run: mvn clean install
 
-    # - name: Publish parent to GitHub Packages Apache Maven
-    #   run: |
-    #     mvn deploy -pl data-services -s $GITHUB_WORKSPACE/settings.xml
-    #   env:
-    #     GITHUB_TOKEN: ${{ github.token }}
+      - name: Archive test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: target/surefire-reports
 
-    - name: Publish to GitHub Packages Apache Maven
-      run: |
-        mvn deploy -pl common_data -am -s $GITHUB_WORKSPACE/settings.xml
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v5
+        if: always()
+        with:
+          report_paths: 'target/surefire-reports/TEST-*.xml'
