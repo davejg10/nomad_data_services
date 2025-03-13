@@ -12,6 +12,7 @@ import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpMethod;
 import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
@@ -43,9 +44,10 @@ public class ApiJobTrigger {
      */
     @FunctionName("apiJobProducer")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
-        HttpRequestMessage<Optional<String>> request) throws JsonMappingException, JsonProcessingException  {
+        HttpRequestMessage<Optional<String>> request,
+        ExecutionContext context) throws JsonMappingException, JsonProcessingException  {
         
-        
+        context.getLogger().
         log.info("cloud bbb");
 
         String correlationId = UUID.randomUUID().toString();
