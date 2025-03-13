@@ -15,8 +15,8 @@
 		<start-class>com.nomad.job_orchestrator.JobOrchestratorApplication</start-class>
 		<version.spring.cloud>2024.0.0</version.spring.cloud>
 		<!-- Plugins -->
-		<functionResourceGroup>fa-dev-uks-nomad-02-job-orchestrator</functionResourceGroup>
-		<functionAppName>rg-dev-uks-nomad-02</functionAppName>
+		<functionResourceGroup>rg-dev-uks-nomad-02</functionResourceGroup>
+		<functionAppName>fa-dev-uks-nomad-02-job-orchestrator</functionAppName>
 		<!-- <functionAppName.default>fa-dev-uks-nomad-02-job-orchestrator</functionAppName.default> -->
 		<!-- <functionResourceGroup.default>rg-dev-uks-nomad-02</functionResourceGroup.default> -->
 		<stagingDirectory>${project.build.directory}/azure-functions/${functionAppName}</stagingDirectory>
