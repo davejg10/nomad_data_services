@@ -113,5 +113,13 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub davejg10 Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/davejg10/nomad_data_services</url>
+        </repository>
+    </distributionManagement>
 	
 </project>
