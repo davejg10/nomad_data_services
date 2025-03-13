@@ -23,7 +23,7 @@ public class Neo4jCountryRepository extends Neo4jCommonCountryRepository {
     }
 
     public Neo4jCountry syncCountry(SqlCountry country) throws Neo4jGenericException {
-        Neo4jCountry neo4jCountry = new Neo4jCountry(country.getId().toString(), country.getName(), country.getDescription(), Set.of());
+        Neo4jCountry neo4jCountry = new Neo4jCountry(country.getId().toString(), country.getName(), Set.of());
         return super.createCountry(neo4jCountry);
     }
 

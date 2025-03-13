@@ -13,6 +13,8 @@ import jakarta.persistence.Converter;
 public class CityMetricsConverter implements AttributeConverter<CityMetrics, String> {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    
+
     @Override
     public String convertToDatabaseColumn(CityMetrics attribute) {
         try {

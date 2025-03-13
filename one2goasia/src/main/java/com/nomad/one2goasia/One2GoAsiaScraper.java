@@ -32,9 +32,11 @@ public class One2GoAsiaScraper implements WebScraperInterface {
     public One2GoAsiaScraper() {
         // Initialize Playwright with proper configurations for scraping
         playwright = Playwright.create();
+
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
                 .setHeadless(true)  // Run in headless mode for better performance
                 .setSlowMo(50));    // Add delay to respect rate limits
+
         browserContext = browser.newContext();
         page = browserContext.newPage();
     }
@@ -108,26 +110,35 @@ public class One2GoAsiaScraper implements WebScraperInterface {
         for(int index = 0; index < lineList.size(); index++) {
             String line = lineList.get(index);
             if (index != 0 && TransportType.to12GoAsiaList().contains(line)) {
-                RouteDTO route;
+                String transportType = null, operator = null, depart = null, arrive = null, cost = null;
                 try {
-                    route = RouteDTO.createWithSchema(
-                            tempLine.get(0),
-                            tempLine.get(1), // operator
-                            tempLine.get(3), // departure
-                            tempLine.get(4), // arrival
-                            tempLine.get(5).length() <= 6 ? Double.parseDouble(tempLine.get(5).substring(1)) : 1000.0, //cost
+                    if (tempLine.get(3).contains("Any time")) {
+                        log.warn("Ignoring route as contains Any Time for depart");
+                        tempLine.clear();
+                        tempLine.add(line);
+                        continue;
+                    }
+                    transportType = tempLine.get(0);
+                    operator = tempLine.get(1);
+                    depart = tempLine.get(3);
+                    arrive = tempLine.get(4);
+                    cost = tempLine.get(5);
+                    RouteDTO route = RouteDTO.createWithSchema(
+                            transportType,
+                            operator,
+                            depart,
+                            arrive,
+                            cost.length() <= 6 ? Double.parseDouble(cost.substring(1)) : 1000.0,
                             searchDate
                     );
                     routes.add(route);
                 } catch (Exception e) {
+                    log.info("transportType: {}, operator: {}, depart: {}, arrive: {}, cost: {}", transportType, operator, depart, arrive, cost);
                     log.error("Issue when trying to map scraped data to RouteDTO object. Error: {}", e.getMessage());
                 }
                 tempLine.clear();
             }
             tempLine.add(line);
-        }
-        for (RouteDTO routeobj : routes) {
-            log.info(routeobj);
         }
         return routes;
     }

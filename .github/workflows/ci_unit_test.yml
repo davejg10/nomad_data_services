@@ -9,6 +9,9 @@ on:
 permissions:
   checks: write
 
+env:
+  JAVA_VERSION: 17
+
 jobs:
   ci-unit-testing:
     runs-on: ubuntu-latest
@@ -23,15 +26,8 @@ jobs:
       - name: Maven Verify
         run: mvn clean install
 
-      - name: Archive test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results
-          path: target/surefire-reports
-
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5
         if: always()
         with:
-          report_paths: 'target/surefire-reports/TEST-*.xml'
+          report_paths: '**/target/surefire-reports/TEST-*.xml'

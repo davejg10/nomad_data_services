@@ -1,6 +1,5 @@
 package com.nomad.job_orchestrator.functions.cron_job_producer;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.nomad.scraping_library.domain.ScraperRequest;
@@ -38,7 +37,7 @@ public class CronJobHandler {
         try {
             allCronJobs = mapper.readValue(resource.getInputStream(), CronJobs.class);
         } catch (IOException e) {
-            log.error("Error when trying to read {} file. Error: {}", fileName, e.getMessage());
+            log.error("Error when trying to read " + fileName + " file. Error: {}" + e.getMessage());
             throw new RuntimeException(e);
         } 
 
@@ -55,7 +54,7 @@ public class CronJobHandler {
             LocalDateTime nextCronJobScheduleAdjusted = nextcronJobSchedule.minusSeconds(20); // handles divisibility/equality issues
             LocalDateTime nextFunctionSchedule = CronExpression.parse(cronTriggerSchedule).next(now);
             
-            log.info("CronJob with id: {}, is next schedule for: {}, nextFunctionSchedule is :{}", cronJob.id(), nextCronJobScheduleAdjusted, nextFunctionSchedule);
+            log.info("CronJob with id: {}, is next scheduled for: {}, nextFunctionSchedule is: {}", cronJob.id(), nextCronJobScheduleAdjusted, nextFunctionSchedule);
             if (nextCronJobScheduleAdjusted.isBefore(nextFunctionSchedule)) {
                 log.info("Adding CronJob with id: {} to filtered CronJob list", cronJob.id());
 
@@ -75,7 +74,9 @@ public class CronJobHandler {
                 List<CityPair> cityPairs = cityRepository.routeDiscoveryGivenCountry(filteredCronJob.countryName());
 
                 for (CityPair cityPair : cityPairs) {
-                    scraperRequests.add(new ScraperRequest("cronTrigger-" + filteredCronJob.id(), ScraperRequestType.ROUTE_DISCOVERY, cityPair.sourceCity(), cityPair.targetCity(), filteredCronJob.searchDate()));
+                    ScraperRequest scraperRequest = new ScraperRequest("cronTrigger-" + filteredCronJob.id(), ScraperRequestType.ROUTE_DISCOVERY, cityPair.sourceCity(), cityPair.targetCity(), filteredCronJob.searchDate());
+                    log.info("Scraper request created. Request is: {}", scraperRequest);
+                    scraperRequests.add(scraperRequest);
                 }
         }
 

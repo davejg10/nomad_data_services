@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.logging.log4j.ThreadContext;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
@@ -58,32 +59,36 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
 
                 if (iterator.hasNext()) {
                     ServiceBusReceivedMessage message = iterator.next();
-                    log.info("Started processing message: {}", message.getMessageId());
+                    String correlationId = message.getCorrelationId();
+                    ThreadContext.put("correlationId", correlationId);
+
+                    log.info("Started processing ScraperRequest");
 
                     try {
                         ScraperRequest request = message.getBody().toObject(ScraperRequest.class);
-                        log.info("Started scraping with request: {}", request);
         
                         log.info("The job is {}, for route {} -> {}", request.getScraperRequestSource(), request.getSourceCity().name(), request.getTargetCity().name());
 
                         List<ScraperResponse> scraperResponses = scraper.scrapeData(request);
                         
                         if (scraperResponses.size() == 0) {
+                            log.warn("WebScraper found no route instances for route {} -> {}. DLQing.", request.getSourceCity().name(), request.getTargetCity().name());
                             throw new NoRoutesFoundException("Scraper found no route instances for route " +  request.getSourceCity().name() + " -> " +  request.getTargetCity().name() + ". DLQing");
                         }
-                        serviceBusBatchSender.sendBatch(scraperResponses); 
 
-                        log.info("Successfully completed message with messageId {}", message.getMessageId());
+                        serviceBusBatchSender.sendBatch(scraperResponses, correlationId); 
+
+                        log.info("Successfully sent message");
                         receiver.complete(message);
-                        
+
                         // Reset timeout
                         endTime = System.currentTimeMillis() + timeout.toMillis();
     
                     } catch(NoRoutesFoundException e)  {
-                        log.error("DLQing the following message with messageId {}, reason: {}", message.getMessageId(), e.getMessage());
+                        log.error("DLQing the following message. Reason: {}", e.getMessage());
                         receiver.deadLetter(message);
                     } catch (Exception e) {
-                        log.error("Abandoning the following message with messageId {}, reason: {}", message.getMessageId(), e.getMessage());
+                        log.error("Abandoning the following message. Reason: {}", e.getMessage());
                         receiver.abandon(message);
                     }
                 }
@@ -96,6 +101,8 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
             serviceBusBatchSender.getSenderClient().close();
 
             log.info("Shutting down application...");
+
+            ThreadContext.clearAll();
             SpringApplication.exit(applicationContext, () -> 0);
             System.exit(0);
         }

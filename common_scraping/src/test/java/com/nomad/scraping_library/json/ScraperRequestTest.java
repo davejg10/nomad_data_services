@@ -19,7 +19,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @SpringBootTest(classes = {AppConfig.class})
-public class ScraperRequestJsonTest {
+public class ScraperRequestTest {
     
     @Autowired
     ObjectMapper objectMapper;

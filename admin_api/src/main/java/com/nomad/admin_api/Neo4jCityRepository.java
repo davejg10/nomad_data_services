@@ -24,7 +24,7 @@ public class Neo4jCityRepository extends Neo4jCommonCityRepository {
     }
 
     public Neo4jCity syncCity(SqlCity city) throws Neo4jGenericException {
-        Neo4jCity neo4jCity = new Neo4jCity(city.getId().toString(), city.getName(), city.getCityMetrics(), Set.of(), new Neo4jCountry(city.getCountryId().toString(), "", "", Set.of()));
+        Neo4jCity neo4jCity = new Neo4jCity(city.getId().toString(), city.getName(), city.getCityMetrics(), Set.of(), new Neo4jCountry(city.getCountryId().toString(), "", Set.of()));
         return super.createCity(neo4jCity);
     }
 }

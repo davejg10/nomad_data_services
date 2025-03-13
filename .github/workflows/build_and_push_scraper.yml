@@ -1,5 +1,5 @@
-name: deploy-${{ github.events.inputs.scraper }}-container-app-job
-run-name: Deploy ${{ github.events.inputs.scraper }} Container App Job
+name: deploy-container-app-job
+run-name: Deploy ${{ github.event.inputs.scraper }} Container App Job
 
 on:
   workflow_dispatch:
@@ -18,7 +18,7 @@ on:
 env:
   ACR_SERVER_NAME: acrglbuksdevopsutils.azurecr.io
   NAMESPACE_NAME: nomad-data
-  REPOSITORY_NAME: ${{ github.events.inputs.scraper }}
+  REPOSITORY_NAME: ${{ github.event.inputs.scraper }}
   TAG: ${{ github.run_id }}
   JAVA_VERSION: '17'
 
@@ -48,7 +48,7 @@ jobs:
       - name: 'Restore Project Dependencies Using Mvn'
         shell: bash
         run: |
-          mvn clean package -pl ${{ env.REPOSITORY_NAME }} -am
+          mvn clean install -pl ${{ env.REPOSITORY_NAME }} -am
 
       - name: ACR build & push image
         run: |

@@ -39,7 +39,4 @@ public class SqlCountry {
         this.name = name;
         this.description = description;
     }
-
-
-
 }

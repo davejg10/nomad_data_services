@@ -5,9 +5,7 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.ToString;
 
-@ToString
 public class ScraperRequest extends ScraperMessage {
     
     @JsonCreator
@@ -17,6 +15,12 @@ public class ScraperRequest extends ScraperMessage {
                           @JsonProperty("targetCity") CityDTO targetCity,
                           @JsonProperty("searchDate") LocalDate searchDate) {
         super(scraperRequestSource, type, sourceCity, targetCity, searchDate);
+    }
+
+    public String toString() {
+        StringBuilder string = new StringBuilder();
+        string.append(this.scraperRequestSource).append(" ").append(this.type).append(" ").append(sourceCity);
+        return string.toString();
     }
     
     

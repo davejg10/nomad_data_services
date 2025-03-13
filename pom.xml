@@ -25,6 +25,7 @@
         <module>one2goasia</module>
         <module>job_orchestrator</module>
         <module>admin_api</module>
+        <module>config</module>
     </modules>
 
     <properties>
@@ -58,9 +59,27 @@
 			</exclusions>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-layout-template-json</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>applicationinsights-logging-log4j2</artifactId>
+			<version>2.6.4</version>
+		</dependency>
+
         <dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-log4j2</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+    		</exclusions>
 		</dependency>
 
         <dependency>
@@ -94,5 +113,13 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub davejg10 Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/davejg10/nomad_data_services</url>
+        </repository>
+    </distributionManagement>
 	
 </project>

@@ -30,16 +30,15 @@ public class ServiceBusBatchSender<T extends ScraperMessage> {
         return sender;
     }
 
-    public void sendBatch(List<T> scraperMessages) {
-        
+    public void sendBatch(List<T> scraperMessages, String correlationId) {
         // Creating a batch without options set.
         ServiceBusMessageBatch batch = sender.createMessageBatch();
         List<T> failedJobs = new ArrayList<>();
 
         for (T scraperMessage : scraperMessages) {
             try {
-                log.info("Preparing message: {} for route {} -> {}", scraperMessage.getScraperRequestSource(), scraperMessage.getSourceCity().name(), scraperMessage.getTargetCity().name());
                 ServiceBusMessage message = new ServiceBusMessage(objectMapper.writeValueAsString(scraperMessage));
+                message.setCorrelationId(correlationId);
 
                 if (batch.tryAddMessage(message)) {
                     continue;
