@@ -3,8 +3,9 @@ run-name: Maven deploy common_data library
 
 on:
   workflow_dispatch:
-  # pull_request:
-  #   branches: [ "main" ]
+  push:
+    branches:
+      - main
 
 jobs:
   maven-deploy:
