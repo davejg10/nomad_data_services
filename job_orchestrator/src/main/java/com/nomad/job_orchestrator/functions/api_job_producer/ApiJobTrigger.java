@@ -44,10 +44,14 @@ public class ApiJobTrigger {
     @FunctionName("apiJobProducer")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request) throws JsonMappingException, JsonProcessingException  {
+        
+        
+        log.info("cloud bbb");
 
         String correlationId = UUID.randomUUID().toString();
         ThreadContext.put("correlationId", correlationId);
-        log.info("cloud bbb");
+        log.info("cloud after");
+
         try {
             if (!request.getBody().isPresent()) {
                 
