@@ -47,7 +47,7 @@ public class ApiJobTrigger {
         HttpRequestMessage<Optional<String>> request,
         ExecutionContext context) throws JsonMappingException, JsonProcessingException  {
         
-        context.getLogger().
+        // context.getLogger().
         log.info("cloud bbb");
 
         String correlationId = UUID.randomUUID().toString();
