@@ -34,35 +34,36 @@ public class CreateCityTrigger {
 
     @FunctionName("createCity")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
-        HttpRequestMessage<Optional<String>> request, ExecutionContext context) throws Exception {
+        HttpRequestMessage<Optional<String>> request) throws Exception {
         
-        ThreadContext.put("traceId", UUID.randomUUID().toString());
+        ThreadContext.put("correlationId", UUID.randomUUID().toString());
 
-
-        if (!request.getBody().isPresent()) {
-            log.info("Unable to read request body. Is empty");
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Unable to read request body.").build();
-        } else {
-
-            try {
-                CityDTO cityToBeCreated = objectMapper.readValue(request.getBody().get(), CityDTO.class);
-                log.info("createCity function hit. Request body is {}", cityToBeCreated);
-
-                createCityHandler.accept(cityToBeCreated);
-
-                return request.createResponseBuilder(HttpStatus.OK).body("Successfully created City " + cityToBeCreated.name() + " in PostgreSQl flexible server & synced to Neo4j.").build();
-
-            } catch(JsonMappingException e) {
-                log.error("some error");
-
-                context.getLogger().log(Level.SEVERE, "An error was thrown when trying to map message to CityDTO. Exception: " + e.getMessage(), e);
-                return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Json mapping error. Please ensure you have the correct payload. Issue: " + e.getMessage()).build();
-            } catch (Exception  e) {
-                log.error("some erorr");
-                context.getLogger().log(Level.SEVERE, "There was an issue saving the country {} in the Postgres Flexible server. Likely a bad requst. Exception: " + e.getMessage(), e);
-                return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue creating City. Issue: " + e.getMessage()).build();
-            } 
+        try {
+            if (!request.getBody().isPresent()) {
+                log.info("Unable to read request body. Is empty");
+                return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Unable to read request body.").build();
+            } else {
+    
+                try {
+                    CityDTO cityToBeCreated = objectMapper.readValue(request.getBody().get(), CityDTO.class);
+                    log.info("createCity function hit. Request body is {}", cityToBeCreated);
+    
+                    createCityHandler.accept(cityToBeCreated);
+    
+                    return request.createResponseBuilder(HttpStatus.OK).body("Successfully created City " + cityToBeCreated.name() + " in PostgreSQl flexible server & synced to Neo4j.").build();
+    
+                } catch(JsonMappingException e) {
+                    log.error("An error was thrown when trying to map message to CityDTO.", e);
+                    return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Json mapping error. Please ensure you have the correct payload. Issue: " + e.getMessage()).build();
+                } catch (Exception  e) {
+                    log.error("There was an issue saving the country {} in the Postgres Flexible server. Likely a bad requst.", e);
+                    return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue creating City. Issue: " + e.getMessage()).build();
+                } 
+            }
+        } finally {
+            ThreadContext.clearAll();
         }
+        
     }
     
 }

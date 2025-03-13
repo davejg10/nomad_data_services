@@ -12,7 +12,7 @@
             <AppenderRef ref="AIAppender"/>
         </Root>
 
-        <!-- Suppress excessive Azure SDK logs -->
+        <!-- Suppress excessive Azure SDK logs
         <Logger name="com.azure" level="warn" additivity="false">
             <AppenderRef ref="AIAppender"/>
         </Logger>
@@ -23,6 +23,6 @@
 
         <Logger name="com.azure.core.util.logging.LoggingEventBuilder" level="warn" additivity="false">
             <AppenderRef ref="AIAppender"/>
-        </Logger>
+        </Logger> -->
     </Loggers>
 </Configuration>

@@ -36,7 +36,7 @@ public class CreateCountryTrigger {
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request, ExecutionContext context) throws Exception {
             
-        ThreadContext.put("traceId", UUID.randomUUID().toString());
+        ThreadContext.put("correlationID", UUID.randomUUID().toString());
 
         try {
             if (!request.getBody().isPresent()) {
@@ -52,15 +52,11 @@ public class CreateCountryTrigger {
     
                     return request.createResponseBuilder(HttpStatus.OK).body("Successfully created Country " + countryToBeCreated.getName() + " in PostgreSQl flexible server & synced to Neo4j.").build();
     
-                } catch(JsonMappingException e) {
-                    log.error("some error");
-    
-                    // context.getLogger().log(Level.SEVERE, "An error was thrown when trying to map message to SqlCountry. Exception: " + e.getMessage(), e);
+                } catch(JsonMappingException e) {    
+                    log.error("An error was thrown when trying to map message to SqlCountry.", e);
                     return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Json mapping error. Please ensure you have the correct payload. Issue: " + e.getMessage()).build();
                 } catch (Exception e) {
-                    log.error("some error", e);
-    
-                    // context.getLogger().log(Level.SEVERE, "There was an issue saving the country in the Postgres Flexible server. Likely a bad requst. Exception: " + e.getMessage(), e);
+                    log.error("There was an issue saving the country in the Postgres Flexible server. Likely a bad requst.", e);
                     return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue creating Country. Issue: " + e.getMessage()).build();
                 }
             }
