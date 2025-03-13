@@ -50,7 +50,7 @@ public class ApiJobTrigger {
 
         String correlationId = UUID.randomUUID().toString();
         ThreadContext.put("correlationId", correlationId);
-        log.info("cloud after");
+        log.warn("cloud after");
 
         try {
             if (!request.getBody().isPresent()) {
