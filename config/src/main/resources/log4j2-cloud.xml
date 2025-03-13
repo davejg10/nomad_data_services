@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
     <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout
-                    pattern="%highlight{%-5level }[%style{%X{correlationId}}{bright,blue}] %style{%C{1.}}{bright,yellow}: %msg%n%throwable" disableAnsi="false"/>
-        </Console>
         <ApplicationInsightsAppender  name="AIAppender">
             <InstrumentationKey>52c31484-0b48-4b47-8bc0-16aa9bf3bffd</InstrumentationKey>
         </ApplicationInsightsAppender >
@@ -13,7 +9,6 @@
     <Loggers>
         <!-- LOG everything at INFO level -->
         <Root level="info">
-            <AppenderRef ref="Console"/>
             <AppenderRef ref="AIAppender"/>
         </Root>
 
