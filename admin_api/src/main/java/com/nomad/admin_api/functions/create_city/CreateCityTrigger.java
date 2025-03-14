@@ -59,8 +59,7 @@ public class CreateCityTrigger {
                     context.getLogger().log(Level.SEVERE, "An error was thrown when trying to map message to CityDTO. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
                     return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Json mapping error. Please ensure you have the correct payload. Issue: " + e.getMessage()).build();
                 } catch (Exception  e) {
-                    log.error("There was an issue saving the country {} in the Postgres Flexible server. Likely a bad requst.", e);
-                    context.getLogger().log(Level.SEVERE, "There was an issue saving the country {} in the Postgres Flexible server. Likely a bad requst. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
+                    context.getLogger().log(Level.SEVERE, "There was an issue saving the city. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
                     return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue creating City. Issue: " + e.getMessage()).build();
                 } 
             }

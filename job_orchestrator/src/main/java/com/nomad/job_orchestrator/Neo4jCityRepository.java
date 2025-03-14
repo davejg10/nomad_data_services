@@ -78,7 +78,7 @@ public class Neo4jCityRepository extends Neo4jCommonCityRepository {
                     .run();
         } catch (Exception e) {
             log.error("Error when trying to saveCityDTOWithDepth0. City: {}. Error: {}", cityAsMap.get("name"), e.getMessage());
-            throw new Neo4jGenericException("Error in saveCityDTOWithDepth0. Error: " + e.getMessage());
+            throw new Neo4jGenericException("Error in saveCityDTOWithDepth0.", e);
         }
     }
 }

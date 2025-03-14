@@ -48,4 +48,6 @@ public class Neo4jTestConfiguration {
         registry.add("spring.neo4j.authentication.username", () -> neo4jUser);
         registry.add("spring.neo4j.authentication.password", () -> neo4jPass);
     }
+
+
 }

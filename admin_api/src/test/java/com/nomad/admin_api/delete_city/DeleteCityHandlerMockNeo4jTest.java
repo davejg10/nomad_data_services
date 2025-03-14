@@ -1,8 +1,6 @@
-package com.nomad.admin_api.create_city;
+package com.nomad.admin_api.delete_city;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,8 +16,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.nomad.admin_api.Neo4jCityRepository;
-import com.nomad.admin_api.domain.CityDTO;
-import com.nomad.admin_api.functions.create_city.CreateCityHandler;
+import com.nomad.admin_api.domain.CityToDeleteDTO;
+import com.nomad.admin_api.functions.delete_city.DeleteCityHandler;
 import com.nomad.data_library.GenericTestGenerator;
 import com.nomad.data_library.Neo4jTestConfiguration;
 import com.nomad.data_library.domain.sql.SqlCity;
@@ -33,7 +31,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @SpringBootTest
 @Import({com.nomad.data_library.Neo4jTestConfiguration.class})
-public class CreateCityHandlerMockNeo4jTest {
+public class DeleteCityHandlerMockNeo4jTest {
 
     @Autowired
     private SqlCountryRepository sqlCountryRepository;
@@ -45,7 +43,7 @@ public class CreateCityHandlerMockNeo4jTest {
     private Neo4jCityRepository neo4jCityRepository;
 
     @Autowired
-    private CreateCityHandler createCityHandler;
+    private DeleteCityHandler deleteCityHandler;
 
     @AfterEach
     void clearDB(@Autowired Neo4jClient neo4jClient) {
@@ -54,24 +52,30 @@ public class CreateCityHandlerMockNeo4jTest {
         neo4jClient.query("MATCH (n) DETACH DELETE n;").run();    }
 
     @Test
-    void createCityHandler_shouldRollbackSql_whenExceptionsThrownByNeo4jRepository() throws Neo4jGenericException {
+    void deleteCityHandler_shouldRollbackSql_whenExceptionsThrownByNeo4jRepository() throws Neo4jGenericException {
         String countryAName = "CountryA";
-        SqlCountry countryToBeCreated = SqlCountry.of(countryAName, "A description of countryA");
-        sqlCountryRepository.save(countryToBeCreated);
-        
-        Mockito.when(neo4jCityRepository.save(Mockito.any(SqlCity.class))).thenThrow(new Neo4jGenericException("", new Throwable()));
+        SqlCountry countryOfCity = SqlCountry.of(countryAName, "A description of countryA");
+        countryOfCity = sqlCountryRepository.save(countryOfCity);
 
-        CityDTO cityDTO = new CityDTO("CityA", "CityA desc", GenericTestGenerator.cityMetrics(), countryAName);
+        SqlCity sqlCity = SqlCity.of("CityA", "CityA desc", GenericTestGenerator.cityMetrics(), countryOfCity.getId());
+        sqlCityRepository.save(sqlCity);
+
+        CityToDeleteDTO cityToDeleteDTO = new CityToDeleteDTO(sqlCity.getName(), countryOfCity.getName());
+
+        
+        Mockito.doThrow(new Neo4jGenericException("", new Throwable()))
+            .when(neo4jCityRepository)
+            .delete(Mockito.any(SqlCity.class));
+
+        assertThat(sqlCityRepository.findAll().size()).isEqualTo(1);
 
         try {
-            createCityHandler.accept(cityDTO);
+            deleteCityHandler.accept(cityToDeleteDTO);
         } catch (Exception e) {
             // we dont care about the exeception
         }
         
-        Set<SqlCity> sqlCities = sqlCityRepository.findAll();
-
-        assertThat(sqlCities.size()).isEqualTo(0);
+        assertThat(sqlCityRepository.findAll().size()).isEqualTo(1);
        
     }
 }

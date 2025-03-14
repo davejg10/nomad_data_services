@@ -1,4 +1,4 @@
-package com.nomad.admin_api.functions.create_country;
+package com.nomad.admin_api.functions.delete_country;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -24,15 +24,15 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Component
-public class CreateCountryTrigger {
+public class DeleteCountryTrigger {
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
-    private CreateCountryHandler createCountryHandler;
+    private DeleteCountryHandler deleteCountryHandler;
 
-    @FunctionName("createCountry")
+    @FunctionName("deleteCountry")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request, 
         ExecutionContext context) throws Exception {
@@ -47,20 +47,20 @@ public class CreateCountryTrigger {
             } else {
                 
                 try {
-                    SqlCountry countryToBeCreated = objectMapper.readValue(request.getBody().get(), SqlCountry.class);
-                    log.info("createCountry function hit. Request body is {}", countryToBeCreated);
+                    String countryToBeDeleted = objectMapper.readTree(request.getBody().get()).get("name").asText();
+                    log.info("deleteCountry function hit. Request body is {}", countryToBeDeleted);
                 
-                    createCountryHandler.accept(countryToBeCreated);
+                    deleteCountryHandler.accept(countryToBeDeleted);
     
-                    return request.createResponseBuilder(HttpStatus.OK).body("Successfully created Country " + countryToBeCreated.getName() + " in PostgreSQl flexible server & synced to Neo4j.").build();
+                    return request.createResponseBuilder(HttpStatus.OK).body("Successfully deleted Country " + countryToBeDeleted + " in PostgreSQl flexible server & deleted in Neo4j.").build();
     
                 } catch(JsonMappingException e) {    
-                    log.error("An error was thrown when trying to map message to SqlCountry.", e);
-                    context.getLogger().log(Level.SEVERE, "An error was thrown when trying to map message to SqlCountry. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
+                    log.error("An error was thrown when trying to map message to String.", e);
+                    context.getLogger().log(Level.SEVERE, "An error was thrown when trying to map message to String. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
                     return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Json mapping error. Please ensure you have the correct payload. Issue: " + e.getMessage()).build();
                 } catch (Exception e) {
-                    context.getLogger().log(Level.SEVERE, "There was an issue creating the country. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
-                    return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue creating Country. Issue: " + e.getMessage()).build();
+                    context.getLogger().log(Level.SEVERE, "There was an issue deleting the country. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
+                    return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue deleting Country. Issue: " + e.getMessage()).build();
                 }
             }
         } finally {
