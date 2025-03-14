@@ -105,8 +105,8 @@ public class Neo4jCommonCountryRepository {
             .get();
             return neo4jCountry;
         } catch (Exception e) {
-            log.info("Exception when trying to create Country; {}", e );
-            throw new Neo4jGenericException("Issue when trying to createCountry: " + e.getMessage());
+            log.info("Exception when trying to create Country; {}", e.getMessage(), e);
+            throw new Neo4jGenericException("Issue when trying to createCountry", e);
         }
     }
 

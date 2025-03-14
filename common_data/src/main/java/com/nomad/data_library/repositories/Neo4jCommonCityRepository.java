@@ -216,8 +216,8 @@ public class Neo4jCommonCityRepository {
             .get();
             return neo4jCity;
         } catch (Exception e) {
-            log.info("Exception when trying to create City; {}", e.getMessage());
-            throw new Neo4jGenericException("Issue when trying to createCity: " + e.getMessage());
+            log.info("Exception when trying to create City; {}", e.getMessage(), e);
+            throw new Neo4jGenericException("Issue when trying to createCity", e);
         }
     }
 

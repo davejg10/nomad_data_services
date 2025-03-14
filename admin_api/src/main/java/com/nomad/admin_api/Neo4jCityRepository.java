@@ -23,8 +23,22 @@ public class Neo4jCityRepository extends Neo4jCommonCityRepository {
         super(neo4jClient, objectMapper, schema);
     }
 
-    public Neo4jCity syncCity(SqlCity city) throws Neo4jGenericException {
+    public Neo4jCity save(SqlCity city) throws Neo4jGenericException {
         Neo4jCity neo4jCity = new Neo4jCity(city.getId().toString(), city.getName(), city.getCityMetrics(), Set.of(), new Neo4jCountry(city.getCountryId().toString(), "", Set.of()));
         return super.createCity(neo4jCity);
     }
+
+    public void delete(SqlCity city) throws Neo4jGenericException {
+        try {
+            neo4jClient
+            .query("""
+                MATCH (city:City {id: $id}) DETACH DELETE city;
+            """)
+            .bind(city.getId().toString()).to("id")
+            .run();
+        } catch (Exception e) {
+            throw new Neo4jGenericException("Exception when trying to delete City. Exception: {}", e);
+        }
+    }
+
 }

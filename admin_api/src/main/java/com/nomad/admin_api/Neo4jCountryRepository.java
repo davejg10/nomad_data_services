@@ -22,9 +22,24 @@ public class Neo4jCountryRepository extends Neo4jCommonCountryRepository {
         super(neo4jClient, objectMapper, schema);
     }
 
-    public Neo4jCountry syncCountry(SqlCountry country) throws Neo4jGenericException {
+    public Neo4jCountry save(SqlCountry country) throws Neo4jGenericException {
         Neo4jCountry neo4jCountry = new Neo4jCountry(country.getId().toString(), country.getName(), Set.of());
         return super.createCountry(neo4jCountry);
     }
+
+    public void delete(SqlCountry country) throws Neo4jGenericException {
+        try {
+            neo4jClient
+            .query("""
+                MATCH (country:Country {id: $id}) DETACH DELETE country;
+            """)
+            .bind(country.getId().toString()).to("id")
+            .run();
+        } catch (Exception e) {
+            throw new Neo4jGenericException("Exception when trying to delete Country. Exception: {}", e);
+        }
+        
+    }
+    
 
 }

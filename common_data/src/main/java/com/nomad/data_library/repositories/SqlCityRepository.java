@@ -1,5 +1,6 @@
 package com.nomad.data_library.repositories;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -13,4 +14,6 @@ import com.nomad.data_library.domain.sql.SqlCity;
 public interface SqlCityRepository extends CrudRepository<SqlCity, UUID> {
 
     Set<SqlCity> findAll();
+
+    Optional<SqlCity> findByCountryIdAndName(UUID countryId, String name);
 } 
