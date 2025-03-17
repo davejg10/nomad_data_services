@@ -17,11 +17,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.nomad.admin_api.Neo4jCityRepository;
 import com.nomad.admin_api.Neo4jCountryRepository;
+import com.nomad.admin_api.domain.CityDTO;
 import com.nomad.admin_api.domain.CityToDeleteDTO;
+import com.nomad.admin_api.domain.CountryDTO;
 import com.nomad.admin_api.functions.delete_city.DeleteCityHandler;
 import com.nomad.data_library.GenericTestGenerator;
 import com.nomad.data_library.Neo4jTestConfiguration;
+import com.nomad.data_library.Neo4jTestGenerator;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
+import com.nomad.data_library.domain.neo4j.Neo4jCountry;
 import com.nomad.data_library.domain.sql.SqlCity;
 import com.nomad.data_library.domain.sql.SqlCountry;
 import com.nomad.data_library.exceptions.Neo4jGenericException;
@@ -63,11 +67,15 @@ public class DeleteCityHandlerTest {
         String countryAName = "CountryA";
         SqlCountry countryOfCity = SqlCountry.of(countryAName, "A description of countryA");
         countryOfCity = sqlCountryRepository.save(countryOfCity);
-        neo4jCountryRepository.save(countryOfCity);
+
+        Neo4jCountry neo4jCountry = Neo4jTestGenerator.neo4jCountryFromSql(countryOfCity);
+        neo4jCountryRepository.save(neo4jCountry);
 
         SqlCity sqlCity = SqlCity.of("CityA", "CityA desc", GenericTestGenerator.cityMetrics(), countryOfCity.getId());
         sqlCity = sqlCityRepository.save(sqlCity);
-        neo4jCityRepository.save(sqlCity);
+
+        Neo4jCity neo4jCity = Neo4jTestGenerator.neo4jCityFromSql(sqlCity, countryOfCity);
+        neo4jCityRepository.save(neo4jCity);
 
         CityToDeleteDTO cityToDeleteDTO = new CityToDeleteDTO(sqlCity.getName(), countryOfCity.getName());
 

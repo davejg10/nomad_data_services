@@ -1,4 +1,6 @@
 {
     "name": "CountryA",
-    "description": "Example description"
+    "shortDescription": "shortDescription",
+    "description": "Example description",
+    "primaryBlobUrl": "url:xx"
 }

@@ -6,7 +6,6 @@ import com.nomad.data_library.domain.neo4j.CityMetricsDeserializer;
 import org.neo4j.cypherdsl.core.renderer.Dialect;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class Neo4jConfig {
@@ -26,5 +25,4 @@ public class Neo4jConfig {
     public CityMetricsDeserializer cityMetricsDeserializer(ObjectMapper objectMapper) {
         return new CityMetricsDeserializer(objectMapper);
     }
-
 }

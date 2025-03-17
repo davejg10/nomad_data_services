@@ -1,14 +1,21 @@
 {
     "name": "CityA",
+    "shortDescription": "Short description",
     "description": "Example description",
+    "primaryBlobUrl": "url:xx",
+    "coordinate": {
+        "latitude": 13.7563,
+        "longitude": 100.5018,
+        "height": 0.0
+    },
     "cityMetrics": {
         "sailing": {
             "criteria": "SAILING",
-            "metric": "4.0"
+            "metric": 4.0
         },
         "food": {
             "criteria": "FOOD",
-            "metric": "8.0"
+            "metric": 8.0
         },
         "nightlife": {
             "criteria": "NIGHTLIFE",

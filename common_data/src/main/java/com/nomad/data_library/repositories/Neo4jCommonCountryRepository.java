@@ -2,6 +2,7 @@ package com.nomad.data_library.repositories;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -60,13 +61,13 @@ public class Neo4jCommonCountryRepository {
 
                         record.get("cities").asList(city -> {
                             Neo4jCity createdTargetCity = cityMapper.apply(typeSystem, city.asNode());
-                            createdTargetCity = new Neo4jCity(createdTargetCity.getId(), createdTargetCity.getName(), createdTargetCity.getCityMetrics(), createdTargetCity.getRoutes(), fetchedCountry);
+                            createdTargetCity = new Neo4jCity(createdTargetCity.getId(), createdTargetCity.getName(),createdTargetCity.getShortDescription(), createdTargetCity.getPrimaryBlobUrl(), createdTargetCity.getCoordinate(), createdTargetCity.getCityMetrics(), createdTargetCity.getRoutes(), fetchedCountry);
                             cities.add(createdTargetCity);
                             return null;
                         });
                     }
 
-                    return new Neo4jCountry(fetchedCountry.getId(), fetchedCountry.getName(), cities);
+                    return new Neo4jCountry(fetchedCountry.getId(), fetchedCountry.getName(), fetchedCountry.getShortDescription(), fetchedCountry.getPrimaryBlobUrl(), cities);
                 })
                 .first();
         return country;
@@ -81,22 +82,25 @@ public class Neo4jCommonCountryRepository {
                 .mappedBy((typeSystem, record) -> {
                     Neo4jCountry fetchedCountry = countryMapper.apply(typeSystem, record.get("country").asNode());
 
-                    return new Neo4jCountry(fetchedCountry.getId(), fetchedCountry.getName(), Set.of());
+                    return new Neo4jCountry(fetchedCountry.getId(), fetchedCountry.getName(), fetchedCountry.getShortDescription(), fetchedCountry.getPrimaryBlobUrl(), Set.of());
                 })
                 .all();
         return new HashSet<>(allCountries);
     }
 
     public Neo4jCountry createCountry(Neo4jCountry country) throws Neo4jGenericException {
+        Map<String, Object> countryAsMap = mapifyCountry(country);
         try {
             Neo4jCountry neo4jCountry = neo4jClient
             .query("""
                 MERGE (country:Country {id: $id})
                 ON CREATE SET country.name = $name
+                SET country.shortDescription = $shortDescription,
+                    country.primaryBlobUrl = $primaryBlobUrl
+                    
                 RETURN country
             """)
-            .bind(country.getId().toString()).to("id")
-            .bind(country.getName()).to("name")
+            .bindAll(countryAsMap)
             .fetchAs(Neo4jCountry.class)
             .mappedBy((typeSystem, record) -> {
                 return countryMapper.apply(typeSystem, record.get("country").asNode());
@@ -108,6 +112,11 @@ public class Neo4jCommonCountryRepository {
             log.info("Exception when trying to create Country; {}", e.getMessage(), e);
             throw new Neo4jGenericException("Issue when trying to createCountry", e);
         }
+    }
+
+    public Map<String, Object> mapifyCountry(Neo4jCountry country) {
+        Map<String, Object> countryAsMap = objectMapper.convertValue(country, Map.class);
+        return countryAsMap;
     }
 
 }

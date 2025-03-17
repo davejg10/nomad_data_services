@@ -22,9 +22,8 @@ public class Neo4jCountryRepository extends Neo4jCommonCountryRepository {
         super(neo4jClient, objectMapper, schema);
     }
 
-    public Neo4jCountry save(SqlCountry country) throws Neo4jGenericException {
-        Neo4jCountry neo4jCountry = new Neo4jCountry(country.getId().toString(), country.getName(), Set.of());
-        return super.createCountry(neo4jCountry);
+    public Neo4jCountry save(Neo4jCountry country) throws Neo4jGenericException {
+        return super.createCountry(country);
     }
 
     public void delete(SqlCountry country) throws Neo4jGenericException {

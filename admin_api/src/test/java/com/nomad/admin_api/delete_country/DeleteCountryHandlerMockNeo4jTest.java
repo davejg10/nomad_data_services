@@ -2,28 +2,21 @@ package com.nomad.admin_api.delete_country;
 
 import com.nomad.admin_api.Neo4jCountryRepository;
 import com.nomad.admin_api.functions.delete_country.DeleteCountryHandler;
-import com.nomad.data_library.Neo4jTestConfiguration;
 import com.nomad.data_library.domain.sql.SqlCountry;
 import com.nomad.data_library.exceptions.Neo4jGenericException;
 import com.nomad.data_library.repositories.SqlCountryRepository;
 import lombok.extern.log4j.Log4j2;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.neo4j.core.Neo4jClient;
-import org.springframework.test.annotation.Commit;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import org.aspectj.lang.annotation.After;
 
 @Log4j2
 @SpringBootTest

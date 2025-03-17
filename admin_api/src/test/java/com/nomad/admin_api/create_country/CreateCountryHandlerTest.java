@@ -19,6 +19,7 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.nomad.admin_api.Neo4jCountryRepository;
+import com.nomad.admin_api.domain.CountryDTO;
 import com.nomad.admin_api.functions.create_country.CreateCountryHandler;
 import com.nomad.data_library.Neo4jTestConfiguration;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
@@ -49,7 +50,7 @@ public class CreateCountryHandlerTest {
     @Test
     void createCountryHandler_shouldCreateCountryInSqlAndNeo4j_whenNoExceptionsThrown() {
 
-        SqlCountry countryToBeCreated = SqlCountry.of("CountryA", "A description of countryA");
+        CountryDTO countryToBeCreated = new CountryDTO("CountryA", "Short description", "A description of countryA", "url:blob");
 
         createCountryHandler.accept(countryToBeCreated);
         

@@ -3,6 +3,7 @@ package com.nomad.data_library.repositories;
 import lombok.extern.log4j.Log4j2;
 
 import org.neo4j.driver.Value;
+import org.neo4j.driver.Values;
 import org.neo4j.driver.types.MapAccessor;
 import org.neo4j.driver.types.TypeSystem;
 import org.springframework.context.annotation.Configuration;
@@ -57,7 +58,7 @@ public class Neo4jCommonCityRepository {
 
             Neo4jCountry targetCityCountry = targetCountriesMap.get(targetCountryNodeElementId);
             Neo4jCity createdTargetCity = cityMapper.apply(typeSystem, targetCity.asNode());
-            Neo4jCity createdTargetCityWithCountry = new Neo4jCity(createdTargetCity.getId(), createdTargetCity.getName(), createdTargetCity.getCityMetrics(), createdTargetCity.getRoutes(), targetCityCountry);
+            Neo4jCity createdTargetCityWithCountry = new Neo4jCity(createdTargetCity.getId(), createdTargetCity.getName(), createdTargetCity.getShortDescription(), createdTargetCity.getPrimaryBlobUrl(), createdTargetCity.getCoordinate(), createdTargetCity.getCityMetrics(), createdTargetCity.getRoutes(), targetCityCountry);
             targetCitiesMap.put(targetCityNodeElementId, createdTargetCityWithCountry);
             return null;
         });
@@ -72,7 +73,7 @@ public class Neo4jCommonCityRepository {
         targetCitiesValue.asList(targetCity -> {
             String targetCityNodeElementId = targetCity.asNode().elementId();
             Neo4jCity createdTargetCity = cityMapper.apply(typeSystem, targetCity.asNode());
-            Neo4jCity createdTargetCityWithCountry = new Neo4jCity(createdTargetCity.getId(), createdTargetCity.getName(), createdTargetCity.getCityMetrics(), createdTargetCity.getRoutes(), country);
+            Neo4jCity createdTargetCityWithCountry = new Neo4jCity(createdTargetCity.getId(), createdTargetCity.getName(), createdTargetCity.getShortDescription(), createdTargetCity.getPrimaryBlobUrl(), createdTargetCity.getCoordinate(), createdTargetCity.getCityMetrics(), createdTargetCity.getRoutes(), country);
             targetCitiesMap.put(targetCityNodeElementId, createdTargetCityWithCountry);
             return null;
         });
@@ -129,7 +130,7 @@ public class Neo4jCommonCityRepository {
                         routes = mapRoutes(typeSystem, record.get("routes"), targetCitiesMap);
                     }
 
-                    return new Neo4jCity(fetchedCity.getId(), fetchedCity.getName(), fetchedCity.getCityMetrics(), routes, fetchedCitiesCountry);
+                    return new Neo4jCity(fetchedCity.getId(), fetchedCity.getName(), fetchedCity.getShortDescription(), fetchedCity.getPrimaryBlobUrl(), fetchedCity.getCoordinate(), fetchedCity.getCityMetrics(), routes, fetchedCitiesCountry);
                 })
                 .first();
         return city;
@@ -155,7 +156,7 @@ public class Neo4jCommonCityRepository {
                         routes = mapRoutes(typeSystem, record.get("routes"), targetCitiesMap);
                     }
 
-                    return new Neo4jCity(fetchedCity.getId(), fetchedCity.getName(), fetchedCity.getCityMetrics(), routes, fetchedCitiesCountry);
+                    return new Neo4jCity(fetchedCity.getId(), fetchedCity.getName(), fetchedCity.getShortDescription(), fetchedCity.getPrimaryBlobUrl(), fetchedCity.getCoordinate(), fetchedCity.getCityMetrics(), routes, fetchedCitiesCountry);
                 })
                 .all();
         return new HashSet<>(allCities);
@@ -182,7 +183,7 @@ public class Neo4jCommonCityRepository {
                         routes = mapRoutes(typeSystem, record.get("routes"), targetCitiesMap);
                     }
 
-                    return new Neo4jCity(fetchedCity.getId(), fetchedCity.getName(), fetchedCity.getCityMetrics(), routes, fetchedCitiesCountry);
+                    return new Neo4jCity(fetchedCity.getId(), fetchedCity.getName(), fetchedCity.getShortDescription(), fetchedCity.getPrimaryBlobUrl(), fetchedCity.getCoordinate(), fetchedCity.getCityMetrics(), routes, fetchedCitiesCountry);
                 })
                 .first();
         return city;
@@ -195,22 +196,27 @@ public class Neo4jCommonCityRepository {
             Neo4jCity neo4jCity = neo4jClient
             .query("""
                 MERGE (c:City {id: $id})
-                ON CREATE SET c.name = $name,      
-                              c.cityMetrics = $cityMetrics
+                ON CREATE SET c.name = $name
+                SET c.cityMetrics = $cityMetrics,
+                    c.shortDescription = $shortDescription,
+                    c.primaryBlobUrl = $primaryBlobUrl,
+                    c.coordinate = point($coordinate)
 
                 WITH c
                 MATCH(country:Country {id: $countryId})
                 MERGE (country)-[fromCountry:HAS_CITY]->(c)
                 ON CREATE SET fromCountry.id = randomUUID()
-                MERGE (c)-[toCountry:OF_COUNTRY]->(country)
-                ON CREATE SET toCountry.id = randomUUID()
-                RETURN c
+                MERGE (c)-[ofCountry:OF_COUNTRY]->(country)
+                ON CREATE SET ofCountry.id = randomUUID()
+                RETURN c, ofCountry, country
             """)
             .bind(city.getCountry().getId()).to("countryId")
             .bindAll(cityAsMap)
             .fetchAs(Neo4jCity.class)
             .mappedBy((typeSystem, record) -> {
-                return cityMapper.apply(typeSystem, record.get("c").asNode());
+                Neo4jCountry country = countryMapper.apply(typeSystem, record.get("country").asNode());
+                Neo4jCity cityWithoutCountry = cityMapper.apply(typeSystem, record.get("c").asNode());
+                return cityWithoutCountry.withCountry(country);
             })
             .first()
             .get();
@@ -228,8 +234,11 @@ public class Neo4jCommonCityRepository {
         neo4jClient.query("""
             MERGE (c:City {id: $id})
             ON CREATE SET c.name = $name
-            SET c.cityMetrics = $cityMetrics
-            
+            SET c.cityMetrics = $cityMetrics,
+                c.shortDescription = $shortDescription,
+                c.primaryBlobUrl = $primaryBlobUrl,
+                c.coordinate = point($coordinate)
+
             WITH c
             MATCH(country:Country {name: $country.name})
             MERGE (country)-[fromCountry:HAS_CITY]->(c)
@@ -243,7 +252,10 @@ public class Neo4jCommonCityRepository {
             MERGE (t:City {id: routeData.targetCity.id})
             ON CREATE SET t.description = routeData.targetCity.description,
                 t.name = routeData.targetCity.name,
-                t.cityMetrics = routeData.targetCity.cityMetrics
+                t.cityMetrics = routeData.targetCity.cityMetrics,
+                t.shortDescription = routeData.targetCity.shortDescription,
+                t.primaryBlobUrl = routeData.targetCity.primaryBlobUrl,
+                t.coordinate = point(routeData.targetCity.coordinate)
             
             WITH c, t, routeData
             MATCH(country:Country {name: routeData.targetCity.country.name})
@@ -275,6 +287,13 @@ public class Neo4jCommonCityRepository {
 
     public Map<String, Object> mapifyCity(Neo4jCity city) {
         Map<String, Object> cityAsMap = objectMapper.convertValue(city, Map.class);
+//        Value neo4jCoord = Values.point(
+//                city.getCoordinate().getSrid(),
+//                city.getCoordinate().getLongitude(),
+//                city.getCoordinate().getLatitude(),
+//                city.getCoordinate().getHeight()
+//        );
+//        cityAsMap.put("coordinateNeo4j", neo4jCoord);
         return cityAsMap;
     }
 

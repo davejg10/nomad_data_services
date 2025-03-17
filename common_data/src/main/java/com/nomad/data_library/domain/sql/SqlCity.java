@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import org.springframework.context.annotation.Profile;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.nomad.data_library.domain.CityMetrics;

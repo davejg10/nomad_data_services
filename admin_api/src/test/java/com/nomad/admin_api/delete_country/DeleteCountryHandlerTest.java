@@ -2,6 +2,7 @@ package com.nomad.admin_api.delete_country;
 
 import com.nomad.admin_api.Neo4jCountryRepository;
 import com.nomad.admin_api.functions.delete_country.DeleteCountryHandler;
+import com.nomad.data_library.Neo4jTestGenerator;
 import com.nomad.data_library.domain.sql.SqlCountry;
 import com.nomad.data_library.repositories.SqlCountryRepository;
 import lombok.extern.log4j.Log4j2;
@@ -39,7 +40,7 @@ public class DeleteCountryHandlerTest {
 
         SqlCountry countryToBeDeleted = SqlCountry.of("CountryA", "A description of countryA");
         countryToBeDeleted = sqlCountryRepository.save(countryToBeDeleted);
-        neo4jCountryRepository.save(countryToBeDeleted);
+        neo4jCountryRepository.save(Neo4jTestGenerator.neo4jCountryFromSql(countryToBeDeleted));
 
         assertThat(sqlCountryRepository.findAll().size()).isEqualTo(1);
         assertThat(neo4jCountryRepository.findAllCountries().size()).isEqualTo(1);

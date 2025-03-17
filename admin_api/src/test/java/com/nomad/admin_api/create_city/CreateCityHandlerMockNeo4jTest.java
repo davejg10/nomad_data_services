@@ -22,6 +22,8 @@ import com.nomad.admin_api.domain.CityDTO;
 import com.nomad.admin_api.functions.create_city.CreateCityHandler;
 import com.nomad.data_library.GenericTestGenerator;
 import com.nomad.data_library.Neo4jTestConfiguration;
+import com.nomad.data_library.Neo4jTestGenerator;
+import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.sql.SqlCity;
 import com.nomad.data_library.domain.sql.SqlCountry;
 import com.nomad.data_library.exceptions.Neo4jGenericException;
@@ -37,7 +39,7 @@ public class CreateCityHandlerMockNeo4jTest {
 
     @Autowired
     private SqlCountryRepository sqlCountryRepository;
-    
+
     @Autowired
     private SqlCityRepository sqlCityRepository;
 
@@ -58,20 +60,20 @@ public class CreateCityHandlerMockNeo4jTest {
         String countryAName = "CountryA";
         SqlCountry countryToBeCreated = SqlCountry.of(countryAName, "A description of countryA");
         sqlCountryRepository.save(countryToBeCreated);
-        
-        Mockito.when(neo4jCityRepository.save(Mockito.any(SqlCity.class))).thenThrow(new Neo4jGenericException("", new Throwable()));
 
-        CityDTO cityDTO = new CityDTO("CityA", "CityA desc", GenericTestGenerator.cityMetrics(), countryAName);
+        Mockito.when(neo4jCityRepository.save(Mockito.any(Neo4jCity.class))).thenThrow(new Neo4jGenericException("", new Throwable()));
+
+        CityDTO cityDTO = new CityDTO("CityA", "Short desc", "CityA desc", "url:blob", Neo4jTestGenerator.generateCoords(), GenericTestGenerator.cityMetrics(), countryAName);
 
         try {
             createCityHandler.accept(cityDTO);
         } catch (Exception e) {
             // we dont care about the exeception
         }
-        
+
         Set<SqlCity> sqlCities = sqlCityRepository.findAll();
 
         assertThat(sqlCities.size()).isEqualTo(0);
-       
+
     }
 }

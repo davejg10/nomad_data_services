@@ -77,7 +77,7 @@ public class Neo4jCommonCityRepositoryTest {
                 .get();
         return cityId.get("id").toString();
     }
-    
+
     @Test
     void findById_shouldReturnEmptyOptionalOfCity_WhenCityDoesntExist() {
         String cityId = "notfound";
@@ -280,6 +280,52 @@ public class Neo4jCommonCityRepositoryTest {
      }
 
      @Test
+     void createCity_createsCityNode_ifNotExist() {
+         Set<Neo4jCity> allCities = cityRepository.findAllCities();
+         Neo4jCity createdCity = cityRepository.createCity(cityA);
+
+         assertThat(allCities).isEmpty();
+         assertThat(createdCity).isEqualTo(cityA);
+     }
+
+    @Test
+    void createCity_overwritesAllPropertiesExceptName_ifExist() {
+
+        Neo4jCity cityAAfterFirstSave = cityRepository.createCity(cityA);
+
+        CityMetrics newCityMetrics = new CityMetrics(
+                new CityMetric(CityCriteria.SAILING, 3.9),
+                new CityMetric(CityCriteria.FOOD, 4.6),
+                new CityMetric(CityCriteria.NIGHTLIFE, 3.3)
+        );
+        cityA = new Neo4jCity(cityA.getId(), "new name", "newdescription", "new blob url", Neo4jTestGenerator.generateCoords(), newCityMetrics, cityA.getRoutes(), cityA.getCountry());
+
+        Neo4jCity cityAAfterSecondSave = cityRepository.createCity(cityA);
+
+        assertThat(cityAAfterSecondSave.getCityMetrics()).isNotEqualTo(cityAAfterFirstSave.getCityMetrics());
+        assertThat(cityAAfterSecondSave.getCoordinate()).isNotEqualTo(cityAAfterFirstSave.getCoordinate());
+        assertThat(cityAAfterSecondSave.getShortDescription()).isNotEqualTo(cityAAfterFirstSave.getShortDescription());
+        assertThat(cityAAfterSecondSave.getPrimaryBlobUrl()).isNotEqualTo(cityAAfterFirstSave.getPrimaryBlobUrl());
+        assertThat(cityAAfterSecondSave.getName()).isEqualTo(cityAAfterFirstSave.getName());
+
+        assertThat(cityAAfterFirstSave.getId()).isEqualTo(cityAAfterSecondSave.getId());
+    }
+
+    @Test
+    void createCity_createsCityBiDirectionalRelationshipToCountry_ifNotExist() {
+
+        Neo4jCity createdCity = cityRepository.createCity(cityA);
+
+        Neo4jCountry dbCountry = countryRepository.findByIdFetchCities(savedCountryA.getId()).get();
+
+        assertThat(createdCity.getCountry().getName()).isEqualTo(dbCountry.getName());
+        assertThat(dbCountry.getCities().stream().findFirst().get())
+                .usingRecursiveComparison()
+                .ignoringFields("routes", "country")
+                .isEqualTo(createdCity);
+    }
+
+     @Test
      void saveCityWithDepth0_createsCityNode_ifNotExist() {
          Set<Neo4jCity> allCities = cityRepository.findAllCities();
          String cityAId = cityRepository.saveCityWithDepth0(cityA).getId();
@@ -314,7 +360,7 @@ public class Neo4jCommonCityRepositoryTest {
                  new CityMetric(CityCriteria.FOOD, 4.6),
                  new CityMetric(CityCriteria.NIGHTLIFE, 3.3)
          );
-         cityA = new Neo4jCity(cityA.getId(), cityA.getName(), newCityMetrics, cityA.getRoutes(), cityA.getCountry());
+         cityA = new Neo4jCity(cityA.getId(), cityA.getName(), cityA.getShortDescription(), cityA.getPrimaryBlobUrl(), cityA.getCoordinate(), newCityMetrics, cityA.getRoutes(), cityA.getCountry());
 
          String cityASecondSaveId = cityRepository.saveCityWithDepth0(cityA).getId();
          Neo4jCity cityAAfterSecondSave = cityRepository.findById(cityASecondSaveId).get();
@@ -360,7 +406,7 @@ public class Neo4jCommonCityRepositoryTest {
                  new CityMetric(CityCriteria.FOOD, 4.3),
                  new CityMetric(CityCriteria.NIGHTLIFE, 3.3)
          );
-         cityB = new Neo4jCity(cityB.getId(), cityB.getName(), newCityMetrics, cityB.getRoutes(), cityB.getCountry());
+         cityB = new Neo4jCity(cityB.getId(), cityB.getName(), "different", "different url", Neo4jTestGenerator.generateCoords(), newCityMetrics, cityB.getRoutes(), cityB.getCountry());
          cityA = cityA.addRoute(Neo4jRoute.of(cityB, 3, 4, 10.0, TransportType.BUS));
 
          cityRepository.saveCityWithDepth0(cityA).getId();
@@ -450,7 +496,7 @@ public class Neo4jCommonCityRepositoryTest {
          String cityCId = fetchId(cityCName);
          Neo4jCity cityCAfterFirstSave = cityRepository.findByIdFetchRoutes(cityCId).get();
 
-         Neo4jCity cityBResetRoutes = new Neo4jCity(cityB.getId(), cityBName, cityB.getCityMetrics(), Set.of(), cityB.getCountry());
+         Neo4jCity cityBResetRoutes = new Neo4jCity(cityB.getId(), cityBName, cityB.getShortDescription(), cityB.getPrimaryBlobUrl(), cityB.getCoordinate(), cityB.getCityMetrics(), Set.of(), cityB.getCountry());
          cityA = cityA.addRoute(UUID.randomUUID().toString(), cityBResetRoutes, 4, 3, 9.0, TransportType.BUS);
          Neo4jCity cityAAfterSecondSave = cityRepository.saveCityWithDepth0(cityA);
 
@@ -479,8 +525,8 @@ public class Neo4jCommonCityRepositoryTest {
                  new CityMetric(CityCriteria.FOOD, 3.3),
                  new CityMetric(CityCriteria.NIGHTLIFE, 2.2)
          );
-         Neo4jCity cityA =  Neo4jCity.of("CityA", cityAMetrics, Set.of(), countryA);
-         Neo4jCity cityB =  Neo4jCity.of("CityB", cityBMetrics, Set.of(), countryA);
+         Neo4jCity cityA =  Neo4jCity.of("CityA", "short desc", "url:blob", Neo4jTestGenerator.generateCoords(), cityAMetrics, Set.of(), countryA);
+         Neo4jCity cityB =  Neo4jCity.of("CityB", "short desc", "url:blob", Neo4jTestGenerator.generateCoords(), cityBMetrics, Set.of(), countryA);
 
          cityA = cityA.addRoute(Neo4jTestGenerator.neo4jRoute(cityB));
          Map<String, Object> mapifiedCity = cityRepository.mapifyCity(cityA);
