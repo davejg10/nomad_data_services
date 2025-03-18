@@ -7,14 +7,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 
-import org.neo4j.driver.types.MapAccessor;
+import org.neo4j.driver.Record;
 import org.neo4j.driver.types.TypeSystem;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.core.Neo4jClient;
-import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
 import com.nomad.data_library.exceptions.Neo4jGenericException;
 
@@ -26,14 +24,14 @@ public class Neo4jCommonCountryRepository {
 
     protected Neo4jClient neo4jClient;
     protected final ObjectMapper objectMapper;
-    protected final BiFunction<TypeSystem, MapAccessor, Neo4jCity> cityMapper;
-    protected final BiFunction<TypeSystem, MapAccessor, Neo4jCountry> countryMapper;
+    protected final BiFunction<TypeSystem, Record, Neo4jCountry> countryWithCitiesMapper;
+    protected final BiFunction<TypeSystem, Record, Neo4jCountry> countryNoCitiesMapper;
 
-    public Neo4jCommonCountryRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jMappingContext schema) {
+    public Neo4jCommonCountryRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jCountryMappers neo4jCountryMappers) {
         this.neo4jClient = neo4jClient;
         this.objectMapper = objectMapper;
-        this.cityMapper = schema.getRequiredMappingFunctionFor(Neo4jCity.class);
-        this.countryMapper = schema.getRequiredMappingFunctionFor(Neo4jCountry.class);
+        this.countryWithCitiesMapper = neo4jCountryMappers.countryWithCitiesMapper();
+        this.countryNoCitiesMapper = neo4jCountryMappers.countryNoCitiesMapper();
     }
 
     public Optional<Neo4jCountry> findById(String countryId) {
@@ -48,26 +46,18 @@ public class Neo4jCommonCountryRepository {
         Optional<Neo4jCountry> country = neo4jClient
                 .query("""
                     MATCH (country:Country {id: $countryId})
-                    OPTIONAL MATCH (country) -[hasCity:HAS_CITY]-> (cities:City)
-                    RETURN country, collect(hasCity) as hasCity, collect(cities) as cities
+                    OPTIONAL MATCH (country) -[:HAS_CITY]-> (cities:City)
+                    RETURN country, collect(cities) as cities
                 """)
                 .bind(countryId).to("countryId")
                 .fetchAs(Neo4jCountry.class)
                 .mappedBy((typeSystem, record) -> {
-                    Neo4jCountry fetchedCountry = countryMapper.apply(typeSystem, record.get("country").asNode());
 
-                    Set<Neo4jCity> cities = new HashSet<>();
-                    if (!record.get("hasCity").asList().isEmpty() && returnAllCities) {
-
-                        record.get("cities").asList(city -> {
-                            Neo4jCity createdTargetCity = cityMapper.apply(typeSystem, city.asNode());
-                            createdTargetCity = new Neo4jCity(createdTargetCity.getId(), createdTargetCity.getName(),createdTargetCity.getShortDescription(), createdTargetCity.getPrimaryBlobUrl(), createdTargetCity.getCoordinate(), createdTargetCity.getCityMetrics(), createdTargetCity.getRoutes(), fetchedCountry);
-                            cities.add(createdTargetCity);
-                            return null;
-                        });
+                    if (returnAllCities) {
+                        return countryWithCitiesMapper.apply(typeSystem, record);
                     }
+                    return countryNoCitiesMapper.apply(typeSystem, record);
 
-                    return new Neo4jCountry(fetchedCountry.getId(), fetchedCountry.getName(), fetchedCountry.getShortDescription(), fetchedCountry.getPrimaryBlobUrl(), cities);
                 })
                 .first();
         return country;
@@ -79,11 +69,7 @@ public class Neo4jCommonCountryRepository {
                     MATCH(country:Country) RETURN country
                 """)
                 .fetchAs(Neo4jCountry.class)
-                .mappedBy((typeSystem, record) -> {
-                    Neo4jCountry fetchedCountry = countryMapper.apply(typeSystem, record.get("country").asNode());
-
-                    return new Neo4jCountry(fetchedCountry.getId(), fetchedCountry.getName(), fetchedCountry.getShortDescription(), fetchedCountry.getPrimaryBlobUrl(), Set.of());
-                })
+                .mappedBy(countryNoCitiesMapper)
                 .all();
         return new HashSet<>(allCountries);
     }
@@ -102,9 +88,7 @@ public class Neo4jCommonCountryRepository {
             """)
             .bindAll(countryAsMap)
             .fetchAs(Neo4jCountry.class)
-            .mappedBy((typeSystem, record) -> {
-                return countryMapper.apply(typeSystem, record.get("country").asNode());
-            })
+            .mappedBy(countryNoCitiesMapper)
             .first()
             .get();
             return neo4jCountry;

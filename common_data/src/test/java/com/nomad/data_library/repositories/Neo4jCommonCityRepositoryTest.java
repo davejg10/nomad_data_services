@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.nomad.data_library.GenericTestGenerator;
 import com.nomad.data_library.config.Neo4jConfig;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
@@ -22,9 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.data_library.Neo4jTestConfiguration;
 import com.nomad.data_library.Neo4jTestGenerator;
 import com.nomad.data_library.TestConfig;
-import com.nomad.data_library.domain.CityCriteria;
-import com.nomad.data_library.domain.CityMetric;
-import com.nomad.data_library.domain.CityMetrics;
 import com.nomad.data_library.domain.TransportType;
 import com.nomad.data_library.exceptions.Neo4jGenericException;
 
@@ -55,27 +53,14 @@ public class Neo4jCommonCityRepositoryTest {
 
     @BeforeEach
     void setup(@Autowired Neo4jClient neo4jClient, @Autowired Neo4jMappingContext schema, @Autowired ObjectMapper objectMapper) throws Neo4jGenericException {
-        cityRepository = new Neo4jCommonCityRepository(neo4jClient, objectMapper, schema);
-        countryRepository = new Neo4jCommonCountryRepository(neo4jClient, objectMapper, schema);
+        Neo4jCityMappers neo4jCityMappers = new Neo4jCityMappers(schema);
+        Neo4jCountryMappers neo4jCountryMappers = new Neo4jCountryMappers(schema);
+
+        cityRepository = new Neo4jCommonCityRepository(neo4jClient, objectMapper, neo4jCityMappers);
+        countryRepository = new Neo4jCommonCountryRepository(neo4jClient, objectMapper, neo4jCountryMappers);
 
         savedCountryA = countryRepository.createCountry(countryA);
         savedCountryB = countryRepository.createCountry(countryB);
-    }
-
-    @Autowired
-    Neo4jClient neo4jClient;
-
-    String fetchId(String cityName) {
-        Map<String, Object> cityId = neo4jClient
-                .query(
-                        "MATCH (city:City {name: $cityName}) " +
-                                "RETURN city.id as id"
-                )
-                .bind(cityName).to("cityName")
-                .fetch()
-                .first()
-                .get();
-        return cityId.get("id").toString();
     }
 
     @Test
@@ -88,7 +73,7 @@ public class Neo4jCommonCityRepositoryTest {
 
     @Test
     void findById_shouldReturnCity_whenCityExists() {
-        Neo4jCity createdCity = cityRepository.saveCityWithDepth0(cityA);
+        Neo4jCity createdCity = cityRepository.createCity(cityA);
 
         Neo4jCity fetchedCity = cityRepository.findById(createdCity.getId()).get();
         assertThat(fetchedCity).isEqualTo(cityA);
@@ -97,8 +82,10 @@ public class Neo4jCommonCityRepositoryTest {
     @Test
     void findById_shouldNotPopulateRoutesRelationship_whenCityHasRoutes() {
         Neo4jCity cityABeforeRoutes = cityA;
+        cityRepository.createCity(cityA);
+        cityRepository.createCity(cityB);
         cityA = cityA.addRoute(routeAToB);
-        Neo4jCity createdCity = cityRepository.saveCityWithDepth0(cityA);
+        Neo4jCity createdCity = cityRepository.saveRoute(cityA);
 
         Neo4jCity fetchedCity = cityRepository.findById(createdCity.getId()).get();
         assertThat(fetchedCity).isEqualTo(cityABeforeRoutes);
@@ -107,7 +94,7 @@ public class Neo4jCommonCityRepositoryTest {
 
     @Test
     void findById_shouldPopulateCountryRelationship_always() {
-        Neo4jCity createdCity = cityRepository.saveCityWithDepth0(cityA);
+        Neo4jCity createdCity = cityRepository.createCity(cityA);
 
         Neo4jCity fetchedCity = cityRepository.findById(createdCity.getId()).get();
 
@@ -128,7 +115,7 @@ public class Neo4jCommonCityRepositoryTest {
 
     @Test
     void findByIdFetchRoutes_shouldReturnCity_whenCityExists() {
-        Neo4jCity createdCity = cityRepository.saveCityWithDepth0(cityA);
+        Neo4jCity createdCity = cityRepository.createCity(cityA);
 
         Neo4jCity fetchedCity = cityRepository.findByIdFetchRoutes(createdCity.getId()).get();
 
@@ -137,9 +124,8 @@ public class Neo4jCommonCityRepositoryTest {
 
     @Test
     void findByIdFetchRoutes_shouldPopulateCountryRelationship_always() {
-        cityA = cityA.addRoute(routeAToB);
-        Neo4jCity createdCityA = cityRepository.saveCityWithDepth0(cityA);
-        Neo4jCity createdCityB = cityRepository.saveCityWithDepth0(cityB);
+        Neo4jCity createdCityA = cityRepository.createCity(cityA);
+        Neo4jCity createdCityB = cityRepository.createCity(cityB);
 
         Neo4jCity fetchedCityA = cityRepository.findByIdFetchRoutes(createdCityA.getId()).get();
 
@@ -157,18 +143,19 @@ public class Neo4jCommonCityRepositoryTest {
 
     @Test
     void findByIdFetchRoutes_shouldPopulateTargetCitiesCountryRelationship_always() {
-        cityA = cityA.addRoute(routeAToB);
         String cityCName = "CityC";
         Neo4jCity cityC = Neo4jTestGenerator.neo4jCityNoRoutes(cityCName, countryB);
-        cityA = cityA.addRoute(Neo4jRoute.of(cityC, 4, 3, 30.0, TransportType.BUS));
+        Neo4jCity createdCityA = cityRepository.createCity(cityA);
+        cityRepository.createCity(cityB);
+        cityRepository.createCity(cityC);
 
-        Neo4jCity createdCityA = cityRepository.saveCityWithDepth0(cityA);
+        cityA = cityA.addRoute(routeAToB).addRoute(Neo4jTestGenerator.neo4jRoute(cityC));
+        cityRepository.saveRoute(cityA);
 
         Neo4jCity fetchedCityA = cityRepository.findByIdFetchRoutes(createdCityA.getId()).get();
 
         Neo4jCity fetchedCityB = fetchedCityA.getRoutes().stream().filter(route -> route.getTargetCity().getName().equals(cityBName)).findFirst().get().getTargetCity();
         Neo4jCity fetchedCityC = fetchedCityA.getRoutes().stream().filter(route -> route.getTargetCity().getName().equals(cityCName)).findFirst().get().getTargetCity();
-
 
         assertThat(fetchedCityB.getCountry())
                 .usingRecursiveComparison()
@@ -183,11 +170,15 @@ public class Neo4jCommonCityRepositoryTest {
     @Test
     void findByIdFetchRoutes_shouldPopulateRoutesRelationshipWithAllTargetCities_whenCityHasRoutes() {
         Neo4jCity cityC = Neo4jTestGenerator.neo4jCityNoRoutes("CityC", countryB);
+        cityRepository.createCity(cityA);
+        cityRepository.createCity(cityB);
+        cityRepository.createCity(cityC);
+
         cityA = cityA.addRoute(routeAToB);
         cityA = cityA.addRoute(Neo4jTestGenerator.neo4jRoute(cityC));
-        Neo4jCity createdCity = cityRepository.saveCityWithDepth0(cityA);
+        Neo4jCity cityWithRoutes = cityRepository.saveRoute(cityA);
 
-        Neo4jCity fetchedCity = cityRepository.findByIdFetchRoutes(createdCity.getId()).get();
+        Neo4jCity fetchedCity = cityRepository.findByIdFetchRoutes(cityWithRoutes.getId()).get();
 
         Set<String> routeTargetNames = fetchedCity.getRoutes().stream().map((route) -> route.getTargetCity().getName()).collect(Collectors.toSet());
         assertThat(fetchedCity).isEqualTo(cityA);
@@ -198,7 +189,8 @@ public class Neo4jCommonCityRepositoryTest {
 
     @Test
     void findByIdFetchRoutes_shouldNotPopulateRoutesRelationship_whenCityDoesntHaveAnyRoutes() {
-        Neo4jCity createdCity = cityRepository.saveCityWithDepth0(cityA);
+        cityRepository.createCity(cityA);
+        Neo4jCity createdCity = cityRepository.saveRoute(cityA);
 
         Neo4jCity fetchedCity = cityRepository.findByIdFetchRoutes(createdCity.getId()).get();
 
@@ -215,9 +207,8 @@ public class Neo4jCommonCityRepositoryTest {
 
      @Test
      void findAllCities_shouldReturnListContainingAllCities_ifCitiesExist() {
-         cityA = cityA.addRoute(routeAToB);
-         cityRepository.saveCityWithDepth0(cityA);
-         cityRepository.saveCityWithDepth0(cityB);
+         cityRepository.createCity(cityA);
+         cityRepository.createCity(cityB);
 
          Set<Neo4jCity> allCities = cityRepository.findAllCities();
          List<String> allCityNames = allCities.stream().map(Neo4jCity::getName).toList();
@@ -229,8 +220,10 @@ public class Neo4jCommonCityRepositoryTest {
      @Test
      void findAllCities_shouldPopulateRoutesRelationship_ifRoutesExist() {
          cityA = cityA.addRoute(routeAToB);
-         cityRepository.saveCityWithDepth0(cityA);
-         cityRepository.saveCityWithDepth0(cityB);
+         cityRepository.createCity(cityA);
+         cityRepository.createCity(cityB);
+
+         cityRepository.saveRoute(cityA);
 
          Set<Neo4jCity> allCities = cityRepository.findAllCities();
 
@@ -244,8 +237,10 @@ public class Neo4jCommonCityRepositoryTest {
      @Test
      void findAllCities_shouldPopulateCountriesRelationship_always() {
          cityA = cityA.addRoute(routeAToB);
-         cityRepository.saveCityWithDepth0(cityA);
-         cityRepository.saveCityWithDepth0(cityB);
+         cityRepository.createCity(cityA);
+         cityRepository.createCity(cityB);
+
+         cityRepository.saveRoute(cityA);
 
          Set<Neo4jCity> allCities = cityRepository.findAllCities();
          assertThat(allCities.size()).isEqualTo(2);
@@ -260,9 +255,12 @@ public class Neo4jCommonCityRepositoryTest {
 
      @Test
      void findAllCities_shouldPopulateTargetCitiesCountriesRelationship_always() {
+         cityRepository.createCity(cityA);
+         cityRepository.createCity(cityB);
+
          cityA = cityA.addRoute(routeAToB);
-         cityRepository.saveCityWithDepth0(cityA);
-         cityRepository.saveCityWithDepth0(cityB);
+         cityRepository.saveRoute(cityA);
+         cityRepository.saveRoute(cityB);
 
          Set<Neo4jCity> allCities = cityRepository.findAllCities();
          assertThat(allCities.size()).isEqualTo(2);
@@ -287,18 +285,25 @@ public class Neo4jCommonCityRepositoryTest {
          assertThat(allCities).isEmpty();
          assertThat(createdCity).isEqualTo(cityA);
      }
+     
+    @Test
+    void createCity_doesntRecreateCityNode_ifExist() {
+        Neo4jCity cityAAfterFirstSave = cityRepository.createCity(cityA);
+
+        Neo4jCity cityAAfterSecondSave = cityRepository.createCity(cityA);
+
+        Set<Neo4jCity> allCities = cityRepository.findAllCities();
+
+        assertThat(cityAAfterFirstSave).isEqualTo(cityAAfterSecondSave);
+        assertThat(allCities).isEqualTo(Set.of(cityAAfterFirstSave));
+    }
 
     @Test
     void createCity_overwritesAllPropertiesExceptName_ifExist() {
 
         Neo4jCity cityAAfterFirstSave = cityRepository.createCity(cityA);
 
-        CityMetrics newCityMetrics = new CityMetrics(
-                new CityMetric(CityCriteria.SAILING, 3.9),
-                new CityMetric(CityCriteria.FOOD, 4.6),
-                new CityMetric(CityCriteria.NIGHTLIFE, 3.3)
-        );
-        cityA = new Neo4jCity(cityA.getId(), "new name", "newdescription", "new blob url", Neo4jTestGenerator.generateCoords(), newCityMetrics, cityA.getRoutes(), cityA.getCountry());
+        cityA = new Neo4jCity(cityA.getId(), "new name", "newdescription", "new blob url", Neo4jTestGenerator.generateCoords(), GenericTestGenerator.cityMetrics(), cityA.getRoutes(), cityA.getCountry());
 
         Neo4jCity cityAAfterSecondSave = cityRepository.createCity(cityA);
 
@@ -321,129 +326,33 @@ public class Neo4jCommonCityRepositoryTest {
         assertThat(createdCity.getCountry().getName()).isEqualTo(dbCountry.getName());
         assertThat(dbCountry.getCities().stream().findFirst().get())
                 .usingRecursiveComparison()
-                .ignoringFields("routes", "country")
+                .ignoringFields("routes", "cityMetrics", "country")
                 .isEqualTo(createdCity);
     }
 
      @Test
-     void saveCityWithDepth0_createsCityNode_ifNotExist() {
-         Set<Neo4jCity> allCities = cityRepository.findAllCities();
-         String cityAId = cityRepository.saveCityWithDepth0(cityA).getId();
+     void saveRoute_doesntOverwriteTargetCityNodeProperties_ifExist() {
+         cityRepository.createCity(cityA);
+         Neo4jCity cityBAfterFirstSave = cityRepository.createCity(cityB);
 
-         Neo4jCity createdCity = cityRepository.findByIdFetchRoutes(cityAId).get();
 
-         assertThat(allCities).isEmpty();
-         assertThat(createdCity).isEqualTo(cityA);
-     }
+         cityB = new Neo4jCity(cityB.getId(), cityB.getName(), "different", "different url", Neo4jTestGenerator.generateCoords(), GenericTestGenerator.cityMetrics(), cityB.getRoutes(), cityB.getCountry());
+         cityA = cityA.addRoute(Neo4jTestGenerator.neo4jRoute(cityB));
 
-     @Test
-     void saveCityWithDepth0_doesntRecreateCityNode_ifExist() {
-         String firstSaveId = cityRepository.saveCityWithDepth0(cityA).getId();
-         Neo4jCity cityAAfterFirstSave = cityRepository.findByIdFetchRoutes(firstSaveId).get();
-
-         String secondSaveId = cityRepository.saveCityWithDepth0(cityA).getId();
-
-         Set<Neo4jCity> allCities = cityRepository.findAllCities();
-
-         assertThat(firstSaveId).isEqualTo(secondSaveId);
-         assertThat(allCities).isEqualTo(Set.of(cityAAfterFirstSave));
-     }
-
-     @Test
-     void saveCityWithDepth0_overwritesCityNodeMetrics_ifExist() {
-
-         String firstSaveId = cityRepository.saveCityWithDepth0(cityA).getId();
-         Neo4jCity cityAAfterFirstSave = cityRepository.findByIdFetchRoutes(firstSaveId).get();
-
-         CityMetrics newCityMetrics = new CityMetrics(
-                 new CityMetric(CityCriteria.SAILING, 3.9),
-                 new CityMetric(CityCriteria.FOOD, 4.6),
-                 new CityMetric(CityCriteria.NIGHTLIFE, 3.3)
-         );
-         cityA = new Neo4jCity(cityA.getId(), cityA.getName(), cityA.getShortDescription(), cityA.getPrimaryBlobUrl(), cityA.getCoordinate(), newCityMetrics, cityA.getRoutes(), cityA.getCountry());
-
-         String cityASecondSaveId = cityRepository.saveCityWithDepth0(cityA).getId();
-         Neo4jCity cityAAfterSecondSave = cityRepository.findById(cityASecondSaveId).get();
-
-         assertThat(cityAAfterSecondSave.getCityMetrics()).isNotEqualTo(cityAAfterFirstSave.getCityMetrics());
-         assertThat(firstSaveId).isEqualTo(cityASecondSaveId);
-     }
-
-     @Test
-     void saveCityWithDepth0_createsCityBiDirectionalRelationshipToCountry_ifNotExist() {
-
-         String cityAId = cityRepository.saveCityWithDepth0(cityA).getId();
-         Neo4jCity createdCity = cityRepository.findByIdFetchRoutes(cityAId).get();
-
-         Neo4jCountry dbCountry = countryRepository.findByIdFetchCities(savedCountryA.getId()).get();
-
-         assertThat(createdCity.getCountry().getName()).isEqualTo(dbCountry.getName());
-         assertThat(dbCountry.getCities().stream().findFirst().get())
-                 .usingRecursiveComparison()
-                 .ignoringFields("routes", "country")
-                 .isEqualTo(createdCity);
-     }
-
-     @Test
-     void saveCityWithDepth0_createsTargetCityNodeAndSetsProperties_ifNotExist() {
-         cityA = cityA.addRoute(routeAToB);
-         cityRepository.saveCityWithDepth0(cityA);
-
-         String cityBId = fetchId(cityBName);
-
-         Neo4jCity createdCityB = cityRepository.findByIdFetchRoutes(cityBId).get();
-
-         assertThat(createdCityB).isNotNull();
-         assertThat(createdCityB).isEqualTo(cityB);
-     }
-
-     @Test
-     void saveCityWithDepth0_doesntOverwriteTargetCityNodeProperties_ifExist() {
-         Neo4jCity cityBAfterFirstSave = cityRepository.saveCityWithDepth0(cityB);
-
-         CityMetrics newCityMetrics = new CityMetrics(
-                 new CityMetric(CityCriteria.SAILING, 3.4),
-                 new CityMetric(CityCriteria.FOOD, 4.3),
-                 new CityMetric(CityCriteria.NIGHTLIFE, 3.3)
-         );
-         cityB = new Neo4jCity(cityB.getId(), cityB.getName(), "different", "different url", Neo4jTestGenerator.generateCoords(), newCityMetrics, cityB.getRoutes(), cityB.getCountry());
-         cityA = cityA.addRoute(Neo4jRoute.of(cityB, 3, 4, 10.0, TransportType.BUS));
-
-         cityRepository.saveCityWithDepth0(cityA).getId();
-
-         String cityBId = fetchId(cityBName);
-         Neo4jCity cityBAfterSecondSave = cityRepository.findByIdFetchRoutes(cityBId).get();
+         cityRepository.saveRoute(cityA);
+         Neo4jCity cityBAfterSecondSave = cityRepository.findByName(cityBName).get();
 
          assertThat(cityBAfterFirstSave.getCityMetrics()).isEqualTo(cityBAfterSecondSave.getCityMetrics());
          assertThat(cityBAfterFirstSave.getId()).isEqualTo(cityBAfterSecondSave.getId());
      }
 
      @Test
-     void saveCityWithDepth0_createsTargetCityBiDirectionalRelationshipToCountry_ifNotExist() {
-         cityA = cityA.addRoute(routeAToB);
-         cityRepository.saveCityWithDepth0(cityA).getId();
-
-         String cityBId = fetchId(cityBName);
-         Neo4jCity createdCityB = cityRepository.findByIdFetchRoutes(cityBId).get();
-         Neo4jCountry dbCountry = countryRepository.findByIdFetchCities(savedCountryA.getId()).get();
-
-         assertThat(createdCityB.getCountry().getName()).isEqualTo(dbCountry.getName());
-
-         Set<Neo4jCity> dbCountryCityB = dbCountry.getCities().stream().filter(city -> Objects.equals(city.getName(), cityBName)).collect(Collectors.toSet());
-         assertThat(dbCountryCityB)
-                 .usingRecursiveComparison()
-                 .ignoringFields("routes", "country")
-                         .isEqualTo(Set.of(createdCityB));
-         assertThat(createdCityB).isEqualTo(cityB);
-     }
-
-     @Test
-     void saveCityWithDepth0_doesntRecreateTargetCityNode_ifExist() {
-
-         Neo4jCity cityBAfterFirstSave = cityRepository.saveCityWithDepth0(cityB);
+     void saveRoute_doesntRecreateTargetCityNode_ifExist() {
+         cityRepository.createCity(cityA);
+         Neo4jCity cityBAfterFirstSave = cityRepository.createCity(cityB);
 
          cityA = cityA.addRoute(routeAToB);
-         Neo4jCity cityASave = cityRepository.saveCityWithDepth0(cityA);
+         Neo4jCity cityASave = cityRepository.saveRoute(cityA);
 
          Neo4jCity cityBAfterSecondSave = cityRepository.findByIdFetchRoutes(cityBAfterFirstSave.getId()).get();
 
@@ -457,24 +366,25 @@ public class Neo4jCommonCityRepositoryTest {
      }
 
      @Test
-     void saveCityWithDepth0_createRouteRelationshipToTargetCityNode_ifNotExist() {
+     void saveRoute_createRouteRelationshipToTargetCityNode_ifNotExist() {
+         cityRepository.createCity(cityA);
+         cityRepository.createCity(cityB);
+
          cityA = cityA.addRoute(routeAToB);
-         Neo4jCity createdCityA = cityRepository.saveCityWithDepth0(cityA);
+         Neo4jCity createdCityA = cityRepository.saveRoute(cityA);
 
          Neo4jRoute createdRouteAToB = createdCityA.getRoutes().stream().findFirst().get();
          assertThat(createdCityA.getRoutes().size()).isEqualTo(1);
-         assertThat(createdRouteAToB)
-                 .usingRecursiveComparison()
-                 .ignoringFields("targetCity.country")
-                 .isEqualTo(routeAToB);
-
+         assertThat(createdRouteAToB).isEqualTo(routeAToB);
      }
 
      @Test
-     void saveCityWithDepth0_createsARouteRelationshipToTargetCityForEachTransportType_ifThereAreTwoTransportTypeRoutes() {
+     void saveRoute_createsARouteRelationshipToTargetCityForEachTransportType_ifThereAreTwoTransportTypeRoutes() {
+         cityRepository.createCity(cityA);
+         cityRepository.createCity(cityB);
          cityA = cityA.addRoute(UUID.randomUUID().toString(), cityB, 4, 3, 16.0, TransportType.BUS);
          cityA = cityA.addRoute(UUID.randomUUID().toString(), cityB, 4, 3, 30.0, TransportType.FLIGHT);
-         Neo4jCity createdCityA = cityRepository.saveCityWithDepth0(cityA);
+         Neo4jCity createdCityA = cityRepository.saveRoute(cityA);
 
          List<String> allTargetCities = createdCityA.getRoutes().stream().map(route -> route.getTargetCity().getName()).distinct().toList();
          List<TransportType> allTransportTypes = createdCityA.getRoutes().stream().map(route -> route.getTransportType()).distinct().toList();
@@ -487,21 +397,23 @@ public class Neo4jCommonCityRepositoryTest {
      }
 
      @Test
-     void saveCityWithDepth0_doesntTouchTargetCityRouteRelationships_ever() {
+     void saveRoute_doesntTouchTargetCityRouteRelationships_ever() {
          String cityCName = "CityC";
          Neo4jCity cityC = Neo4jTestGenerator.neo4jCityNoRoutes(cityCName, countryA);
+         cityRepository.createCity(cityA);
+         cityRepository.createCity(cityB);
+         cityRepository.createCity(cityC);
+
          cityB = cityB.addRoute(UUID.randomUUID().toString(), cityC, 4, 3, 5.0, TransportType.BUS);
 
-         Neo4jCity cityBAfterFirstSave = cityRepository.saveCityWithDepth0(cityB);
-         String cityCId = fetchId(cityCName);
-         Neo4jCity cityCAfterFirstSave = cityRepository.findByIdFetchRoutes(cityCId).get();
+         Neo4jCity cityBAfterFirstSave = cityRepository.saveRoute(cityB);
+         Neo4jCity cityCAfterFirstSave = cityRepository.findByIdFetchRoutes(cityC.getId()).get();
 
          Neo4jCity cityBResetRoutes = new Neo4jCity(cityB.getId(), cityBName, cityB.getShortDescription(), cityB.getPrimaryBlobUrl(), cityB.getCoordinate(), cityB.getCityMetrics(), Set.of(), cityB.getCountry());
          cityA = cityA.addRoute(UUID.randomUUID().toString(), cityBResetRoutes, 4, 3, 9.0, TransportType.BUS);
-         Neo4jCity cityAAfterSecondSave = cityRepository.saveCityWithDepth0(cityA);
+         Neo4jCity cityAAfterSecondSave = cityRepository.saveRoute(cityA);
 
-         String cityBId = fetchId(cityBName);
-         Neo4jCity cityBAfterSecondSave = cityRepository.findByIdFetchRoutes(cityBId).get();
+         Neo4jCity cityBAfterSecondSave = cityRepository.findByIdFetchRoutes(cityB.getId()).get();
 
          Set<Neo4jCity> allCities = cityRepository.findAllCities();
 
@@ -511,34 +423,5 @@ public class Neo4jCommonCityRepositoryTest {
 
          assertThat(cityBAfterSecondSave.getRoutes()).isEqualTo(cityBAfterFirstSave.getRoutes());
          assertThat(cityBResetRoutes.getRoutes()).isNotEqualTo(cityB.getRoutes());
-     }
-
-     @Test
-     void mapifyCity_shouldRecursivelyStringifyCityMetricsFields() {
-         CityMetrics cityAMetrics = new CityMetrics(
-                 new CityMetric(CityCriteria.SAILING, 8.4),
-                 new CityMetric(CityCriteria.FOOD, 5.4),
-                 new CityMetric(CityCriteria.NIGHTLIFE, 4.3)
-         );
-         CityMetrics cityBMetrics = new CityMetrics(
-                 new CityMetric(CityCriteria.SAILING, 4.3),
-                 new CityMetric(CityCriteria.FOOD, 3.3),
-                 new CityMetric(CityCriteria.NIGHTLIFE, 2.2)
-         );
-         Neo4jCity cityA =  Neo4jCity.of("CityA", "short desc", "url:blob", Neo4jTestGenerator.generateCoords(), cityAMetrics, Set.of(), countryA);
-         Neo4jCity cityB =  Neo4jCity.of("CityB", "short desc", "url:blob", Neo4jTestGenerator.generateCoords(), cityBMetrics, Set.of(), countryA);
-
-         cityA = cityA.addRoute(Neo4jTestGenerator.neo4jRoute(cityB));
-         Map<String, Object> mapifiedCity = cityRepository.mapifyCity(cityA);
-
-         Object cityACityMetrics = mapifiedCity.get("cityMetrics");
-
-         ArrayList<LinkedHashMap<String, Object>> cityARoutes = (ArrayList<LinkedHashMap<String, Object>>) mapifiedCity.get("routes");
-         LinkedHashMap<String, Object> routeToB = cityARoutes.get(0);
-         LinkedHashMap<String, Object> cityBFetched = (LinkedHashMap<String, Object>) routeToB.get("targetCity");
-         Object cityBCityMetrics = cityBFetched.get("cityMetrics");
-
-         assertThat(cityACityMetrics).isEqualTo("{\"sailing\":{\"criteria\":\"SAILING\",\"metric\":8.4},\"food\":{\"criteria\":\"FOOD\",\"metric\":5.4},\"nightlife\":{\"criteria\":\"NIGHTLIFE\",\"metric\":4.3}}");
-         assertThat(cityBCityMetrics).isEqualTo("{\"sailing\":{\"criteria\":\"SAILING\",\"metric\":4.3},\"food\":{\"criteria\":\"FOOD\",\"metric\":3.3},\"nightlife\":{\"criteria\":\"NIGHTLIFE\",\"metric\":2.2}}");
      }
 }

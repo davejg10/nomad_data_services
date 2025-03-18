@@ -5,9 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.data_library.Neo4jTestGenerator;
 import com.nomad.data_library.config.Neo4jConfig;
-import com.nomad.data_library.domain.CityCriteria;
-import com.nomad.data_library.domain.CityMetric;
-import com.nomad.data_library.domain.CityMetrics;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
 import com.nomad.data_library.domain.neo4j.Neo4jRoute;
@@ -51,9 +48,12 @@ public class Neo4jCommonCountryRepositoryTest {
     Neo4jRoute routeAToB = Neo4jTestGenerator.neo4jRoute(cityB);
 
     @BeforeEach
-    void setup(@Autowired Neo4jClient client, @Autowired Neo4jMappingContext schema, @Autowired ObjectMapper objectMapper) {
-        cityRepository = new Neo4jCommonCityRepository(client, objectMapper, schema);
-        countryRepository = new Neo4jCommonCountryRepository(client, objectMapper, schema);
+    void setup(@Autowired Neo4jClient neo4jClient, @Autowired Neo4jMappingContext schema, @Autowired ObjectMapper objectMapper) {
+        Neo4jCityMappers neo4jCityMappers = new Neo4jCityMappers(schema);
+        Neo4jCountryMappers neo4jCountryMappers = new Neo4jCountryMappers(schema);
+
+        cityRepository = new Neo4jCommonCityRepository(neo4jClient, objectMapper, neo4jCityMappers);
+        countryRepository = new Neo4jCommonCountryRepository(neo4jClient, objectMapper, neo4jCountryMappers);
     }
 
     @Test
@@ -79,8 +79,8 @@ public class Neo4jCommonCountryRepositoryTest {
     @Test
     void findAllCountries_shouldNotPopulateCitiesRelationship_ifCountryHasCities() throws Neo4jGenericException {
         countryRepository.createCountry(countryA);
-        cityA = cityA.addRoute(routeAToB);
-        cityRepository.saveCityWithDepth0(cityA);
+        cityRepository.createCity(cityA);
+        cityRepository.createCity(cityB);
 
         Set<Neo4jCountry> allCountries = countryRepository.findAllCountries();
 
@@ -107,14 +107,14 @@ public class Neo4jCommonCountryRepositoryTest {
     @Test
     void findByIdFetchCities_shouldPopulateCitiesRelationship_ifCountryHasCities() throws Neo4jGenericException {
         Neo4jCountry createdCountry = countryRepository.createCountry(countryA);
-        cityRepository.saveCityWithDepth0(cityA);
+        cityRepository.createCity(cityA);
 
         createdCountry = countryRepository.findByIdFetchCities(createdCountry.getId()).get();
 
         assertThat(createdCountry.getCities()).isNotEmpty();
         assertThat(createdCountry.getCities().stream().findFirst().get())
                 .usingRecursiveComparison()
-                .ignoringFields("routes")
+                .ignoringFields("routes", "cityMetrics")
                 .isEqualTo(cityA);
     }
 
@@ -169,7 +169,9 @@ public class Neo4jCommonCountryRepositoryTest {
         countryRepository.createCountry(countryA);
 
         cityA = cityA.addRoute(routeAToB);
-        cityRepository.saveCityWithDepth0(cityA);
+        cityRepository.createCity(cityA);
+        cityRepository.createCity(cityB);
+        cityRepository.saveRoute(cityA);
 
         Set<Neo4jCity> allCitiesFirstSearch = cityRepository.findAllCities();
 

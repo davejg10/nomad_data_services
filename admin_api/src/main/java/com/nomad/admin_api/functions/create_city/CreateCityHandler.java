@@ -51,10 +51,10 @@ public class CreateCityHandler implements Consumer<CityDTO> {
             log.info("Created city in Neo4j with id {}, and name: {}", neo4jCity.getId(), cityName);
 
         } catch (Neo4jGenericException e) {
-            log.error("Failed to create city: {} in Neo4j. Transaction will be rolled back. Error: ", cityName, e.getMessage());
+            log.error("Failed to create city: {} in Neo4j. Transaction will be rolled back. Error: {}", cityName, e.getMessage());
             throw new DatabaseSyncException("Failed to create city: " + cityName + " in Neo4j.", e);
         } catch (Exception e) {
-            log.error("Unexpected error while creating city: {}, Transaction will be rolled back. Error: ", cityName, e.getMessage());
+            log.error("Unexpected error while creating city: {}, Transaction will be rolled back. Error: {}", cityName, e.getMessage());
             throw new DatabaseSyncException("Unexpected error while creating city: " + cityName, e);
         }
     }

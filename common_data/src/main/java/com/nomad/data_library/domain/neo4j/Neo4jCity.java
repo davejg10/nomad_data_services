@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.data.neo4j.core.convert.ConvertWith;
+import com.nomad.data_library.domain.CityMetric;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
@@ -14,7 +14,6 @@ import org.springframework.data.neo4j.types.GeographicPoint3d;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.nomad.data_library.domain.CityMetrics;
 import com.nomad.data_library.domain.TransportType;
 
 import lombok.Getter;
@@ -34,9 +33,8 @@ public class Neo4jCity {
     @JsonSerialize(using = CoordinateSerializer.class) // Converts GeographicPoint3d into a map that Neo4js `point()` Cypher function can use
     @Getter private final GeographicPoint3d coordinate;
 
-    @JsonSerialize(using = CityMetricsSerializer.class) // Conversion TO map (called by mapifyCity())
-    @ConvertWith(converterRef = "cityMetricsDeserializer") // Conversion TO CityMetrics (when being read) (requires a bean in context with name cityMetricsDeserializer)
-    @Getter private final CityMetrics cityMetrics;
+    @Relationship(type = "HAS_METRIC", direction = Relationship.Direction.OUTGOING)
+    @Getter private final Set<CityMetric> cityMetrics;
 
     @Relationship(type = "ROUTE", direction = Relationship.Direction.OUTGOING)
     private final Set<Neo4jRoute> routes;
@@ -45,7 +43,7 @@ public class Neo4jCity {
     @Getter private final Neo4jCountry country;
 
     @JsonCreator // This is used by Spring Data for object mapping
-    public Neo4jCity(String id, String name, String shortDescription, String primaryBlobUrl, GeographicPoint3d coordinate, CityMetrics cityMetrics, Set<Neo4jRoute> routes, Neo4jCountry country) {
+    public Neo4jCity(String id, String name, String shortDescription, String primaryBlobUrl, GeographicPoint3d coordinate, Set<CityMetric> cityMetrics, Set<Neo4jRoute> routes, Neo4jCountry country) {
         this.id = id;
         this.name = name;
         this.shortDescription = shortDescription;
@@ -56,7 +54,7 @@ public class Neo4jCity {
         this.country = country;
     }
 
-    public static Neo4jCity of(String name, String shortDescription, String primaryBlobUrl, GeographicPoint3d coordinate, CityMetrics cityMetrics, Set<Neo4jRoute> routes, Neo4jCountry country) {
+    public static Neo4jCity of(String name, String shortDescription, String primaryBlobUrl, GeographicPoint3d coordinate, Set<CityMetric> cityMetrics, Set<Neo4jRoute> routes, Neo4jCountry country) {
         return new Neo4jCity(null, name, shortDescription, primaryBlobUrl, coordinate, cityMetrics, Set.copyOf(routes), country);
     }
 
@@ -67,6 +65,10 @@ public class Neo4jCity {
     // This is used by Neo4j for object mapping
     public Neo4jCity withId(String id) {
         return new Neo4jCity(id, this.name, this.shortDescription, this.primaryBlobUrl, this.coordinate, this.cityMetrics, this.routes, this.country);
+    }
+
+    public Neo4jCity withCityMetrics(Set<CityMetric> cityMetrics) {
+        return new Neo4jCity(this.id, this.name, this.shortDescription, this.primaryBlobUrl, this.coordinate, new HashSet<>(cityMetrics), this.routes, this.country);
     }
 
     // Ensure mutable field 'routes' remains immutable
@@ -104,7 +106,7 @@ public class Neo4jCity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Neo4jCity city = (Neo4jCity) o;
-        return Objects.equals(id, city.id) && Objects.equals(name, city.name) && Objects.equals(shortDescription, city.shortDescription) && Objects.equals(coordinate, city.coordinate) && Objects.equals(cityMetrics, city.cityMetrics) && city.getRoutes().containsAll(routes) && routes.containsAll(city.getRoutes()) && Objects.equals(country, city.country);
+        return Objects.equals(id, city.id) && Objects.equals(name, city.name) && Objects.equals(shortDescription, city.shortDescription) && Objects.equals(coordinate, city.coordinate) && cityMetrics.containsAll(city.cityMetrics) && city.cityMetrics.containsAll(cityMetrics) && city.getRoutes().containsAll(routes) && routes.containsAll(city.getRoutes()) && Objects.equals(country, city.country);
     }
 
     @Override

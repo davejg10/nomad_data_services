@@ -70,7 +70,7 @@ public class CreateCityHandlerTest {
 
     @Test
     void deserialize() throws Exception {
-        CityMetrics newCityMetrics = new CityMetrics(
+        Set<CityMetric> newCityMetrics = Set.of(
                 new CityMetric(CityCriteria.SAILING, 4.0),
                 new CityMetric(CityCriteria.FOOD, 8.0),
                 new CityMetric(CityCriteria.NIGHTLIFE, 4.0));

@@ -8,19 +8,19 @@
         "longitude": 100.5018,
         "height": 0.0
     },
-    "cityMetrics": {
-        "sailing": {
+    "cityMetrics": [
+        {
             "criteria": "SAILING",
             "metric": 4.0
         },
-        "food": {
+        {
             "criteria": "FOOD",
             "metric": 8.0
         },
-        "nightlife": {
+        {
             "criteria": "NIGHTLIFE",
             "metric": 4.0
         }
-    },
+    ],
     "countryName": "CountryA"
 }
