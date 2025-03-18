@@ -51,7 +51,7 @@ jobs:
           mvn clean install -pl ${{ env.REPOSITORY_NAME }} -am
 
       - name: ACR login
-        run: az acr login --name ${{ env.ACR_NAME }}
+        run: az acr login --name ${{ env.ACR_SERVER_NAME }}
 
       - name: Docker build
         run: |
