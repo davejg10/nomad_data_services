@@ -63,8 +63,8 @@ jobs:
 
       - name: Docker push
         run: |
-          docker push ${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}
-          docker push ${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:latest
+          docker push ${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}
+          docker push ${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:latest
 
 #      - name: ACR build & push image
 #        run: |
