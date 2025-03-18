@@ -2,27 +2,18 @@ package com.nomad.admin_api.delete_city;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Set;
-
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.neo4j.core.Neo4jClient;
-import org.springframework.test.annotation.Commit;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.nomad.admin_api.Neo4jCityRepository;
-import com.nomad.admin_api.Neo4jCountryRepository;
-import com.nomad.admin_api.domain.CityDTO;
 import com.nomad.admin_api.domain.CityToDeleteDTO;
-import com.nomad.admin_api.domain.CountryDTO;
 import com.nomad.admin_api.functions.delete_city.DeleteCityHandler;
+import com.nomad.admin_api.repositories.Neo4jCityRepository;
+import com.nomad.admin_api.repositories.Neo4jCountryRepository;
 import com.nomad.data_library.GenericTestGenerator;
-import com.nomad.data_library.Neo4jTestConfiguration;
 import com.nomad.data_library.Neo4jTestGenerator;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;

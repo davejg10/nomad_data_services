@@ -53,8 +53,8 @@ public class Neo4jCommonCityRepositoryTest {
 
     @BeforeEach
     void setup(@Autowired Neo4jClient neo4jClient, @Autowired Neo4jMappingContext schema, @Autowired ObjectMapper objectMapper) throws Neo4jGenericException {
-        Neo4jCityMappers neo4jCityMappers = new Neo4jCityMappers(schema);
-        Neo4jCountryMappers neo4jCountryMappers = new Neo4jCountryMappers(schema);
+        Neo4jCommonCityMappers neo4jCityMappers = new Neo4jCommonCityMappers(schema);
+        Neo4jCommonCountryMappers neo4jCountryMappers = new Neo4jCommonCountryMappers(schema);
 
         cityRepository = new Neo4jCommonCityRepository(neo4jClient, objectMapper, neo4jCityMappers);
         countryRepository = new Neo4jCommonCountryRepository(neo4jClient, objectMapper, neo4jCountryMappers);

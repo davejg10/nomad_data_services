@@ -1,6 +1,5 @@
-package com.nomad.admin_api;
+package com.nomad.admin_api.repositories;
 
-import com.nomad.data_library.repositories.Neo4jCityMappers;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Repository;
 

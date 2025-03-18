@@ -27,11 +27,11 @@ public class Neo4jCommonCountryRepository {
     protected final BiFunction<TypeSystem, Record, Neo4jCountry> countryWithCitiesMapper;
     protected final BiFunction<TypeSystem, Record, Neo4jCountry> countryNoCitiesMapper;
 
-    public Neo4jCommonCountryRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jCountryMappers neo4jCountryMappers) {
+    public Neo4jCommonCountryRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jCommonCountryMappers neo4jCommonCountryMappers) {
         this.neo4jClient = neo4jClient;
         this.objectMapper = objectMapper;
-        this.countryWithCitiesMapper = neo4jCountryMappers.countryWithCitiesMapper();
-        this.countryNoCitiesMapper = neo4jCountryMappers.countryNoCitiesMapper();
+        this.countryWithCitiesMapper = neo4jCommonCountryMappers.countryWithCitiesMapper();
+        this.countryNoCitiesMapper = neo4jCommonCountryMappers.countryNoCitiesMapper();
     }
 
     public Optional<Neo4jCountry> findById(String countryId) {

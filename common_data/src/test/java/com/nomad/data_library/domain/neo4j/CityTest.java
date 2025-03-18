@@ -1,7 +1,6 @@
 package com.nomad.data_library.domain.neo4j;
 
 import com.nomad.data_library.Neo4jTestGenerator;
-import com.nomad.data_library.domain.CityMetrics;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

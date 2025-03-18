@@ -1,7 +1,7 @@
 package com.nomad.admin_api.delete_country;
 
-import com.nomad.admin_api.Neo4jCountryRepository;
 import com.nomad.admin_api.functions.delete_country.DeleteCountryHandler;
+import com.nomad.admin_api.repositories.Neo4jCountryRepository;
 import com.nomad.data_library.Neo4jTestGenerator;
 import com.nomad.data_library.domain.sql.SqlCountry;
 import com.nomad.data_library.repositories.SqlCountryRepository;

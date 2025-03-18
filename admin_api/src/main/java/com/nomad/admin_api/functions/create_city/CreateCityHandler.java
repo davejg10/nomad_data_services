@@ -6,9 +6,9 @@ import java.util.function.Consumer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.nomad.admin_api.Neo4jCityRepository;
 import com.nomad.admin_api.domain.CityDTO;
 import com.nomad.admin_api.exceptions.DatabaseSyncException;
+import com.nomad.admin_api.repositories.Neo4jCityRepository;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
 import com.nomad.data_library.domain.sql.SqlCity;
