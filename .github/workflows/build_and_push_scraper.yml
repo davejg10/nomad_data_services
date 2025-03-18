@@ -56,15 +56,15 @@ jobs:
       - name: Docker build
         run: |
           docker build \
-            -t "${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" \
+            -t "${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" \
             --build-arg MODULE_TO_BUILD=${{ env.REPOSITORY_NAME }} .
           
-          docker tag "${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" "${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:latest"
+          docker tag "${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" "${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:latest"
 
       - name: Docker push
         run: |
-          docker push ${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}
-          docker push ${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:latest
+          docker push ${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}
+          docker push ${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:latest
 
 #      - name: ACR build & push image
 #        run: |
