@@ -1,6 +1,5 @@
 package com.nomad.job_orchestrator.functions.api_job_producer;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -14,7 +13,6 @@ import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpMethod;
 import com.microsoft.azure.functions.HttpRequestMessage;

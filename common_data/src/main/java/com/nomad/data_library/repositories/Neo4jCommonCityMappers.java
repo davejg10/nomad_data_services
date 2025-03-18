@@ -18,12 +18,12 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 
-public class Neo4jCityMappers {
+public class Neo4jCommonCityMappers {
 
     @Getter public final BiFunction<TypeSystem, MapAccessor, Neo4jCity> cityMapper;
     @Getter public final BiFunction<TypeSystem, MapAccessor, Neo4jCountry> countryMapper;
 
-    public Neo4jCityMappers(Neo4jMappingContext schema) {
+    public Neo4jCommonCityMappers(Neo4jMappingContext schema) {
         this.cityMapper = schema.getRequiredMappingFunctionFor(Neo4jCity.class);
         this.countryMapper = schema.getRequiredMappingFunctionFor(Neo4jCountry.class);
     }

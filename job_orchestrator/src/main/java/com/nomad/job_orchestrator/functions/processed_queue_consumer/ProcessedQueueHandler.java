@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nomad.job_orchestrator.Neo4jCityRepository;
+import com.nomad.job_orchestrator.repositories.Neo4jCityRepository;
 import com.nomad.scraping_library.domain.ScraperResponse;
 
 import lombok.extern.log4j.Log4j2;

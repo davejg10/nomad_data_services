@@ -1,10 +1,8 @@
-package com.nomad.job_orchestrator;
+package com.nomad.job_orchestrator.repositories;
 
-import com.nomad.data_library.repositories.Neo4jCityMappers;
 import com.nomad.job_orchestrator.domain.CityPair;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
-import com.nomad.data_library.exceptions.Neo4jGenericException;
 import com.nomad.data_library.repositories.Neo4jCommonCityRepository;
 
 import com.nomad.scraping_library.domain.CityDTO;
@@ -14,7 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.neo4j.core.Neo4jClient;
-import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;

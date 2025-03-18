@@ -23,11 +23,11 @@ public class Neo4jCommonCityRepository {
     protected final BiFunction<TypeSystem, Record, Neo4jCity> cityWithAllRelationshipsMapper;
     protected final BiFunction<TypeSystem, Record, Neo4jCity> cityWithNoRoutesMapper;
 
-    public Neo4jCommonCityRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jCityMappers neo4jMappers) {
+    public Neo4jCommonCityRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jCommonCityMappers neo4jCommonCityMappers) {
         this.neo4jClient = neo4jClient;
         this.objectMapper = objectMapper;
-        this.cityWithAllRelationshipsMapper = neo4jMappers.cityWithAllRelationshipsMapper();
-        this.cityWithNoRoutesMapper = neo4jMappers.cityWithNoRoutesMapper();
+        this.cityWithAllRelationshipsMapper = neo4jCommonCityMappers.cityWithAllRelationshipsMapper();
+        this.cityWithNoRoutesMapper = neo4jCommonCityMappers.cityWithNoRoutesMapper();
     }
 
     public Optional<Neo4jCity> findById(String id) {

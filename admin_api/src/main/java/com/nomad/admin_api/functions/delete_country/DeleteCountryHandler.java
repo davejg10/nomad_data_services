@@ -6,8 +6,8 @@ import java.util.function.Consumer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.nomad.admin_api.Neo4jCountryRepository;
 import com.nomad.admin_api.exceptions.DatabaseSyncException;
+import com.nomad.admin_api.repositories.Neo4jCountryRepository;
 import com.nomad.data_library.domain.sql.SqlCountry;
 import com.nomad.data_library.exceptions.Neo4jGenericException;
 import com.nomad.data_library.repositories.SqlCountryRepository;

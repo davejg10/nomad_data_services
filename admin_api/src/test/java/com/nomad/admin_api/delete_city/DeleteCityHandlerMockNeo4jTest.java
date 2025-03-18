@@ -11,9 +11,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import com.nomad.admin_api.Neo4jCityRepository;
 import com.nomad.admin_api.domain.CityToDeleteDTO;
 import com.nomad.admin_api.functions.delete_city.DeleteCityHandler;
+import com.nomad.admin_api.repositories.Neo4jCityRepository;
 import com.nomad.data_library.GenericTestGenerator;
 import com.nomad.data_library.domain.sql.SqlCity;
 import com.nomad.data_library.domain.sql.SqlCountry;

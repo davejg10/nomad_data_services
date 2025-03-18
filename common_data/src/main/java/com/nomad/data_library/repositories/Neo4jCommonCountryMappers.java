@@ -14,12 +14,12 @@ import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
 
-public class Neo4jCountryMappers {
+public class Neo4jCommonCountryMappers {
 
     protected final BiFunction<TypeSystem, MapAccessor, Neo4jCity> cityMapper;
     protected final BiFunction<TypeSystem, MapAccessor, Neo4jCountry> countryMapper;
 
-    public Neo4jCountryMappers(Neo4jMappingContext schema) {
+    public Neo4jCommonCountryMappers(Neo4jMappingContext schema) {
         this.cityMapper = schema.getRequiredMappingFunctionFor(Neo4jCity.class);
         this.countryMapper = schema.getRequiredMappingFunctionFor(Neo4jCountry.class);
     }

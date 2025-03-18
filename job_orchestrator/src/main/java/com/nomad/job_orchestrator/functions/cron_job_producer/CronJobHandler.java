@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.nomad.scraping_library.domain.ScraperRequest;
 import com.nomad.scraping_library.domain.ScraperRequestType;
-import com.nomad.job_orchestrator.Neo4jCityRepository;
 import com.nomad.job_orchestrator.domain.CityPair;
+import com.nomad.job_orchestrator.repositories.Neo4jCityRepository;
 
 import lombok.extern.log4j.Log4j2;
 

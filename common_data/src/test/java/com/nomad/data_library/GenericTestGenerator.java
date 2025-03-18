@@ -1,13 +1,11 @@
 package com.nomad.data_library;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.nomad.data_library.domain.CityCriteria;
 import com.nomad.data_library.domain.CityMetric;
-import com.nomad.data_library.domain.CityMetrics;
 
 public class GenericTestGenerator {
 

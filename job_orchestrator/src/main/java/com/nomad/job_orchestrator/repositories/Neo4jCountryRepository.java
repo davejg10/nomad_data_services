@@ -1,12 +1,10 @@
-package com.nomad.job_orchestrator;
+package com.nomad.job_orchestrator.repositories;
 
 import com.nomad.data_library.repositories.Neo4jCommonCountryRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.nomad.data_library.repositories.Neo4jCountryMappers;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.neo4j.core.Neo4jClient;
-import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 import org.springframework.stereotype.Repository;
 
 @Repository
