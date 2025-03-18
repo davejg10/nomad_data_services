@@ -1,16 +1,17 @@
 package com.nomad.data_library;
 
-import com.nomad.data_library.domain.CityCriteria;
-import com.nomad.data_library.domain.CityMetric;
-import com.nomad.data_library.domain.CityMetrics;
 import com.nomad.data_library.domain.TransportType;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
 import com.nomad.data_library.domain.neo4j.Neo4jRoute;
+import com.nomad.data_library.domain.sql.SqlCity;
+import com.nomad.data_library.domain.sql.SqlCountry;
 
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+
+import org.springframework.data.neo4j.types.GeographicPoint3d;
 
 public class Neo4jTestGenerator {
     
@@ -25,13 +26,35 @@ public class Neo4jTestGenerator {
         return new Neo4jRoute(UUID.randomUUID().toString(), targetCity, popularity, time, cost, randomTransportType);
     }
 
+    public static GeographicPoint3d generateCoords() {
+        double latitude = ThreadLocalRandom.current().nextDouble(-90, 90);
+        double longitude = ThreadLocalRandom.current().nextDouble(-180, 180);
+        double height = 0.0;
+        return new GeographicPoint3d(latitude, longitude, height);
+    }
+
     public static Neo4jCountry neo4jCountryNoCities(String countryName) {
 
-        return new Neo4jCountry(UUID.randomUUID().toString(), countryName, Set.of());
+        return new Neo4jCountry(UUID.randomUUID().toString(), countryName, "a country short desscription", "url:blob", Set.of());
+    }
+
+    public static Neo4jCountry neo4jCountryFromSql(SqlCountry country) {
+
+        return new Neo4jCountry(country.getId().toString(), country.getName(), "a country short desscription", "url:blob", Set.of());
     }
 
     public static Neo4jCity neo4jCityNoRoutes(String cityName, Neo4jCountry country) {
 
-        return new Neo4jCity(UUID.randomUUID().toString(), cityName, GenericTestGenerator.cityMetrics(), Set.of(), country);
+        return new Neo4jCity(UUID.randomUUID().toString(), cityName, "some short description", "url:blob", generateCoords(), GenericTestGenerator.cityMetrics(), Set.of(), country);
+    }
+
+    public static Neo4jCity neo4jCityNoRoutesWithId(String id, String cityName, Neo4jCountry country) {
+
+        return new Neo4jCity(id, cityName, "some short description", "url:blob", generateCoords(), GenericTestGenerator.cityMetrics(), Set.of(), country);
+    }
+
+    public static Neo4jCity neo4jCityFromSql(SqlCity city, SqlCountry country) {
+
+        return new Neo4jCity(city.getId().toString(), city.getName(), "some short description", "url:blob", generateCoords(), city.getCityMetrics(), Set.of(), neo4jCountryFromSql(country));
     }
 }

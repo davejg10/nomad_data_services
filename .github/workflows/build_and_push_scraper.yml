@@ -50,13 +50,29 @@ jobs:
         run: |
           mvn clean install -pl ${{ env.REPOSITORY_NAME }} -am
 
-      - name: ACR build & push image
+      - name: ACR login
+        run: az acr login --name ${{ env.ACR_SERVER_NAME }}
+
+      - name: Docker build
         run: |
-          az acr build \
-            --registry ${{ env.ACR_SERVER_NAME }} \
-            --image "${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" \
+          docker build \
+            -t "${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" \
             --build-arg MODULE_TO_BUILD=${{ env.REPOSITORY_NAME }} .
+          
+          docker tag "${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" "${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:latest"
 
-          # Also tag with latest
-          az acr import --name ${{ env.ACR_SERVER_NAME }} --source "${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" --image ${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:latest --force
+      - name: Docker push
+        run: |
+          docker push ${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}
+          docker push ${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:latest
 
+#      - name: ACR build & push image
+#        run: |
+#          az acr build \
+#            --registry ${{ env.ACR_SERVER_NAME }} \
+#            --image "${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" \
+#            --build-arg MODULE_TO_BUILD=${{ env.REPOSITORY_NAME }} .
+#
+#          # Also tag with latest
+#          az acr import --name ${{ env.ACR_SERVER_NAME }} --source "${{ env.ACR_SERVER_NAME }}/${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:${{ env.TAG }}" --image ${{ env.NAMESPACE_NAME }}/${{ env.REPOSITORY_NAME }}:latest --force
+#

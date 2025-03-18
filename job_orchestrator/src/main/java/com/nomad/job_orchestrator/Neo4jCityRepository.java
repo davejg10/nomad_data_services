@@ -1,5 +1,6 @@
 package com.nomad.job_orchestrator;
 
+import com.nomad.data_library.repositories.Neo4jCityMappers;
 import com.nomad.job_orchestrator.domain.CityPair;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
@@ -22,8 +23,11 @@ import java.util.*;
 @Log4j2
 public class Neo4jCityRepository extends Neo4jCommonCityRepository {
 
-    public Neo4jCityRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jMappingContext schema) {
-        super(neo4jClient, objectMapper, schema);
+    private final Neo4jCityMappers neo4jCityMappers;
+
+    public Neo4jCityRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jCityMappers neo4jCityMappers) {
+        super(neo4jClient, objectMapper, neo4jCityMappers);
+        this.neo4jCityMappers = neo4jCityMappers;
     }
 
     public List<CityPair> routeDiscoveryGivenCountry(String countryName) {
@@ -37,9 +41,10 @@ public class Neo4jCityRepository extends Neo4jCommonCityRepository {
                 .bind(countryName).to("countryName")
                 .fetchAs(CityPair.class)
                 .mappedBy((typeSystem, record) -> {
-                    Neo4jCity sourceCity = cityMapper.apply(typeSystem, record.get("source").asNode());
-                    Neo4jCity targetCity = cityMapper.apply(typeSystem, record.get("dest").asNode());
-                    Neo4jCountry country = countryMapper.apply(typeSystem, record.get("country").asNode());
+
+                    Neo4jCity sourceCity = neo4jCityMappers.cityMapper.apply(typeSystem, record.get("source").asNode());
+                    Neo4jCity targetCity = neo4jCityMappers.cityMapper.apply(typeSystem, record.get("dest").asNode());
+                    Neo4jCountry country = neo4jCityMappers.countryMapper.apply(typeSystem, record.get("country").asNode());
 
                     CityDTO sourceCityDTO = new CityDTO(sourceCity.getId(), sourceCity.getName());
                     CityDTO targetCityDTO = new CityDTO(targetCity.getId(), targetCity.getName());
@@ -47,38 +52,5 @@ public class Neo4jCityRepository extends Neo4jCommonCityRepository {
                 })
                 .all();
         return cities.stream().toList();
-    }
-
-    public void saveCityDTOWithDepth0(Map<String, Object> cityAsMap) throws Neo4jGenericException {
-        try {
-            neo4jClient.query("""
-                MERGE (c:City {id: $id})
-              
-                WITH c
-                UNWIND $route AS routeData
-                
-                MERGE (t:City {id: routeData.targetCity.id})
-                
-                WITH c, t, routeData   
-                OPTIONAL MATCH (c)-[r:ROUTE {
-                       transportType: routeData.transportType
-                }]->(t)
-                WHERE r.popularity <> routeData.popularity OR r.time <> routeData.time OR r.cost <> routeData.cost
-                DELETE r
-                
-                MERGE (c)-[rel:ROUTE {
-                    popularity: routeData.popularity,
-                    time: routeData.time,
-                    cost: routeData.cost,
-                    transportType: routeData.transportType
-                }]->(t)
-                ON CREATE SET rel.id = randomUUID()
-            """)
-                    .bindAll(cityAsMap)
-                    .run();
-        } catch (Exception e) {
-            log.error("Error when trying to saveCityDTOWithDepth0. City: {}. Error: {}", cityAsMap.get("name"), e.getMessage());
-            throw new Neo4jGenericException("Error in saveCityDTOWithDepth0.", e);
-        }
     }
 }

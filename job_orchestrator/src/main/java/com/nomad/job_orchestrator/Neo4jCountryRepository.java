@@ -3,6 +3,7 @@ package com.nomad.job_orchestrator;
 import com.nomad.data_library.repositories.Neo4jCommonCountryRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.nomad.data_library.repositories.Neo4jCountryMappers;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
@@ -12,8 +13,8 @@ import org.springframework.stereotype.Repository;
 @Log4j2
 public class Neo4jCountryRepository extends Neo4jCommonCountryRepository {
 
-    public Neo4jCountryRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jMappingContext schema) {
-        super(neo4jClient, objectMapper, schema);
+    public Neo4jCountryRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jCountryMappers neo4jCountryMappers) {
+        super(neo4jClient, objectMapper, neo4jCountryMappers);
     }
 
 }

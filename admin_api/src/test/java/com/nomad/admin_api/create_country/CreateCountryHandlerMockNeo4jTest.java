@@ -15,8 +15,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.nomad.admin_api.Neo4jCountryRepository;
+import com.nomad.admin_api.domain.CountryDTO;
 import com.nomad.admin_api.functions.create_country.CreateCountryHandler;
 import com.nomad.data_library.Neo4jTestConfiguration;
+import com.nomad.data_library.domain.neo4j.Neo4jCountry;
 import com.nomad.data_library.domain.sql.SqlCountry;
 import com.nomad.data_library.exceptions.Neo4jGenericException;
 import com.nomad.data_library.repositories.SqlCountryRepository;
@@ -44,10 +46,9 @@ public class CreateCountryHandlerMockNeo4jTest {
     
     @Test
     void createCountryHandler_shouldRollBackSql_whenExceptionThrownByNeo4jRepository() throws Neo4jGenericException {
+        CountryDTO countryToBeCreated = new CountryDTO("CountryA", "Short description", "long desription", "url:blob");
 
-        SqlCountry countryToBeCreated = SqlCountry.of("CountryA", "A description of countryA");
-
-        Mockito.when(neo4jCountryRepository.save(Mockito.any(SqlCountry.class))).thenThrow(new Neo4jGenericException("", new Throwable()));
+        Mockito.when(neo4jCountryRepository.save(Mockito.any(Neo4jCountry.class))).thenThrow(new Neo4jGenericException("", new Throwable()));
         
         try {
             createCountryHandler.accept(countryToBeCreated);

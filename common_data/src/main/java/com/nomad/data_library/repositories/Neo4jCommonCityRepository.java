@@ -2,18 +2,13 @@ package com.nomad.data_library.repositories;
 
 import lombok.extern.log4j.Log4j2;
 
-import org.neo4j.driver.Value;
-import org.neo4j.driver.types.MapAccessor;
+import org.neo4j.driver.Record;
 import org.neo4j.driver.types.TypeSystem;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.core.Neo4jClient;
-import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nomad.data_library.domain.TransportType;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
-import com.nomad.data_library.domain.neo4j.Neo4jCountry;
-import com.nomad.data_library.domain.neo4j.Neo4jRoute;
 import com.nomad.data_library.exceptions.Neo4jGenericException;
 
 import java.util.*;
@@ -25,77 +20,14 @@ public class Neo4jCommonCityRepository {
 
     protected Neo4jClient neo4jClient;
     protected final ObjectMapper objectMapper;
-    protected final BiFunction<TypeSystem, MapAccessor, Neo4jCity> cityMapper;
-    protected final BiFunction<TypeSystem, MapAccessor, Neo4jCountry> countryMapper;
+    protected final BiFunction<TypeSystem, Record, Neo4jCity> cityWithAllRelationshipsMapper;
+    protected final BiFunction<TypeSystem, Record, Neo4jCity> cityWithNoRoutesMapper;
 
-    public Neo4jCommonCityRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jMappingContext schema) {
+    public Neo4jCommonCityRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jCityMappers neo4jMappers) {
         this.neo4jClient = neo4jClient;
         this.objectMapper = objectMapper;
-        this.cityMapper = schema.getRequiredMappingFunctionFor(Neo4jCity.class);
-        this.countryMapper = schema.getRequiredMappingFunctionFor(Neo4jCountry.class);
-    }
-
-    // TODO think there will be ways of making this more efficient. Note that there are ids within node sets start = 5 for instace..
-    public Map<String, Neo4jCity> mapTargetCitiesAndCountries(TypeSystem typeSystem, Value targetCitiesValue, Value targetCityCountryRelValue, Value targetCityCountryValue) {
-        Map<String, Neo4jCountry> targetCountriesMap = new HashMap<>();
-        Map<String, Neo4jCity> targetCitiesMap = new HashMap<>();
-
-        targetCityCountryValue.asList(targetCountry -> {
-            String nodeElementId = targetCountry.asNode().elementId();
-            Neo4jCountry createdTargetCountry = countryMapper.apply(typeSystem, targetCountry.asNode());
-            targetCountriesMap.put(nodeElementId, createdTargetCountry);
-            return null;
-        });
-
-        targetCitiesValue.asList(targetCity -> {
-            String targetCityNodeElementId = targetCity.asNode().elementId();
-            String targetCountryNodeElementId = targetCityCountryRelValue
-                    .asList(targetCityCountry -> targetCityCountry.asRelationship())
-                    .stream()
-                    .filter(targetCityCountryRel -> targetCityCountryRel.startNodeElementId().equals(targetCityNodeElementId))
-                    .findFirst().get().endNodeElementId();
-
-            Neo4jCountry targetCityCountry = targetCountriesMap.get(targetCountryNodeElementId);
-            Neo4jCity createdTargetCity = cityMapper.apply(typeSystem, targetCity.asNode());
-            Neo4jCity createdTargetCityWithCountry = new Neo4jCity(createdTargetCity.getId(), createdTargetCity.getName(), createdTargetCity.getCityMetrics(), createdTargetCity.getRoutes(), targetCityCountry);
-            targetCitiesMap.put(targetCityNodeElementId, createdTargetCityWithCountry);
-            return null;
-        });
-
-        return targetCitiesMap;
-    }
-
-    // Same `mapTargetCitiesAndCountries` except we dont map the target cities to the country as we already have that.
-    public Map<String, Neo4jCity> mapTargetCities(TypeSystem typeSystem, Value targetCitiesValue, Neo4jCountry country) {
-        Map<String, Neo4jCity> targetCitiesMap = new HashMap<>();
-
-        targetCitiesValue.asList(targetCity -> {
-            String targetCityNodeElementId = targetCity.asNode().elementId();
-            Neo4jCity createdTargetCity = cityMapper.apply(typeSystem, targetCity.asNode());
-            Neo4jCity createdTargetCityWithCountry = new Neo4jCity(createdTargetCity.getId(), createdTargetCity.getName(), createdTargetCity.getCityMetrics(), createdTargetCity.getRoutes(), country);
-            targetCitiesMap.put(targetCityNodeElementId, createdTargetCityWithCountry);
-            return null;
-        });
-
-        return targetCitiesMap;
-    }
-
-    public Set<Neo4jRoute> mapRoutes(TypeSystem typeSystem, Value routesValue, Map<String, Neo4jCity> targetCitiesMap) {
-
-        Set<Neo4jRoute> routes = new HashSet<>(routesValue
-                .asList(route -> {
-                    String endNodeElementId = route.asRelationship().endNodeElementId().toString();
-                    return new Neo4jRoute(
-                            route.get("id").asString(),
-                            targetCitiesMap.get(endNodeElementId),
-                            route.get("popularity").asDouble(),
-                            route.get("time").asDouble(),
-                            route.get("cost").asDouble(),
-                            TransportType.valueOf(route.get("transportType").asString())
-                    );
-                }));
-
-        return routes;
+        this.cityWithAllRelationshipsMapper = neo4jMappers.cityWithAllRelationshipsMapper();
+        this.cityWithNoRoutesMapper = neo4jMappers.cityWithNoRoutesMapper();
     }
 
     public Optional<Neo4jCity> findById(String id) {
@@ -106,30 +38,44 @@ public class Neo4jCommonCityRepository {
         return findById(id, true);
     }
 
-    // This method returns a Neo4jCity and fetches all of its routes to cities that have a particular Neo4jCountryId
-    // If the origin Neo4jCity has no valid routes, then just the Neo4jCity is returned.
+    private static String QUERY_RETURN_ALL_RELATIONSHIPS = """
+            OPTIONAL MATCH (city)-[:OF_COUNTRY]->(country)
+
+            WITH city, country
+            OPTIONAL MATCH (city)-[:HAS_METRIC]->(m:Metric)
+            WITH city, country, collect(m) as cityMetrics
+           
+            OPTIONAL MATCH (city)-[route:ROUTE]->(t)
+           
+            OPTIONAL MATCH (t) -[targetCityCountryRel:OF_COUNTRY]-> (targetCityCountry:Country)
+           
+            WITH city, country, cityMetrics, route, t, targetCityCountryRel, targetCityCountry
+            OPTIONAL MATCH (t)-[targetCityMetricRel:HAS_METRIC]->(targetCityMetric:Metric)
+           
+            WITH city, country, cityMetrics, route, t, targetCityCountryRel, targetCityCountry,
+                 collect(targetCityMetricRel) as targetCityMetricRels,
+                 collect(targetCityMetric) as targetCityMetrics
+                
+            RETURN city, country, cityMetrics,
+                   collect(route) as routes,
+                   collect(t) as targetCities,
+                   collect(targetCityCountryRel) as targetCityCountryRels,
+                   collect(targetCityCountry) as targetCityCountries,
+                   collect(targetCityMetricRels) as targetCityMetricRels,
+                   collect(targetCityMetrics) as targetCityMetrics
+            """;
+
     public Optional<Neo4jCity> findById(String id, boolean includeRoutes) {
         Optional<Neo4jCity> city = neo4jClient
-                .query("""
-                    MATCH (city:City {id: $id})
-                    OPTIONAL MATCH (city) -[toCountry:OF_COUNTRY]-> (country:Country)
-                    OPTIONAL MATCH (city) -[route:ROUTE]-> (t)
-                    OPTIONAL MATCH (t) -[targetCityCountryRel:OF_COUNTRY]-> (targetCityCountry:Country)
-                    RETURN city, toCountry, country, collect(route) as routes, collect(t) as targetCity, collect(targetCityCountryRel) as targetCityCountryRel, collect(targetCityCountry) as targetCityCountry
-                """)
+                .query("MATCH (city:City {id: $id})" + QUERY_RETURN_ALL_RELATIONSHIPS)
                 .bind(id).to("id")
                 .fetchAs(Neo4jCity.class)
                 .mappedBy((typeSystem, record) -> {
-                    Neo4jCity fetchedCity = cityMapper.apply(typeSystem, record.get("city").asNode());
-                    Neo4jCountry fetchedCitiesCountry = countryMapper.apply(typeSystem, record.get("country").asNode());
-
-                    Set<Neo4jRoute> routes = Set.of();
-                    if (!record.get("routes").asList().isEmpty() && includeRoutes) {
-                        Map<String, Neo4jCity> targetCitiesMap = mapTargetCitiesAndCountries(typeSystem, record.get("targetCity"), record.get("targetCityCountryRel"), record.get("targetCityCountry"));
-                        routes = mapRoutes(typeSystem, record.get("routes"), targetCitiesMap);
+                    if (includeRoutes) {
+                        return cityWithAllRelationshipsMapper.apply(typeSystem, record);
                     }
+                    return cityWithNoRoutesMapper.apply(typeSystem, record);
 
-                    return new Neo4jCity(fetchedCity.getId(), fetchedCity.getName(), fetchedCity.getCityMetrics(), routes, fetchedCitiesCountry);
                 })
                 .first();
         return city;
@@ -137,53 +83,19 @@ public class Neo4jCommonCityRepository {
 
     public Set<Neo4jCity> findAllCities() {
         Collection<Neo4jCity> allCities = neo4jClient
-                .query("""
-                    MATCH (city:City)
-                    OPTIONAL MATCH (city)-[ofCountry:OF_COUNTRY]->(country)
-                    OPTIONAL MATCH (city)-[route:ROUTE]->(t)
-                    OPTIONAL MATCH (t) -[targetCityCountryRel:OF_COUNTRY]-> (targetCityCountry:Country)
-                    RETURN city, ofCountry, country, collect(route) as routes, collect(t) as targetCity, collect(targetCityCountryRel) as targetCityCountryRel, collect(targetCityCountry) as targetCityCountry
-                """)
+                .query(" MATCH (city:City)" + QUERY_RETURN_ALL_RELATIONSHIPS)
                 .fetchAs(Neo4jCity.class)
-                .mappedBy((typeSystem, record) -> {
-                    Neo4jCity fetchedCity = cityMapper.apply(typeSystem, record.get("city").asNode());
-                    Neo4jCountry fetchedCitiesCountry = countryMapper.apply(typeSystem, record.get("country").asNode());
-
-                    Set<Neo4jRoute> routes = Set.of();
-                    if (!record.get("routes").asList().isEmpty()) {
-                        Map<String, Neo4jCity> targetCitiesMap = mapTargetCitiesAndCountries(typeSystem, record.get("targetCity"), record.get("targetCityCountryRel"), record.get("targetCityCountry"));
-                        routes = mapRoutes(typeSystem, record.get("routes"), targetCitiesMap);
-                    }
-
-                    return new Neo4jCity(fetchedCity.getId(), fetchedCity.getName(), fetchedCity.getCityMetrics(), routes, fetchedCitiesCountry);
-                })
+                .mappedBy(cityWithAllRelationshipsMapper)
                 .all();
         return new HashSet<>(allCities);
     }
 
     public Optional<Neo4jCity> findByName(String name) {
         Optional<Neo4jCity> city = neo4jClient
-                .query("""
-                    MATCH (city:City {name: $name})
-                    OPTIONAL MATCH (city)-[ofCountry:OF_COUNTRY]->(country)
-                    OPTIONAL MATCH (city)-[route:ROUTE]->(t)
-                    OPTIONAL MATCH (t) -[targetCityCountryRel:OF_COUNTRY]-> (targetCityCountry:Country)
-                    RETURN city, ofCountry, country, collect(route) as routes, collect(t) as targetCity, collect(targetCityCountryRel) as targetCityCountryRel, collect(targetCityCountry) as targetCityCountry
-                """)
+                .query("MATCH (city:City {name: $name})" + QUERY_RETURN_ALL_RELATIONSHIPS)
                 .bind(name).to("name")
                 .fetchAs(Neo4jCity.class)
-                .mappedBy((typeSystem, record) -> {
-                    Neo4jCity fetchedCity = cityMapper.apply(typeSystem, record.get("city").asNode());
-                    Neo4jCountry fetchedCitiesCountry = countryMapper.apply(typeSystem, record.get("country").asNode());
-
-                    Set<Neo4jRoute> routes = Set.of();
-                    if (!record.get("routes").asList().isEmpty()) {
-                        Map<String, Neo4jCity> targetCitiesMap = mapTargetCitiesAndCountries(typeSystem, record.get("targetCity"), record.get("targetCityCountryRel"), record.get("targetCityCountry"));
-                        routes = mapRoutes(typeSystem, record.get("routes"), targetCitiesMap);
-                    }
-
-                    return new Neo4jCity(fetchedCity.getId(), fetchedCity.getName(), fetchedCity.getCityMetrics(), routes, fetchedCitiesCountry);
-                })
+                .mappedBy(cityWithAllRelationshipsMapper)
                 .first();
         return city;
     }
@@ -194,24 +106,30 @@ public class Neo4jCommonCityRepository {
         try {
             Neo4jCity neo4jCity = neo4jClient
             .query("""
-                MERGE (c:City {id: $id})
-                ON CREATE SET c.name = $name,      
-                              c.cityMetrics = $cityMetrics
+                MERGE (city:City {id: $id})
+                ON CREATE SET city.name = $name
+                SET city.shortDescription = $shortDescription,
+                    city.primaryBlobUrl = $primaryBlobUrl,
+                    city.coordinate = point($coordinate)
 
-                WITH c
+                WITH city
                 MATCH(country:Country {id: $countryId})
-                MERGE (country)-[fromCountry:HAS_CITY]->(c)
+                MERGE (country)-[fromCountry:HAS_CITY]->(city)
                 ON CREATE SET fromCountry.id = randomUUID()
-                MERGE (c)-[toCountry:OF_COUNTRY]->(country)
-                ON CREATE SET toCountry.id = randomUUID()
-                RETURN c
+                MERGE (city)-[ofCountry:OF_COUNTRY]->(country)
+                ON CREATE SET ofCountry.id = randomUUID()
+                
+                WITH city, ofCountry, country
+                UNWIND $cityMetrics AS cityMetric
+                MERGE (city)-[:HAS_METRIC]->(m:Metric {criteria: cityMetric.criteria})
+                SET m.metric = cityMetric.metric
+                    
+                RETURN city, ofCountry, country, collect(m) as cityMetrics
             """)
             .bind(city.getCountry().getId()).to("countryId")
             .bindAll(cityAsMap)
             .fetchAs(Neo4jCity.class)
-            .mappedBy((typeSystem, record) -> {
-                return cityMapper.apply(typeSystem, record.get("c").asNode());
-            })
+            .mappedBy(cityWithNoRoutesMapper)
             .first()
             .get();
             return neo4jCity;
@@ -221,36 +139,17 @@ public class Neo4jCommonCityRepository {
         }
     }
 
-    public Neo4jCity saveCityWithDepth0(Neo4jCity city) {
+    public Neo4jCity saveRoute(Neo4jCity city) {
 
         Map<String, Object> cityAsMap = mapifyCity(city);
 
         neo4jClient.query("""
-            MERGE (c:City {id: $id})
-            ON CREATE SET c.name = $name
-            SET c.cityMetrics = $cityMetrics
-            
-            WITH c
-            MATCH(country:Country {name: $country.name})
-            MERGE (country)-[fromCountry:HAS_CITY]->(c)
-            ON CREATE SET fromCountry.id = randomUUID()
-            MERGE (c)-[toCountry:OF_COUNTRY]->(country)
-            ON CREATE SET toCountry.id = randomUUID()
+            MATCH (c:City {id: $id})
           
             WITH c
             UNWIND $routes AS routeData
             
-            MERGE (t:City {id: routeData.targetCity.id})
-            ON CREATE SET t.description = routeData.targetCity.description,
-                t.name = routeData.targetCity.name,
-                t.cityMetrics = routeData.targetCity.cityMetrics
-            
-            WITH c, t, routeData
-            MATCH(country:Country {name: routeData.targetCity.country.name})
-            MERGE (country)-[fromCountry:HAS_CITY]->(t)
-            ON CREATE SET fromCountry.id = randomUUID()
-            MERGE (t)-[toCountry:OF_COUNTRY]->(country)
-            ON CREATE SET toCountry.id = randomUUID()
+            MATCH (t:City {id: routeData.targetCity.id})
             
             WITH c, t, routeData   
             OPTIONAL MATCH (c)-[r:ROUTE {

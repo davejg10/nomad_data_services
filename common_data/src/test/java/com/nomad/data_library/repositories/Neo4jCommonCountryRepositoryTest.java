@@ -48,9 +48,12 @@ public class Neo4jCommonCountryRepositoryTest {
     Neo4jRoute routeAToB = Neo4jTestGenerator.neo4jRoute(cityB);
 
     @BeforeEach
-    void setup(@Autowired Neo4jClient client, @Autowired Neo4jMappingContext schema, @Autowired ObjectMapper objectMapper) {
-        cityRepository = new Neo4jCommonCityRepository(client, objectMapper, schema);
-        countryRepository = new Neo4jCommonCountryRepository(client, objectMapper, schema);
+    void setup(@Autowired Neo4jClient neo4jClient, @Autowired Neo4jMappingContext schema, @Autowired ObjectMapper objectMapper) {
+        Neo4jCityMappers neo4jCityMappers = new Neo4jCityMappers(schema);
+        Neo4jCountryMappers neo4jCountryMappers = new Neo4jCountryMappers(schema);
+
+        cityRepository = new Neo4jCommonCityRepository(neo4jClient, objectMapper, neo4jCityMappers);
+        countryRepository = new Neo4jCommonCountryRepository(neo4jClient, objectMapper, neo4jCountryMappers);
     }
 
     @Test
@@ -76,8 +79,8 @@ public class Neo4jCommonCountryRepositoryTest {
     @Test
     void findAllCountries_shouldNotPopulateCitiesRelationship_ifCountryHasCities() throws Neo4jGenericException {
         countryRepository.createCountry(countryA);
-        cityA = cityA.addRoute(routeAToB);
-        cityRepository.saveCityWithDepth0(cityA);
+        cityRepository.createCity(cityA);
+        cityRepository.createCity(cityB);
 
         Set<Neo4jCountry> allCountries = countryRepository.findAllCountries();
 
@@ -104,14 +107,14 @@ public class Neo4jCommonCountryRepositoryTest {
     @Test
     void findByIdFetchCities_shouldPopulateCitiesRelationship_ifCountryHasCities() throws Neo4jGenericException {
         Neo4jCountry createdCountry = countryRepository.createCountry(countryA);
-        cityRepository.saveCityWithDepth0(cityA);
+        cityRepository.createCity(cityA);
 
         createdCountry = countryRepository.findByIdFetchCities(createdCountry.getId()).get();
 
         assertThat(createdCountry.getCities()).isNotEmpty();
         assertThat(createdCountry.getCities().stream().findFirst().get())
                 .usingRecursiveComparison()
-                .ignoringFields("routes")
+                .ignoringFields("routes", "cityMetrics")
                 .isEqualTo(cityA);
     }
 
@@ -147,18 +150,35 @@ public class Neo4jCommonCountryRepositoryTest {
     }
 
     @Test
+    void createCountry_overwritesAllPropertiesExceptName_ifExist() {
+
+        Neo4jCountry countryAFirstSave = countryRepository.createCountry(countryA);
+
+        countryA = new Neo4jCountry(countryA.getId(), "new name", "newdescription", "new blob url", Set.of());
+
+        Neo4jCountry countryASecondSave = countryRepository.createCountry(countryA);
+
+        assertThat(countryASecondSave.getShortDescription()).isNotEqualTo(countryAFirstSave.getShortDescription());
+        assertThat(countryASecondSave.getPrimaryBlobUrl()).isNotEqualTo(countryAFirstSave.getPrimaryBlobUrl());
+        assertThat(countryASecondSave.getName()).isEqualTo(countryAFirstSave.getName());
+        assertThat(countryASecondSave.getId()).isEqualTo(countryAFirstSave.getId());
+    }
+
+    @Test
     void createCountry_doesntTouchCityNodes_ever() throws Neo4jGenericException {
         countryRepository.createCountry(countryA);
 
         cityA = cityA.addRoute(routeAToB);
-        cityRepository.saveCityWithDepth0(cityA);
+        cityRepository.createCity(cityA);
+        cityRepository.createCity(cityB);
+        cityRepository.saveRoute(cityA);
 
         Set<Neo4jCity> allCitiesFirstSearch = cityRepository.findAllCities();
 
         Neo4jCity cityADifferentProperties = Neo4jTestGenerator.neo4jCityNoRoutes(cityAName, countryA);
         Neo4jCity cityBDifferentProperties = Neo4jTestGenerator.neo4jCityNoRoutes(cityBName, countryA);
 
-        Neo4jCountry countryAWithCities = new Neo4jCountry(countryA.getId(), countryA.getName(), Set.of(cityADifferentProperties, cityBDifferentProperties));
+        Neo4jCountry countryAWithCities = new Neo4jCountry(countryA.getId(), countryA.getName(), countryA.getShortDescription(), countryA.getPrimaryBlobUrl(), Set.of(cityADifferentProperties, cityBDifferentProperties));
         countryRepository.createCountry(countryAWithCities);
 
         Set<Neo4jCity> allCitiesSecondSearch = cityRepository.findAllCities();

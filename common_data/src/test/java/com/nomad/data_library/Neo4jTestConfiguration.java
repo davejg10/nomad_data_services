@@ -1,7 +1,5 @@
 package com.nomad.data_library;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nomad.data_library.domain.neo4j.CityMetricsDeserializer;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;

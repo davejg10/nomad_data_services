@@ -18,6 +18,7 @@ import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
+import com.nomad.admin_api.domain.CountryDTO;
 import com.nomad.data_library.domain.sql.SqlCountry;
 
 import lombok.extern.log4j.Log4j2;
@@ -47,12 +48,12 @@ public class CreateCountryTrigger {
             } else {
                 
                 try {
-                    SqlCountry countryToBeCreated = objectMapper.readValue(request.getBody().get(), SqlCountry.class);
+                    CountryDTO countryToBeCreated = objectMapper.readValue(request.getBody().get(), CountryDTO.class);
                     log.info("createCountry function hit. Request body is {}", countryToBeCreated);
                 
                     createCountryHandler.accept(countryToBeCreated);
     
-                    return request.createResponseBuilder(HttpStatus.OK).body("Successfully created Country " + countryToBeCreated.getName() + " in PostgreSQl flexible server & synced to Neo4j.").build();
+                    return request.createResponseBuilder(HttpStatus.OK).body("Successfully created Country " + countryToBeCreated.name() + " in PostgreSQl flexible server & synced to Neo4j.").build();
     
                 } catch(JsonMappingException e) {    
                     log.error("An error was thrown when trying to map message to SqlCountry.", e);

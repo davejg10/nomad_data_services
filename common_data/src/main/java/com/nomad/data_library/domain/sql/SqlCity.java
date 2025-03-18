@@ -1,14 +1,11 @@
 package com.nomad.data_library.domain.sql;
 
+import java.util.Set;
 import java.util.UUID;
 
+import com.nomad.data_library.domain.CityMetric;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import org.springframework.context.annotation.Profile;
-
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.nomad.data_library.domain.CityMetrics;
-import com.nomad.data_library.domain.neo4j.CityMetricsSerializer;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -37,18 +34,17 @@ public class SqlCity {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "city_metrics", columnDefinition = "jsonb")
-    @JsonSerialize(using = CityMetricsSerializer.class) // Conversion TO JSON String (called by mapifyCity())
     @Convert(converter = CityMetricsConverter.class) // Used to convert to/from Postgres
-    private CityMetrics cityMetrics;
+    private Set<CityMetric> cityMetrics;
 
     @Column(name = "country_id")
     private UUID countryId;
 
-    public static SqlCity of(String name, String description, CityMetrics cityMetrics, UUID countryId) {
+    public static SqlCity of(String name, String description, Set<CityMetric> cityMetrics, UUID countryId) {
         return new SqlCity(null, name, description, cityMetrics, countryId);
     }
 
-    public SqlCity(UUID id, String name, String description, CityMetrics cityMetrics, UUID countryId) {
+    public SqlCity(UUID id, String name, String description, Set<CityMetric> cityMetrics, UUID countryId) {
         this.id = id;
         this.name = name;
         this.description = description;

@@ -1,14 +1,11 @@
 package com.nomad.admin_api;
 
-import java.util.Set;
-
+import com.nomad.data_library.repositories.Neo4jCityMappers;
 import org.springframework.data.neo4j.core.Neo4jClient;
-import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
-import com.nomad.data_library.domain.neo4j.Neo4jCountry;
 import com.nomad.data_library.domain.sql.SqlCity;
 import com.nomad.data_library.exceptions.Neo4jGenericException;
 import com.nomad.data_library.repositories.Neo4jCommonCityRepository;
@@ -19,13 +16,12 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class Neo4jCityRepository extends Neo4jCommonCityRepository {
 
-    public Neo4jCityRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jMappingContext schema) {
-        super(neo4jClient, objectMapper, schema);
+    public Neo4jCityRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jCityMappers neo4jCityMappers) {
+        super(neo4jClient, objectMapper, neo4jCityMappers);
     }
 
-    public Neo4jCity save(SqlCity city) throws Neo4jGenericException {
-        Neo4jCity neo4jCity = new Neo4jCity(city.getId().toString(), city.getName(), city.getCityMetrics(), Set.of(), new Neo4jCountry(city.getCountryId().toString(), "", Set.of()));
-        return super.createCity(neo4jCity);
+    public Neo4jCity save(Neo4jCity city) throws Neo4jGenericException {
+        return super.createCity(city);
     }
 
     public void delete(SqlCity city) throws Neo4jGenericException {

@@ -1,9 +1,7 @@
 package com.nomad.admin_api;
 
-import java.util.Set;
-
+import com.nomad.data_library.repositories.Neo4jCountryMappers;
 import org.springframework.data.neo4j.core.Neo4jClient;
-import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,13 +16,12 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class Neo4jCountryRepository extends Neo4jCommonCountryRepository {
 
-    public Neo4jCountryRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jMappingContext schema) {
-        super(neo4jClient, objectMapper, schema);
+    public Neo4jCountryRepository(Neo4jClient neo4jClient, ObjectMapper objectMapper, Neo4jCountryMappers neo4jCountryMappers) {
+        super(neo4jClient, objectMapper, neo4jCountryMappers);
     }
 
-    public Neo4jCountry save(SqlCountry country) throws Neo4jGenericException {
-        Neo4jCountry neo4jCountry = new Neo4jCountry(country.getId().toString(), country.getName(), Set.of());
-        return super.createCountry(neo4jCountry);
+    public Neo4jCountry save(Neo4jCountry country) throws Neo4jGenericException {
+        return super.createCountry(country);
     }
 
     public void delete(SqlCountry country) throws Neo4jGenericException {

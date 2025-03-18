@@ -5,15 +5,15 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.data.neo4j.core.convert.ConvertWith;
+import com.nomad.data_library.domain.CityMetric;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.types.GeographicPoint3d;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.nomad.data_library.domain.CityMetrics;
 import com.nomad.data_library.domain.TransportType;
 
 import lombok.Getter;
@@ -27,10 +27,14 @@ public class Neo4jCity {
     @Id
     @Getter private final String id;
     @Getter private final String name;
+    @Getter private final String shortDescription;
+    @Getter private final String primaryBlobUrl;
 
-    @JsonSerialize(using = CityMetricsSerializer.class) // Conversion TO Neo4j.Value (called by mapifyCity())
-    @ConvertWith(converterRef = "cityMetricsDeserializer") // Conversion TO CityMetrics (when being read) (requires a bean in context with name cityMetricsDeserializer)
-    @Getter private final CityMetrics cityMetrics;
+    @JsonSerialize(using = CoordinateSerializer.class) // Converts GeographicPoint3d into a map that Neo4js `point()` Cypher function can use
+    @Getter private final GeographicPoint3d coordinate;
+
+    @Relationship(type = "HAS_METRIC", direction = Relationship.Direction.OUTGOING)
+    @Getter private final Set<CityMetric> cityMetrics;
 
     @Relationship(type = "ROUTE", direction = Relationship.Direction.OUTGOING)
     private final Set<Neo4jRoute> routes;
@@ -39,25 +43,32 @@ public class Neo4jCity {
     @Getter private final Neo4jCountry country;
 
     @JsonCreator // This is used by Spring Data for object mapping
-    public Neo4jCity(String id, String name, CityMetrics cityMetrics, Set<Neo4jRoute> routes, Neo4jCountry country) {
+    public Neo4jCity(String id, String name, String shortDescription, String primaryBlobUrl, GeographicPoint3d coordinate, Set<CityMetric> cityMetrics, Set<Neo4jRoute> routes, Neo4jCountry country) {
         this.id = id;
         this.name = name;
+        this.shortDescription = shortDescription;
+        this.primaryBlobUrl = primaryBlobUrl;
+        this.coordinate = coordinate;
         this.cityMetrics = cityMetrics;
         this.routes = routes;
         this.country = country;
     }
 
-    public static Neo4jCity of(String name, CityMetrics cityMetrics, Set<Neo4jRoute> routes, Neo4jCountry country) {
-        return new Neo4jCity(null, name, cityMetrics, Set.copyOf(routes), country);
+    public static Neo4jCity of(String name, String shortDescription, String primaryBlobUrl, GeographicPoint3d coordinate, Set<CityMetric> cityMetrics, Set<Neo4jRoute> routes, Neo4jCountry country) {
+        return new Neo4jCity(null, name, shortDescription, primaryBlobUrl, coordinate, cityMetrics, Set.copyOf(routes), country);
     }
 
     public Neo4jCity withCountry(Neo4jCountry country) {
-        return new Neo4jCity(this.id, this.name, this.cityMetrics, this.routes, country);
+        return new Neo4jCity(this.id, this.name, this.shortDescription, this.primaryBlobUrl, this.coordinate, this.cityMetrics, this.routes, country);
     }
 
     // This is used by Neo4j for object mapping
     public Neo4jCity withId(String id) {
-        return new Neo4jCity(id, this.name, this.cityMetrics, this.routes, this.country);
+        return new Neo4jCity(id, this.name, this.shortDescription, this.primaryBlobUrl, this.coordinate, this.cityMetrics, this.routes, this.country);
+    }
+
+    public Neo4jCity withCityMetrics(Set<CityMetric> cityMetrics) {
+        return new Neo4jCity(this.id, this.name, this.shortDescription, this.primaryBlobUrl, this.coordinate, new HashSet<>(cityMetrics), this.routes, this.country);
     }
 
     // Ensure mutable field 'routes' remains immutable
@@ -87,7 +98,7 @@ public class Neo4jCity {
         } else {
             existingRoutes.add(routeToAdd);
         }
-        return new Neo4jCity(this.id, this.name, this.cityMetrics, existingRoutes, this.country);
+        return new Neo4jCity(this.id, this.name, this.shortDescription, this.primaryBlobUrl, this.coordinate, this.cityMetrics, existingRoutes, this.country);
     }
 
     @Override
@@ -95,12 +106,12 @@ public class Neo4jCity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Neo4jCity city = (Neo4jCity) o;
-        return Objects.equals(id, city.id) && Objects.equals(name, city.name) && Objects.equals(cityMetrics, city.cityMetrics) && city.getRoutes().containsAll(routes) && routes.containsAll(city.getRoutes()) && Objects.equals(country, city.country);
+        return Objects.equals(id, city.id) && Objects.equals(name, city.name) && Objects.equals(shortDescription, city.shortDescription) && Objects.equals(coordinate, city.coordinate) && cityMetrics.containsAll(city.cityMetrics) && city.cityMetrics.containsAll(cityMetrics) && city.getRoutes().containsAll(routes) && routes.containsAll(city.getRoutes()) && Objects.equals(country, city.country);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, cityMetrics, routes, country);
+        return Objects.hash(id, name, shortDescription, primaryBlobUrl, coordinate, cityMetrics, routes, country);
     }
 
     @Override
@@ -108,6 +119,9 @@ public class Neo4jCity {
         return "Neo4jCity{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
+                ", shortDescription='" + shortDescription + '\'' +
+                ", primaryBlobUrl='" + primaryBlobUrl + '\'' +
+                ", coordinate='" + coordinate + '\'' +
                 ", cityMetrics=" + cityMetrics +
                 ", routes=" + routes +
                 ", country=" + country +
