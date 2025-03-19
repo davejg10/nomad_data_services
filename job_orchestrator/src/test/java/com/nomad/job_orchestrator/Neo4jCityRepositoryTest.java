@@ -2,23 +2,24 @@ package com.nomad.job_orchestrator;
 
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nomad.data_library.Neo4jTestConfiguration;
 import com.nomad.data_library.Neo4jTestGenerator;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
 import com.nomad.data_library.exceptions.Neo4jGenericException;
 import com.nomad.data_library.repositories.Neo4jCommonCountryRepository;
 import com.nomad.job_orchestrator.domain.CityPair;
+import com.nomad.job_orchestrator.functions.processed_queue_consumer.ProcessedQueueHandler;
 import com.nomad.job_orchestrator.repositories.Neo4jCityMappers;
 import com.nomad.job_orchestrator.repositories.Neo4jCityRepository;
 import com.nomad.job_orchestrator.repositories.Neo4jCountryMappers;
 import com.nomad.scraping_library.connectors.ServiceBusBatchSender;
 import com.nomad.scraping_library.domain.ScraperRequest;
+
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
@@ -29,15 +30,17 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Log4j2
-@DataNeo4jTest
-@Import({Neo4jTestConfiguration.class})
-@Transactional
+@SpringBootTest
+@Import({com.nomad.data_library.Neo4jTestConfiguration.class})
+@Transactional  // Ensures test changes do not persist
 public class Neo4jCityRepositoryTest {
 
     @MockitoBean
     private ServiceBusBatchSender<ScraperRequest> serviceBusBatchSender;
     @MockitoBean
     private ServiceBusSenderClient serviceBusSenderClient;
+    @MockitoBean
+    private ProcessedQueueHandler processedQueueHandler;
 
     private Neo4jCityRepository cityRepository;
     private Neo4jCommonCountryRepository countryRepository;
@@ -61,7 +64,7 @@ public class Neo4jCityRepositoryTest {
     }
 
     @Test
-    void findById_shouldReturnEmptyOptionalOfCity_WhenCityDoesntExist() {
+    void routeDiscoveryGivenCountry_shouldReturnListOfCityPairsForAllPermutationsOfCitiesForGivenCountry() {
         cityRepository.createCity(Neo4jTestGenerator.neo4jCityNoRoutes("CityA", savedCountryA));
         cityRepository.createCity(Neo4jTestGenerator.neo4jCityNoRoutes("CityB", savedCountryA));
         cityRepository.createCity(Neo4jTestGenerator.neo4jCityNoRoutes("CityC", savedCountryA));
@@ -73,5 +76,21 @@ public class Neo4jCityRepositoryTest {
         List<String> allCityNames = allCityPairsNames.stream().flatMap(list -> list.stream()).toList();
         assertThat(allCityPairsNames.size()).isEqualTo(6);
         assertThat(allCityNames).containsOnly("CityA", "CityB", "CityC");
+    }
+
+    @Test
+    void routeDiscoveryGivenCountry_shouldReturnEmptyList_whenNoCitiesExistForCountry() {
+
+        List<CityPair> allCityPairs = cityRepository.routeDiscoveryGivenCountry(countryA.getName());
+
+        assertThat(allCityPairs.size()).isEqualTo(0);
+    }
+    @Test
+    void routeDiscoveryGivenCountry_shouldReturnEmptyList_whenOneCityExistsForCountry() {
+        cityRepository.createCity(Neo4jTestGenerator.neo4jCityNoRoutes("CityA", savedCountryA));
+
+        List<CityPair> allCityPairs = cityRepository.routeDiscoveryGivenCountry(countryA.getName());
+
+        assertThat(allCityPairs.size()).isEqualTo(0);
     }
 }

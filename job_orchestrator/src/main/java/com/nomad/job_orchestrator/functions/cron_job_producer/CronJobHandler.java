@@ -23,7 +23,7 @@ import java.util.List;
 @Log4j2
 public class CronJobHandler {
 
-    private Neo4jCityRepository cityRepository;
+    private final Neo4jCityRepository cityRepository;
 
     public CronJobHandler(Neo4jCityRepository cityRepository) {
         this.cityRepository = cityRepository;

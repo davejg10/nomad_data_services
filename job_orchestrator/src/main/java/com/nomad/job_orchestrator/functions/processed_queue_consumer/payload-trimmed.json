@@ -1,0 +1,1 @@
+{"scraperRequestSource": "cronJob","type":"ROUTE_DISCOVERY","sourceCity":{"id":"2c4a7b46-6341-4151-b9ba-ccd76d5f7e05","name":"CityA"},"targetCity":{"id":"21e6152a-a924-41cb-b249-2ec0f906360c","name":"CityB"},"route":{"depart":"2025-03-08T10:00:01","arrival":"2025-03-08T14:00:01","cost":12.99,"transportType":"FLIGHT"},"searchDate":"2024-03-10"}

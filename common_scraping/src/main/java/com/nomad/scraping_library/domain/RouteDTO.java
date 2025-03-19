@@ -1,23 +1,25 @@
 package com.nomad.scraping_library.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 
+import com.nomad.common_utils.domain.TransportType;
 import com.nomad.scraping_library.exceptions.ScrapingDataSchemaException;
 
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public record RouteDTO(TransportType transportType, String operator, LocalDateTime depart, LocalDateTime arrival, double cost) {
+public record RouteDTO(TransportType transportType, String operator, LocalDateTime depart, LocalDateTime arrival, BigDecimal cost) {
 
     public static RouteDTO createWithSchema(
         String transportType,
         String operator,
         String depart,
         String arrival,
-        double cost,
+        String cost,
         LocalDate searchDate) throws ScrapingDataSchemaException
         {
             LocalDateTime departDateTime, arrivalDateTime = null;
@@ -42,13 +44,15 @@ public record RouteDTO(TransportType transportType, String operator, LocalDateTi
                 throw new ScrapingDataSchemaException("In RouteDTO createWithSchema: " + e.getMessage());
 
             }
+
+            BigDecimal costConverted = new BigDecimal(cost);
             
-            if (cost < 0) {
+            if (costConverted.compareTo(BigDecimal.ZERO) < 0) {
                 log.error("Cost was less than 0. Rejecting");
                 throw new ScrapingDataSchemaException("Cost cannot be less than 0 when creating RouteDTO object");
             }
 
-            return new RouteDTO(transportTypeEnum, operator, departDateTime, arrivalDateTime, cost);
+            return new RouteDTO(transportTypeEnum, operator, departDateTime, arrivalDateTime, new BigDecimal(cost));
         }
     
 }

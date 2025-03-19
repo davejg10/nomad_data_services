@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nomad.data_library.SqlTestGenerator;
 import com.nomad.data_library.domain.CityCriteria;
 import com.nomad.data_library.domain.CityMetric;
 import org.junit.jupiter.api.AfterEach;
@@ -86,7 +87,7 @@ public class CreateCityHandlerTest {
     @Test
     void createCityHandler_shouldCreateCityInSqlAndSyncInNeo4j_whenNoExceptionsThrown() throws Neo4jGenericException {
         String countryAName = "CountryA";
-        SqlCountry countryToBeCreated = SqlCountry.of(countryAName, "A description of countryA");
+        SqlCountry countryToBeCreated = SqlTestGenerator.sqlCountry(countryAName);
         SqlCountry savedCountry = sqlCountryRepository.save(countryToBeCreated);
         Neo4jCountry neo4jCountry = Neo4jTestGenerator.neo4jCountryFromSql(savedCountry);
         neo4jCountry  = neo4jCountryRepository.save(neo4jCountry);

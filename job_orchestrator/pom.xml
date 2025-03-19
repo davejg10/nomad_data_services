@@ -65,6 +65,12 @@
 			<artifactId>spring-cloud-function-adapter-azure</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- Used to read YML file -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>

@@ -1,8 +1,10 @@
 package com.nomad.job_orchestrator.repositories;
 
 import com.nomad.job_orchestrator.domain.CityPair;
+import com.nomad.job_orchestrator.domain.Neo4jRouteToSave;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
+import com.nomad.data_library.exceptions.Neo4jGenericException;
 import com.nomad.data_library.repositories.Neo4jCommonCityRepository;
 
 import com.nomad.scraping_library.domain.CityDTO;
@@ -49,5 +51,22 @@ public class Neo4jCityRepository extends Neo4jCommonCityRepository {
                 })
                 .all();
         return cities.stream().toList();
+    }
+    
+    public void saveRoute(Neo4jRouteToSave routeToSave) {
+        try {
+            neo4jClient.query(Neo4jCommonCityRepository.QUERY_SAVE_ROUTE)
+            .bind(routeToSave.routeDefinitionId()).to("routeId")
+            .bind(routeToSave.sourceCityId()).to("id")
+            .bind(routeToSave.targetCityId()).to("targetId")
+            .bind(routeToSave.popularity()).to("popularity")
+            .bind(routeToSave.averageDuration().toString()).to("averageDuration")
+            .bind(routeToSave.averageCost().toString()).to("averageCost")
+            .bind(routeToSave.transportType().toString()).to("transportType")
+            .run();
+        } catch (Exception e) {
+            log.error("Unexpected exception when trying to save route to Neo4j. Exception: {}", e.getMessage());
+            throw new Neo4jGenericException("Unexpected exception when trying to save route to Neo4j.", e);
+        }
     }
 }

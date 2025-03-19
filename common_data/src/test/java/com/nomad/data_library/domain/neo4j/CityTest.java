@@ -9,6 +9,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
+
 @Log4j2
 @ExtendWith(MockitoExtension.class)
 public class CityTest {
@@ -61,17 +63,17 @@ public class CityTest {
         assertThat(city.getRoutes().size()).isEqualTo(1);
         assertThat(city.getRoutes()).contains(route);
 
-        Neo4jRoute lessPopularRoute = new Neo4jRoute(route.getId(), route.getTargetCity(), route.getPopularity() - 1, route.getTime(), route.getCost(), route.getTransportType());
+        Neo4jRoute lessPopularRoute = new Neo4jRoute(route.getId(), route.getTargetCity(), route.getPopularity() - 1, route.getAverageDuration(), route.getAverageCost(), route.getTransportType());
         city = city.addRoute(lessPopularRoute);
         assertThat(city.getRoutes().size()).isEqualTo(1);
         assertThat(city.getRoutes()).contains(lessPopularRoute);
 
-        Neo4jRoute longerRoute = new Neo4jRoute(lessPopularRoute.getId(), lessPopularRoute.getTargetCity(), lessPopularRoute.getPopularity(), lessPopularRoute.getTime() + 4, lessPopularRoute.getCost(), lessPopularRoute.getTransportType());
+        Neo4jRoute longerRoute = new Neo4jRoute(lessPopularRoute.getId(), lessPopularRoute.getTargetCity(), lessPopularRoute.getPopularity(), lessPopularRoute.getAverageDuration().plusHours(4), lessPopularRoute.getAverageCost(), lessPopularRoute.getTransportType());
         city = city.addRoute(longerRoute);
         assertThat(city.getRoutes().size()).isEqualTo(1);
         assertThat(city.getRoutes()).contains(longerRoute);
 
-        Neo4jRoute moreExpensiveRoute = new Neo4jRoute(longerRoute.getId(), longerRoute.getTargetCity(), longerRoute.getPopularity(), longerRoute.getTime(), longerRoute.getCost() + 10.0, longerRoute.getTransportType());
+        Neo4jRoute moreExpensiveRoute = new Neo4jRoute(longerRoute.getId(), longerRoute.getTargetCity(), longerRoute.getPopularity(), longerRoute.getAverageDuration(), longerRoute.getAverageCost().add(new BigDecimal(10.0)), longerRoute.getTransportType());
         city = city.addRoute(moreExpensiveRoute);
         assertThat(city.getRoutes().size()).isEqualTo(1);
         assertThat(city.getRoutes()).contains(moreExpensiveRoute);

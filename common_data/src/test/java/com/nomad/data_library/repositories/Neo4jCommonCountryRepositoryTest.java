@@ -164,27 +164,27 @@ public class Neo4jCommonCountryRepositoryTest {
         assertThat(countryASecondSave.getId()).isEqualTo(countryAFirstSave.getId());
     }
 
-    @Test
-    void createCountry_doesntTouchCityNodes_ever() throws Neo4jGenericException {
-        countryRepository.createCountry(countryA);
+     @Test
+     void createCountry_doesntTouchCityNodes_ever() throws Neo4jGenericException {
+         countryRepository.createCountry(countryA);
 
-        cityA = cityA.addRoute(routeAToB);
-        cityRepository.createCity(cityA);
-        cityRepository.createCity(cityB);
-        cityRepository.saveRoute(cityA);
+         cityRepository.createCity(cityA);
+         cityRepository.createCity(cityB);
+         cityA = cityA.addRoute(routeAToB);
+         cityRepository.saveRoute(cityA);
 
-        Set<Neo4jCity> allCitiesFirstSearch = cityRepository.findAllCities();
+         Set<Neo4jCity> allCitiesFirstSearch = cityRepository.findAllCities();
 
-        Neo4jCity cityADifferentProperties = Neo4jTestGenerator.neo4jCityNoRoutes(cityAName, countryA);
-        Neo4jCity cityBDifferentProperties = Neo4jTestGenerator.neo4jCityNoRoutes(cityBName, countryA);
+         Neo4jCity cityADifferentProperties = Neo4jTestGenerator.neo4jCityNoRoutes(cityAName, countryA);
+         Neo4jCity cityBDifferentProperties = Neo4jTestGenerator.neo4jCityNoRoutes(cityBName, countryA);
 
-        Neo4jCountry countryAWithCities = new Neo4jCountry(countryA.getId(), countryA.getName(), countryA.getShortDescription(), countryA.getPrimaryBlobUrl(), Set.of(cityADifferentProperties, cityBDifferentProperties));
-        countryRepository.createCountry(countryAWithCities);
+         Neo4jCountry countryAWithCities = new Neo4jCountry(countryA.getId(), countryA.getName(), countryA.getShortDescription(), countryA.getPrimaryBlobUrl(), Set.of(cityADifferentProperties, cityBDifferentProperties));
+         countryRepository.createCountry(countryAWithCities);
 
-        Set<Neo4jCity> allCitiesSecondSearch = cityRepository.findAllCities();
+         Set<Neo4jCity> allCitiesSecondSearch = cityRepository.findAllCities();
 
-        assertThat(allCitiesSecondSearch.size()).isEqualTo(2);
-        assertThat(allCitiesFirstSearch).isEqualTo(allCitiesSecondSearch);
-    }
+         assertThat(allCitiesSecondSearch.size()).isEqualTo(2);
+         assertThat(allCitiesFirstSearch).isEqualTo(allCitiesSecondSearch);
+     }
 
 }

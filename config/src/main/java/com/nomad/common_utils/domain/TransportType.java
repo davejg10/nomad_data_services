@@ -1,4 +1,4 @@
-package com.nomad.data_library.domain;
+package com.nomad.common_utils.domain;
 
 import java.util.Arrays;
 import java.util.List;

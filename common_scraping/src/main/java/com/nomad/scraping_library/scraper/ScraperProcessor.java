@@ -59,6 +59,7 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
 
                 if (iterator.hasNext()) {
                     ServiceBusReceivedMessage message = iterator.next();
+                    
                     String correlationId = message.getCorrelationId();
                     ThreadContext.put("correlationId", correlationId);
 

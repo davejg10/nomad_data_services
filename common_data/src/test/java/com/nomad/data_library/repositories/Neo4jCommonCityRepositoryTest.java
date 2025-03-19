@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.nomad.common_utils.domain.TransportType;
 import com.nomad.data_library.GenericTestGenerator;
 import com.nomad.data_library.config.Neo4jConfig;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
@@ -23,7 +24,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.data_library.Neo4jTestConfiguration;
 import com.nomad.data_library.Neo4jTestGenerator;
 import com.nomad.data_library.TestConfig;
-import com.nomad.data_library.domain.TransportType;
 import com.nomad.data_library.exceptions.Neo4jGenericException;
 
 import jakarta.transaction.Transactional;
@@ -219,10 +219,9 @@ public class Neo4jCommonCityRepositoryTest {
 
      @Test
      void findAllCities_shouldPopulateRoutesRelationship_ifRoutesExist() {
-         cityA = cityA.addRoute(routeAToB);
          cityRepository.createCity(cityA);
          cityRepository.createCity(cityB);
-
+         cityA = cityA.addRoute(routeAToB);
          cityRepository.saveRoute(cityA);
 
          Set<Neo4jCity> allCities = cityRepository.findAllCities();
@@ -236,10 +235,10 @@ public class Neo4jCommonCityRepositoryTest {
 
      @Test
      void findAllCities_shouldPopulateCountriesRelationship_always() {
-         cityA = cityA.addRoute(routeAToB);
          cityRepository.createCity(cityA);
          cityRepository.createCity(cityB);
 
+         cityA = cityA.addRoute(routeAToB);
          cityRepository.saveRoute(cityA);
 
          Set<Neo4jCity> allCities = cityRepository.findAllCities();
@@ -382,8 +381,8 @@ public class Neo4jCommonCityRepositoryTest {
      void saveRoute_createsARouteRelationshipToTargetCityForEachTransportType_ifThereAreTwoTransportTypeRoutes() {
          cityRepository.createCity(cityA);
          cityRepository.createCity(cityB);
-         cityA = cityA.addRoute(UUID.randomUUID().toString(), cityB, 4, 3, 16.0, TransportType.BUS);
-         cityA = cityA.addRoute(UUID.randomUUID().toString(), cityB, 4, 3, 30.0, TransportType.FLIGHT);
+         cityA = cityA.addRoute(UUID.randomUUID().toString(), cityB, 4, Neo4jTestGenerator.calculateRandomDuration(), Neo4jTestGenerator.calculateRandomCost(), TransportType.BUS);
+         cityA = cityA.addRoute(UUID.randomUUID().toString(), cityB, 4, Neo4jTestGenerator.calculateRandomDuration(), Neo4jTestGenerator.calculateRandomCost(), TransportType.FLIGHT);
          Neo4jCity createdCityA = cityRepository.saveRoute(cityA);
 
          List<String> allTargetCities = createdCityA.getRoutes().stream().map(route -> route.getTargetCity().getName()).distinct().toList();
@@ -404,13 +403,13 @@ public class Neo4jCommonCityRepositoryTest {
          cityRepository.createCity(cityB);
          cityRepository.createCity(cityC);
 
-         cityB = cityB.addRoute(UUID.randomUUID().toString(), cityC, 4, 3, 5.0, TransportType.BUS);
+         cityB = cityB.addRoute(UUID.randomUUID().toString(), cityC, 4, Neo4jTestGenerator.calculateRandomDuration(), Neo4jTestGenerator.calculateRandomCost(), TransportType.BUS);
 
          Neo4jCity cityBAfterFirstSave = cityRepository.saveRoute(cityB);
          Neo4jCity cityCAfterFirstSave = cityRepository.findByIdFetchRoutes(cityC.getId()).get();
 
          Neo4jCity cityBResetRoutes = new Neo4jCity(cityB.getId(), cityBName, cityB.getShortDescription(), cityB.getPrimaryBlobUrl(), cityB.getCoordinate(), cityB.getCityMetrics(), Set.of(), cityB.getCountry());
-         cityA = cityA.addRoute(UUID.randomUUID().toString(), cityBResetRoutes, 4, 3, 9.0, TransportType.BUS);
+         cityA = cityA.addRoute(UUID.randomUUID().toString(), cityBResetRoutes, 4, Neo4jTestGenerator.calculateRandomDuration(), Neo4jTestGenerator.calculateRandomCost(), TransportType.BUS);
          Neo4jCity cityAAfterSecondSave = cityRepository.saveRoute(cityA);
 
          Neo4jCity cityBAfterSecondSave = cityRepository.findByIdFetchRoutes(cityB.getId()).get();

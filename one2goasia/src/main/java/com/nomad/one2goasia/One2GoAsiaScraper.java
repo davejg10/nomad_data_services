@@ -1,8 +1,9 @@
 package com.nomad.one2goasia;
 
+import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.LoadState;
-import com.nomad.scraping_library.domain.TransportType;
+import com.nomad.common_utils.domain.TransportType;
 import com.nomad.scraping_library.domain.RouteDTO;
 import com.nomad.scraping_library.domain.ScraperRequest;
 import com.nomad.scraping_library.domain.ScraperResponse;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -77,19 +79,22 @@ public class One2GoAsiaScraper implements WebScraperInterface {
             while (showMoreButton.count() > 0) {
                 showMoreButton.scrollIntoViewIfNeeded();
                 showMoreButton.click();
-                Thread.sleep(400);
+                Thread.sleep(200);
                 showMoreButton = page.locator(timeTableShowMoreButtonSelector);
             }
             Locator tableBody = page.locator(timeTableListSelector);
             tableBody.waitFor();
 
             List<RouteDTO> results = parseTableBody(tableBody.innerText(), request.getSearchDate());
-            Thread.sleep(500);
-            for (RouteDTO routeDTO  : results) {
-                ScraperResponse response = new ScraperResponse(request.getScraperRequestSource(), request.getType(), request.getSourceCity(), request.getTargetCity(), routeDTO, request.getSearchDate());
-                scraperResponses.add(response);
-            }
+            Thread.sleep(300);
 
+            Map<TransportType, List<RouteDTO>> groupedRoutes = results.stream().collect(Collectors.groupingBy(RouteDTO::transportType));
+
+            groupedRoutes.forEach((type, routeListForType) -> {
+                ScraperResponse response = new ScraperResponse(request.getScraperRequestSource(), request.getType(), type, request.getSourceCity(), request.getTargetCity(), routeListForType, request.getSearchDate());
+                scraperResponses.add(response);
+            });
+           
         } catch (PlaywrightException e) {
             log.error("Playwright Scraping error: " + e.getMessage());
         } catch (InterruptedException e) {
@@ -128,7 +133,7 @@ public class One2GoAsiaScraper implements WebScraperInterface {
                             operator,
                             depart,
                             arrive,
-                            cost.length() <= 6 ? Double.parseDouble(cost.substring(1)) : 1000.0,
+                            cost.substring(1),
                             searchDate
                     );
                     routes.add(route);

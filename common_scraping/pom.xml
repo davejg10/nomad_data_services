@@ -16,6 +16,12 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.nomad.multi</groupId>
+            <artifactId>config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
         <!-- Service Bus dependencies -->
         <dependency>
 			<groupId>com.azure</groupId>
