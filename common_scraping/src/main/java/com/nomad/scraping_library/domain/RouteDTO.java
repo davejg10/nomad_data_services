@@ -43,9 +43,19 @@ public record RouteDTO(TransportType transportType, String operator, LocalDateTi
                     transportTypeEnum = TransportType.VAN_FERRY;
                 } else if (transportType.equals("Bus, Bus, Ferry")) {
                     transportTypeEnum = TransportType.BUS_BUS_FERRY;
+                } else if (transportType.equals("Bus, Van")) {
+                    transportTypeEnum = TransportType.BUS_VAN;
+                } else if (transportType.equals("Ferry, Bus")) {
+                    transportTypeEnum = TransportType.FERRY_BUS;
+                } else if (transportType.equals("Ferry, Van")) {
+                    transportTypeEnum = TransportType.FERRY_VAN;
+                } else if (transportType.equals("Bus, Bus")) {
+                    transportTypeEnum = TransportType.BUS_BUS;
                 } else {
                     transportTypeEnum = TransportType.valueOf(transportType.toUpperCase());
                 }
+
+
 
             } catch (DateTimeParseException e) {
                 log.error("Error when passing depart/arrival time to LocalTime. Error: {}", e.getMessage());

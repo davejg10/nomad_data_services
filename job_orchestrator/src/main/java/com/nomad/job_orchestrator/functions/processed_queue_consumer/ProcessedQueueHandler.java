@@ -38,7 +38,7 @@ public class ProcessedQueueHandler implements Consumer<ScraperResponse> {
     }
 
     public void accept(ScraperResponse scraperResponse) {
-        log.info("In here with scraperResponse: {}", scraperResponse);
+        log.info("In processedQueueHandler. Starting to process scraperResponse");
 
         UUID sourceCityId = UUID.fromString(scraperResponse.getSourceCity().id());
         UUID targetCityId = UUID.fromString(scraperResponse.getTargetCity().id());

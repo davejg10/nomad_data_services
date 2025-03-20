@@ -31,7 +31,7 @@
     
      // Note that no matter the cron schedule on the jobs within jobs-config, the maximumum frequency with
      // which they can be called is down to this cron schedule.
-     private final String cronTriggerSchedule = "0 */50 * * * *";
+     private final String cronTriggerSchedule = "0 */5 * * * *";
 
      @Autowired
      private CronJobHandler cronJobHandler;
