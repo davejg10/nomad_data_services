@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.Type;
 import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.Column;
@@ -16,7 +15,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,6 +36,8 @@ public class RouteInstance {
     private LocalDateTime departure;
 
     private LocalDateTime arrival;
+
+    private String url;
     
     @JdbcTypeCode(SqlTypes.INTERVAL_SECOND)
     @Column(name = "travel_time")
@@ -54,14 +54,14 @@ public class RouteInstance {
     private RouteDefinition routeDefinition;
 
 
-    public static RouteInstance of(BigDecimal cost, LocalDateTime departure, LocalDateTime arrival, LocalDate searchDate, RouteDefinition routeDefinition) {
-        return new RouteInstance(null, cost, departure, arrival, Duration.between(departure, arrival), searchDate, LocalDateTime.now(), routeDefinition);
+    public static RouteInstance of(BigDecimal cost, LocalDateTime departure, LocalDateTime arrival, String url, LocalDate searchDate, RouteDefinition routeDefinition) {
+        return new RouteInstance(null, cost, departure, arrival, url, Duration.between(departure, arrival), searchDate, LocalDateTime.now(), routeDefinition);
     }
 
-    @PostLoad
-    protected void convertMillisToDuration() {
-        if ("org.h2.Driver".equals(System.getProperty("database.driver"))) {
-            this.travelTime = Duration.between(departure, arrival);
-        }
-    }
+    // @PostLoad
+    // protected void convertMillisToDuration() {
+    //     if ("org.h2.Driver".equals(System.getProperty("database.driver"))) {
+    //         this.travelTime = Duration.between(departure, arrival);
+    //     }
+    // }
 }

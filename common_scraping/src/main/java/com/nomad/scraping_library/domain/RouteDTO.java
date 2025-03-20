@@ -9,23 +9,25 @@ import java.time.format.DateTimeParseException;
 import com.nomad.common_utils.domain.TransportType;
 import com.nomad.scraping_library.exceptions.ScrapingDataSchemaException;
 
+import lombok.EqualsAndHashCode;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public record RouteDTO(TransportType transportType, String operator, LocalDateTime depart, LocalDateTime arrival, BigDecimal cost) {
+public record RouteDTO(TransportType transportType, String operator, LocalDateTime depart, LocalDateTime arrival, BigDecimal cost, String url) {
 
     public static RouteDTO createWithSchema(
         String transportType,
         String operator,
-        String depart,
+        String departure,
         String arrival,
         String cost,
+        String url,
         LocalDate searchDate) throws ScrapingDataSchemaException
         {
             LocalDateTime departDateTime, arrivalDateTime = null;
             TransportType transportTypeEnum = null;
             try {
-                departDateTime = LocalDateTime.of(searchDate, LocalTime.parse(depart));
+                departDateTime = LocalDateTime.of(searchDate, LocalTime.parse(departure));
 
                 arrivalDateTime = LocalDateTime.of(searchDate, LocalTime.parse(arrival));
     
@@ -33,15 +35,24 @@ public record RouteDTO(TransportType transportType, String operator, LocalDateTi
                     arrivalDateTime = arrivalDateTime.plusDays(1);
                 }
 
-                transportTypeEnum = TransportType.valueOf(transportType.toUpperCase());
+                if (transportType.equals("Bus, Ferry")) {
+                    transportTypeEnum = TransportType.BUS_FERRY;
+                } else if (transportType.equals("Van, Bus")) {
+                    transportTypeEnum = TransportType.VAN_BUS;
+                } else if (transportType.equals("Van, Ferry")) {
+                    transportTypeEnum = TransportType.VAN_FERRY;
+                } else if (transportType.equals("Bus, Bus, Ferry")) {
+                    transportTypeEnum = TransportType.BUS_BUS_FERRY;
+                } else {
+                    transportTypeEnum = TransportType.valueOf(transportType.toUpperCase());
+                }
 
-                
             } catch (DateTimeParseException e) {
                 log.error("Error when passing depart/arrival time to LocalTime. Error: {}", e.getMessage());
-                throw new ScrapingDataSchemaException("In RouteDTO createWithSchema: " + e.getMessage());
+                throw new ScrapingDataSchemaException("In RouteDTO createWithSchema", e);
             } catch (Exception e ) {
-                log.error("Error most likely when mapping TransportType. TransportType string given: {}", transportType);
-                throw new ScrapingDataSchemaException("In RouteDTO createWithSchema: " + e.getMessage());
+                log.error("Error most likely when mapping TransportType. TransportType string given: {}. Error: {}", transportType, e.getMessage());
+                throw new ScrapingDataSchemaException("In RouteDTO createWithSchema", e);
 
             }
 
@@ -52,7 +63,7 @@ public record RouteDTO(TransportType transportType, String operator, LocalDateTi
                 throw new ScrapingDataSchemaException("Cost cannot be less than 0 when creating RouteDTO object");
             }
 
-            return new RouteDTO(transportTypeEnum, operator, departDateTime, arrivalDateTime, new BigDecimal(cost));
+            return new RouteDTO(transportTypeEnum, operator, departDateTime, arrivalDateTime, new BigDecimal(cost), url);
         }
     
 }

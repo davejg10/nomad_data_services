@@ -12,26 +12,29 @@ import lombok.Getter;
 @Getter
 public class ScraperResponse extends ScraperMessage {
 
+    private ScraperIdentifier scraperIdentifier;
     private TransportType transportType;
     private List<RouteDTO> routes;
     
     @JsonCreator
     public ScraperResponse(@JsonProperty("scraperRequestSource") String scraperRequestSource,
                            @JsonProperty("type") ScraperRequestType type,
+                           @JsonProperty("scraperIdentifier") ScraperIdentifier scraperIdentifier,
                            @JsonProperty("transportType") TransportType transportType,
                            @JsonProperty("sourceCity") CityDTO sourceCity,
                            @JsonProperty("targetCity") CityDTO targetCity,
                            @JsonProperty("routes") List<RouteDTO> routes,
                            @JsonProperty("searchDate") LocalDate searchDate) {
         super(scraperRequestSource, type, sourceCity, targetCity, searchDate);
+        this.scraperIdentifier = scraperIdentifier;
         this.transportType = transportType;
         this.routes = routes;
     }
 
     @Override
     public String toString() {
-        return "ScraperResponse [scraperRequestSource=" + scraperRequestSource + ", type=" + type + ", transportType=" + transportType + ", sourceCity="
-                + sourceCity + ", routes=" + routes + ", targetCity=" + targetCity + ", searchDate=" + searchDate + "]";
+        return "ScraperResponse [scraperRequestSource=" + scraperRequestSource + ", scraperIdentifier=" + scraperIdentifier + ", type=" + type + "," +
+                " transportType=" + transportType + ", sourceCity=" + sourceCity + ", routes=" + routes + ", targetCity=" + targetCity + ", searchDate=" + searchDate + "]";
     }
 
 }   

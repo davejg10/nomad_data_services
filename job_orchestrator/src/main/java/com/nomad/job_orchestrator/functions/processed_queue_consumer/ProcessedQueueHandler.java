@@ -71,8 +71,10 @@ public class ProcessedQueueHandler implements Consumer<ScraperResponse> {
 
         Set<RouteInstance> routeInstances = new HashSet<>();
         for (RouteDTO route : scraperResponse.getRoutes()) {
-            routeInstances.add(RouteInstance.of(route.cost(), route.depart(), route.arrival(), scraperResponse.getSearchDate(), routeDefinition));
+            routeInstances.add(RouteInstance.of(route.cost(), route.depart(), route.arrival(), route.url(), scraperResponse.getSearchDate(), routeDefinition));
         }
+        log.info("request length: {}", scraperResponse.getRoutes().size());
+        log.info("Route instances lenght: {}", routeInstances.size());
 
         sqlRouteInstanceRepository.saveAll(routeInstances);
         

@@ -9,16 +9,13 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 
+import com.nomad.scraping_library.domain.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.nomad.common_utils.domain.TransportType;
 import com.nomad.scraping_library.config.AppConfig;
-import com.nomad.scraping_library.domain.CityDTO;
-import com.nomad.scraping_library.domain.RouteDTO;
-import com.nomad.scraping_library.domain.ScraperRequestType;
-import com.nomad.scraping_library.domain.ScraperResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.log4j.Log4j2;
@@ -39,14 +36,15 @@ public class ScraperResponseTest {
     CityDTO sourceCity = new CityDTO("d637fdf7-d4d8-4bbb-a0d7-218b87d86442", "CityA");
     CityDTO targetCity = new CityDTO("9ef0a8a7-fab9-4c7d-8040-194ba1e3a726", "CityB");
 
-    RouteDTO routeDTOEasyjet = new RouteDTO(TransportType.FLIGHT, "Easyjet", departEasy, arrivalEasy, new BigDecimal("12.99"));
-    RouteDTO routeDTOWizz = new RouteDTO(TransportType.FLIGHT, "WizzAir", departWizz, arrivalWizz, new BigDecimal("4.22"));
+    RouteDTO routeDTOEasyjet = new RouteDTO(TransportType.FLIGHT, "Easyjet", departEasy, arrivalEasy, new BigDecimal("12.99"), "someurl");
+    RouteDTO routeDTOWizz = new RouteDTO(TransportType.FLIGHT, "WizzAir", departWizz, arrivalWizz, new BigDecimal("4.22"), "someurl");
 
-    ScraperResponse scraperResponseObject = new ScraperResponse("httpTrigger", ScraperRequestType.ROUTE_DISCOVERY, TransportType.FLIGHT, sourceCity, targetCity, List.of(routeDTOEasyjet, routeDTOWizz), futureDate);
+    ScraperResponse scraperResponseObject = new ScraperResponse("httpTrigger", ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, sourceCity, targetCity, List.of(routeDTOEasyjet, routeDTOWizz), futureDate);
     String scraperResponseJson = String.format("""
             {
                 "scraperRequestSource": "httpTrigger",
                 "type": "ROUTE_DISCOVERY",
+                "scraperIdentifier": "ONE2GOASIA",
                 "transportType": "FLIGHT",
                 "sourceCity": {
                     "id": "d637fdf7-d4d8-4bbb-a0d7-218b87d86442",
@@ -62,14 +60,16 @@ public class ScraperResponseTest {
                         "operator": "Easyjet",
                         "depart": "%s",
                         "arrival": "%s",
-                        "cost": 12.99
+                        "cost": 12.99,
+                        "url": "someurl"
                     },
                     {
                         "transportType": "FLIGHT",
                         "operator": "WizzAir",
                         "depart": "%s",
                         "arrival": "%s",
-                        "cost": 4.22
+                        "cost": 4.22,
+                        "url": "someurl"
                     }
                 ],
                 "searchDate": "%s"

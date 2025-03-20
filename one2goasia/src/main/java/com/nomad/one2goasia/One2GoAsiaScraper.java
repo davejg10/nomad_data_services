@@ -1,13 +1,17 @@
 package com.nomad.one2goasia;
 
 import com.azure.messaging.servicebus.ServiceBusReceiverClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.LoadState;
 import com.nomad.common_utils.domain.TransportType;
 import com.nomad.scraping_library.domain.RouteDTO;
+import com.nomad.scraping_library.domain.ScraperIdentifier;
 import com.nomad.scraping_library.domain.ScraperRequest;
 import com.nomad.scraping_library.domain.ScraperResponse;
+import com.nomad.scraping_library.exceptions.ScrapingDataSchemaException;
 import com.nomad.scraping_library.scraper.WebScraperInterface;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -21,15 +25,14 @@ import java.util.stream.Collectors;
 public class One2GoAsiaScraper implements WebScraperInterface {
 
     private static final String BASE_URL = "https://12go.asia/en/travel/";
-    private static final String timeTableShowMoreButtonSelector = "#__nuxt > div.wrapper > div.wrapper-content > div.page-search-results > div:nth-child(6) > div > button";
-    private static final String timeTableListSelector =  "#__nuxt > div.wrapper > div.wrapper-content > div.page-search-results > div:nth-child(6) > div > div > table > tbody";
+    private static final String timeTableShowMoreButtonSelector = "#best_options > div.container.block-module > div.list > button";
+    private static final String tripListCard = "#best_options > div.container.block-module > div.list > div:has(a)";
     private static final int RATE_LIMIT_DELAY = 1000;
 
     private final Playwright playwright;
     private final Browser browser;
     private final Page page;
     private final BrowserContext browserContext;
-   
 
     public One2GoAsiaScraper() {
         // Initialize Playwright with proper configurations for scraping
@@ -37,28 +40,12 @@ public class One2GoAsiaScraper implements WebScraperInterface {
 
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
                 .setHeadless(true)  // Run in headless mode for better performance
-                .setSlowMo(50));    // Add delay to respect rate limits
+                .setSlowMo(50));// Add delay to respect rate limits
 
         browserContext = browser.newContext();
         page = browserContext.newPage();
     }
-
-    // @PreDestroy
-    // public void onDestroy() throws InterruptedException {
-    //     log.info("Closing playwright gracefully...");
-    //     page.close();
-    //     Thread.sleep(2000);
-
-    //     browserContext.close();
-    //     Thread.sleep(2000);
-
-    //     browser.close();
-    //     Thread.sleep(2000);
-    //     playwright.close();
-
-    //     Thread.sleep(1000);
-
-    // }
+    ObjectMapper objectMapper = new ObjectMapper();
 
     // Method to extract data from a webpage
     public List<ScraperResponse> scrapeData(ScraperRequest request) {
@@ -75,77 +62,104 @@ public class One2GoAsiaScraper implements WebScraperInterface {
             page.navigate(url);
             page.waitForLoadState(LoadState.NETWORKIDLE);
 
-            Locator showMoreButton = page.locator(timeTableShowMoreButtonSelector);
-            while (showMoreButton.count() > 0) {
-                showMoreButton.scrollIntoViewIfNeeded();
-                showMoreButton.click();
-                Thread.sleep(200);
-                showMoreButton = page.locator(timeTableShowMoreButtonSelector);
+            page.setDefaultTimeout(5000);
+            page.waitForSelector(tripListCard);
+
+            Set<RouteDTO> routesSet = new HashSet<>();
+
+            int timesScrolled = 0, maxScrolls = 8, lastItemCount = 0;
+            while (timesScrolled < maxScrolls) {
+
+                page.mouse().wheel(0, 1200);
+                List<Locator> divList = page.locator(tripListCard).all();
+                int currentItemCount = divList.size();
+
+                // If no new elements were loaded, stop scrolling
+                if (currentItemCount == lastItemCount) {
+                    log.info("No new items found. Stopping scroll.");
+                    break;
+                }
+                try {
+                    routesSet.addAll(parseDivListRow(tripListCard, request.getSearchDate()));
+                } catch (Exception e) {
+                    log.error("Unexpected exception was: {}", e.getMessage(), e);
+                }
+                timesScrolled ++;
             }
-            Locator tableBody = page.locator(timeTableListSelector);
-            tableBody.waitFor();
 
-            List<RouteDTO> results = parseTableBody(tableBody.innerText(), request.getSearchDate());
-            Thread.sleep(300);
-
-            Map<TransportType, List<RouteDTO>> groupedRoutes = results.stream().collect(Collectors.groupingBy(RouteDTO::transportType));
+            Map<TransportType, List<RouteDTO>> groupedRoutes = routesSet.stream().collect(Collectors.groupingBy(RouteDTO::transportType));
 
             groupedRoutes.forEach((type, routeListForType) -> {
-                ScraperResponse response = new ScraperResponse(request.getScraperRequestSource(), request.getType(), type, request.getSourceCity(), request.getTargetCity(), routeListForType, request.getSearchDate());
+                ScraperResponse response = new ScraperResponse(request.getScraperRequestSource(), request.getType(), ScraperIdentifier.ONE2GOASIA, type, request.getSourceCity(), request.getTargetCity(), routeListForType, request.getSearchDate());
                 scraperResponses.add(response);
             });
-           
+
         } catch (PlaywrightException e) {
             log.error("Playwright Scraping error: " + e.getMessage());
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
         return scraperResponses;
     }
 
-    private List<RouteDTO> parseTableBody(String tableBodyInnerText, LocalDate searchDate) {
-        // Split on line breaks
-        String[] lines = tableBodyInnerText.split("\\R+");
-        // Remove empty entries
-        List<String> lineList = Arrays.stream(lines).map(String::trim).filter(line -> !line.equals("")).toList();
+    private Set<RouteDTO> parseDivListRow(String tripListCard, LocalDate searchDate) throws Exception {
+        Set<RouteDTO> routes = new HashSet<>();
+        Object tripData = page.evalOnSelectorAll(tripListCard, """
+                            elements => elements.map(el => {
+                                let anchor = el.querySelector("a");
+                                let href = anchor ? anchor.href : null;
+                        
+                                let trip = { href: href };
+                        
+                                let items = anchor ? anchor.querySelectorAll("div.trip-body div.points div.item") : [];
+                                
+                                items.forEach(item => {
+                                    let innerHTML = item.innerHTML;
+                        
+                                    if (innerHTML.includes("vehclasses")) {
+                                        let vehClasses = item.querySelector("div.vehclasses > div");
+                                        let newVehClass = vehClasses ? vehClasses : item.querySelector("div.vehclasses > span");
+                                        let transport = newVehClass ? newVehClass.getAttribute("tooltip") : null;
+                                        if (transport) {
+                                            let transportSplit = transport.split(" with ");
+                                            trip.transportType = transportSplit[0] || null;
+                                            trip.transportOperator = transportSplit[1] || null;
+                                        }
+                                    } else if (innerHTML.includes("trip-time dep")) {
+                                        let departTime = item.querySelector("strong.time")?.innerText;
+                                        trip.departure = departTime;
+                                        trip.departureLocation = item.querySelector("div.one-line")?.innerText;
+                                    } else {
+                                        let arrivalTime = item.querySelector("strong.time")?.innerText;
+                                        trip.arrival = arrivalTime;
+                                        trip.arrivalLocation = item.querySelector("div.one-line")?.innerText;
+                                    }
+                                });
+                                
+                                let cost = anchor.querySelector("div.trip-cta > div.price > meta[data-qa='trip-card-meta-price']").getAttribute("content");
+                                trip.cost = cost;
+                                return trip;
+                            })
+                        """);
+        List<Map<String, String>> tripList = objectMapper.convertValue(tripData, new TypeReference<List<Map<String, String>>>() {});
 
-        List<String> tempLine = new ArrayList<>();
-        List<RouteDTO> routes = new ArrayList<>();
-
-        for(int index = 0; index < lineList.size(); index++) {
-            String line = lineList.get(index);
-            if (index != 0 && TransportType.to12GoAsiaList().contains(line)) {
-                String transportType = null, operator = null, depart = null, arrive = null, cost = null;
-                try {
-                    if (tempLine.get(3).contains("Any time")) {
-                        log.warn("Ignoring route as contains Any Time for depart");
-                        tempLine.clear();
-                        tempLine.add(line);
-                        continue;
-                    }
-                    transportType = tempLine.get(0);
-                    operator = tempLine.get(1);
-                    depart = tempLine.get(3);
-                    arrive = tempLine.get(4);
-                    cost = tempLine.get(5);
-                    RouteDTO route = RouteDTO.createWithSchema(
-                            transportType,
-                            operator,
-                            depart,
-                            arrive,
-                            cost.substring(1),
-                            searchDate
-                    );
-                    routes.add(route);
-                } catch (Exception e) {
-                    log.info("transportType: {}, operator: {}, depart: {}, arrive: {}, cost: {}", transportType, operator, depart, arrive, cost);
-                    log.error("Issue when trying to map scraped data to RouteDTO object. Error: {}", e.getMessage());
-                }
-                tempLine.clear();
+        for (Map<String, String> trip : tripList) {
+            if (trip.get("departure").equals("--:--")) {
+                log.error("Not adding due to departTime being --:--");
+                continue;
             }
-            tempLine.add(line);
+            RouteDTO newRoute = RouteDTO.createWithSchema(
+                    trip.get("transportType"),
+                    trip.get("transportOperator"),
+                    trip.get("departure"),
+                    trip.get("arrival"),
+                    trip.get("cost"),
+                    trip.get("href"),
+                    searchDate
+            );
+            routes.add(newRoute);
         }
+
         return routes;
     }
+
 
 }
