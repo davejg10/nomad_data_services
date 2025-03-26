@@ -14,7 +14,6 @@
      CONSTRAINT unique_city_per_country UNIQUE (name, country_id)
  );
 
-
  CREATE TABLE IF NOT EXISTS route_definition (
      id UUID DEFAULT (UUID()) PRIMARY KEY,
      popularity REAL NOT NULL,
@@ -33,6 +32,9 @@
      url TEXT NOT NULL,
      departure TIMESTAMP WITH TIME ZONE NOT NULL,
      arrival TIMESTAMP WITH TIME ZONE NOT NULL,
+     operator VARCHAR(50) NOT NULL,
+     departure_location VARCHAR(100) NOT NULL,
+     arrival_location VARCHAR(100) NOT NULL,
      last_check TIMESTAMP WITH TIME ZONE NOT NULL,
      travel_time BIGINT,
      route_definition_id UUID,

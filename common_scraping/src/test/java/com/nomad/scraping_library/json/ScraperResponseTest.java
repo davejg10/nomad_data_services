@@ -36,8 +36,8 @@ public class ScraperResponseTest {
     CityDTO sourceCity = new CityDTO("d637fdf7-d4d8-4bbb-a0d7-218b87d86442", "CityA");
     CityDTO targetCity = new CityDTO("9ef0a8a7-fab9-4c7d-8040-194ba1e3a726", "CityB");
 
-    RouteDTO routeDTOEasyjet = new RouteDTO(TransportType.FLIGHT, "Easyjet", departEasy, arrivalEasy, new BigDecimal("12.99"), "someurl");
-    RouteDTO routeDTOWizz = new RouteDTO(TransportType.FLIGHT, "WizzAir", departWizz, arrivalWizz, new BigDecimal("4.22"), "someurl");
+    RouteDTO routeDTOEasyjet = new RouteDTO(TransportType.FLIGHT, "Easyjet", departEasy, arrivalEasy, "London", "Bangkok", new BigDecimal("12.99"), "someurl");
+    RouteDTO routeDTOWizz = new RouteDTO(TransportType.FLIGHT, "WizzAir", departWizz, arrivalWizz, "London", "Bangkok", new BigDecimal("4.22"), "someurl");
 
     ScraperResponse scraperResponseObject = new ScraperResponse("httpTrigger", ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, sourceCity, targetCity, List.of(routeDTOEasyjet, routeDTOWizz), futureDate);
     String scraperResponseJson = String.format("""
@@ -60,6 +60,8 @@ public class ScraperResponseTest {
                         "operator": "Easyjet",
                         "depart": "%s",
                         "arrival": "%s",
+                        "departureLocation": "London",
+                        "arrivalLocation": "Bangkok",
                         "cost": 12.99,
                         "url": "someurl"
                     },
@@ -68,6 +70,8 @@ public class ScraperResponseTest {
                         "operator": "WizzAir",
                         "depart": "%s",
                         "arrival": "%s",
+                        "departureLocation": "London",
+                        "arrivalLocation": "Bangkok",
                         "cost": 4.22,
                         "url": "someurl"
                     }

@@ -37,6 +37,14 @@ public class RouteInstance {
 
     private LocalDateTime arrival;
 
+    private String operator;
+
+    @Column(name = "departure_location")
+    private String departureLocation;
+
+    @Column(name = "arrival_location")
+    private String arrivalLocation;
+
     private String url;
     
     @JdbcTypeCode(SqlTypes.INTERVAL_SECOND)
@@ -54,14 +62,7 @@ public class RouteInstance {
     private RouteDefinition routeDefinition;
 
 
-    public static RouteInstance of(BigDecimal cost, LocalDateTime departure, LocalDateTime arrival, String url, LocalDate searchDate, RouteDefinition routeDefinition) {
-        return new RouteInstance(null, cost, departure, arrival, url, Duration.between(departure, arrival), searchDate, LocalDateTime.now(), routeDefinition);
+    public static RouteInstance of(BigDecimal cost, LocalDateTime departure, LocalDateTime arrival, String operator, String departureLocation, String arrivalLocation, String url, LocalDate searchDate, RouteDefinition routeDefinition) {
+        return new RouteInstance(null, cost, departure, arrival, operator, departureLocation, arrivalLocation, url, Duration.between(departure, arrival), searchDate, LocalDateTime.now(), routeDefinition);
     }
-
-    // @PostLoad
-    // protected void convertMillisToDuration() {
-    //     if ("org.h2.Driver".equals(System.getProperty("database.driver"))) {
-    //         this.travelTime = Duration.between(departure, arrival);
-    //     }
-    // }
 }

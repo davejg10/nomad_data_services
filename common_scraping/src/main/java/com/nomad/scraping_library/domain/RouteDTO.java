@@ -9,17 +9,18 @@ import java.time.format.DateTimeParseException;
 import com.nomad.common_utils.domain.TransportType;
 import com.nomad.scraping_library.exceptions.ScrapingDataSchemaException;
 
-import lombok.EqualsAndHashCode;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public record RouteDTO(TransportType transportType, String operator, LocalDateTime depart, LocalDateTime arrival, BigDecimal cost, String url) {
+public record RouteDTO(TransportType transportType, String operator, LocalDateTime depart, LocalDateTime arrival, String departureLocation, String arrivalLocation, BigDecimal cost, String url) {
 
     public static RouteDTO createWithSchema(
         String transportType,
         String operator,
         String departure,
         String arrival,
+        String departureLocation,
+        String arrivalLocation,
         String cost,
         String url,
         LocalDate searchDate) throws ScrapingDataSchemaException
@@ -73,7 +74,7 @@ public record RouteDTO(TransportType transportType, String operator, LocalDateTi
                 throw new ScrapingDataSchemaException("Cost cannot be less than 0 when creating RouteDTO object");
             }
 
-            return new RouteDTO(transportTypeEnum, operator, departDateTime, arrivalDateTime, new BigDecimal(cost), url);
+            return new RouteDTO(transportTypeEnum, operator, departDateTime, arrivalDateTime, departureLocation, arrivalLocation, new BigDecimal(cost), url);
         }
     
 }

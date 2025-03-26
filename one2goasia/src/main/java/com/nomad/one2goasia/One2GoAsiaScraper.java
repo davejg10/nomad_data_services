@@ -9,7 +9,6 @@ import com.nomad.scraping_library.domain.RouteDTO;
 import com.nomad.scraping_library.domain.ScraperIdentifier;
 import com.nomad.scraping_library.domain.ScraperRequest;
 import com.nomad.scraping_library.domain.ScraperResponse;
-import com.nomad.scraping_library.exceptions.ScrapingDataSchemaException;
 import com.nomad.scraping_library.scraper.WebScraperInterface;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -151,6 +150,8 @@ public class One2GoAsiaScraper implements WebScraperInterface {
                     trip.get("transportOperator"),
                     trip.get("departure"),
                     trip.get("arrival"),
+                    trip.get("departureLocation"),
+                    trip.get("arrivalLocation"),
                     trip.get("cost"),
                     trip.get("href"),
                     searchDate

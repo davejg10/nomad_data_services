@@ -101,9 +101,9 @@ public class ProcessedQueueHandlerTest {
         return LocalDateTime.of(futureDate, LocalTime.parse("12:00:01").plusMinutes(randomLong));
     }
 
-    private static RouteDTO routeDTOFlight1 = new RouteDTO(TransportType.FLIGHT, RandomStringUtils.randomAlphanumeric(6), generateRandomDepartureTime(), generateRandomArrivalTime(), BigDecimal.valueOf(10.40), "url");
-    private static RouteDTO routeDTOFlight2 = new RouteDTO(TransportType.FLIGHT, RandomStringUtils.randomAlphanumeric(6), generateRandomDepartureTime(), generateRandomArrivalTime(), BigDecimal.valueOf(25.60), "url");
-    private static RouteDTO routeDTOFlight3 = new RouteDTO(TransportType.FLIGHT, RandomStringUtils.randomAlphanumeric(6), generateRandomDepartureTime(), generateRandomArrivalTime(), BigDecimal.valueOf(120.20), "url");
+    private static RouteDTO routeDTOFlight1 = new RouteDTO(TransportType.FLIGHT, RandomStringUtils.randomAlphanumeric(6), generateRandomDepartureTime(), generateRandomArrivalTime(), "London", "Bangkok", BigDecimal.valueOf(10.40), "url");
+    private static RouteDTO routeDTOFlight2 = new RouteDTO(TransportType.FLIGHT, RandomStringUtils.randomAlphanumeric(6), generateRandomDepartureTime(), generateRandomArrivalTime(), "London", "Bangkok", BigDecimal.valueOf(25.60), "url");
+    private static RouteDTO routeDTOFlight3 = new RouteDTO(TransportType.FLIGHT, RandomStringUtils.randomAlphanumeric(6), generateRandomDepartureTime(), generateRandomArrivalTime(), "London", "Bangkok", BigDecimal.valueOf(120.20), "url");
 
     @BeforeEach
     void setupDb() {
@@ -168,8 +168,8 @@ public class ProcessedQueueHandlerTest {
         UUID cityBId = UUID.fromString(cityDTOB.id());
         RouteDefinition routeDefinition = sqlRouteDefinitionRepository.save(RouteDefinition.of(1, TransportType.FLIGHT, cityAId, cityBId));
 
-        RouteInstance routeInstance1 = sqlRouteInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "url", futureDate, routeDefinition));
-        RouteInstance routeInstance2 = sqlRouteInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "url", futureDate, routeDefinition));
+        RouteInstance routeInstance1 = sqlRouteInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "EasyJet", "London", "Bangkok", "url", futureDate, routeDefinition));
+        RouteInstance routeInstance2 = sqlRouteInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "EasyJet", "London", "Bangkok", "url", futureDate, routeDefinition));
         List<RouteInstance> allRouteInstanceBeforeSave = (List<RouteInstance>) sqlRouteInstanceRepository.findAll();
 
         ScraperResponse scraperResponse = new ScraperResponse("cronTrigger", ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), futureDate);
@@ -190,8 +190,8 @@ public class ProcessedQueueHandlerTest {
         UUID cityBId = UUID.fromString(cityDTOB.id());
         RouteDefinition routeDefinition = sqlRouteDefinitionRepository.save(RouteDefinition.of(1, TransportType.FLIGHT, cityAId, cityBId));
 
-        RouteInstance routeInstance1 = sqlRouteInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "url", futureDate, routeDefinition));
-        RouteInstance routeInstance2 = sqlRouteInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "url", futureDate, routeDefinition));
+        RouteInstance routeInstance1 = sqlRouteInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "EasyJet", "London", "Bangkok", "url", futureDate, routeDefinition));
+        RouteInstance routeInstance2 = sqlRouteInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "EasyJet", "London", "Bangkok", "url", futureDate, routeDefinition));
         List<RouteInstance> allRouteInstanceBeforeSave = (List<RouteInstance>) sqlRouteInstanceRepository.findAll();
 
         LocalDate differentSearchDate = futureDate.plusDays(5);

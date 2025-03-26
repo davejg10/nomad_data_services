@@ -3,5 +3,5 @@ jobs:
     type: ROUTE_DISCOVERY
     cronSchedule: "0 */5 * * * *"
     countryName: Thailand
-    timeToFetch: +2d
+    timeToFetch: +5d
     isActive: true

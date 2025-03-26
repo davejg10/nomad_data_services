@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.stream.DoubleStream;
 
 import org.springframework.stereotype.Component;
 
@@ -71,7 +70,7 @@ public class ProcessedQueueHandler implements Consumer<ScraperResponse> {
 
         Set<RouteInstance> routeInstances = new HashSet<>();
         for (RouteDTO route : scraperResponse.getRoutes()) {
-            routeInstances.add(RouteInstance.of(route.cost(), route.depart(), route.arrival(), route.url(), scraperResponse.getSearchDate(), routeDefinition));
+            routeInstances.add(RouteInstance.of(route.cost(), route.depart(), route.arrival(), route.operator(), route.departureLocation(), route.arrivalLocation(), route.url(), scraperResponse.getSearchDate(), routeDefinition));
         }
         log.info("request length: {}", scraperResponse.getRoutes().size());
         log.info("Route instances lenght: {}", routeInstances.size());
