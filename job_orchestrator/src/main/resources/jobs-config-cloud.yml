@@ -1,7 +1,7 @@
 jobs:
   - id: thailand-routes
     type: ROUTE_DISCOVERY
-    cronSchedule: "0 */50 * * * *"
+    cronSchedule: "0 0 15 * * *"
     countryName: Thailand
     timeToFetch: +2d
     isActive: true

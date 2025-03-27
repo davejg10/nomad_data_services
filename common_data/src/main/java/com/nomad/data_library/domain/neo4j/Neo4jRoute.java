@@ -1,6 +1,5 @@
 package com.nomad.data_library.domain.neo4j;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.nomad.common_utils.domain.TransportType;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
