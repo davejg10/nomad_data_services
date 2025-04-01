@@ -19,7 +19,7 @@ public class ScraperRequest extends ScraperMessage {
 
     public String toString() {
         StringBuilder string = new StringBuilder();
-        string.append(this.scraperRequestSource).append(" ").append(this.type).append(" ").append(sourceCity);
+        string.append(this.scraperRequestSource).append(" ").append(this.scraperRequestType).append(" ").append(sourceCity);
         return string.toString();
     }
     

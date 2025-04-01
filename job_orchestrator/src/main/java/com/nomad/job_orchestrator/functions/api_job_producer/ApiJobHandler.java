@@ -20,9 +20,8 @@ public class ApiJobHandler implements Function<HttpScraperRequest, ScraperReques
         CityDTO sourceCity = new CityDTO(routeRequest.sourceCity().id(), routeRequest.sourceCity().name());
         CityDTO targetCity = new CityDTO(routeRequest.targetCity().id(), routeRequest.targetCity().name());
 
-        ScraperRequest scraperRequest = new ScraperRequest("httpTrigger", ScraperRequestType.ROUTE_DISCOVERY, sourceCity, targetCity, routeRequest.searchDate());
+        ScraperRequest scraperRequest = new ScraperRequest("httpTrigger", ScraperRequestType.ROUTE_UPDATE, sourceCity, targetCity, routeRequest.searchDate());
         return scraperRequest;
-        
     }
     
 }

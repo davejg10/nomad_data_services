@@ -13,10 +13,12 @@ import org.springframework.context.ApplicationContext;
 import com.azure.core.util.IterableStream;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.azure.messaging.servicebus.ServiceBusReceiverClient;
+import com.azure.messaging.servicebus.models.DeadLetterOptions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.nomad.scraping_library.connectors.ServiceBusBatchSender;
 import com.nomad.scraping_library.domain.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperRequestType;
 import com.nomad.scraping_library.domain.ScraperResponse;
 import com.nomad.scraping_library.exceptions.NoRoutesFoundException;
 
@@ -57,43 +59,48 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
             boolean alwaysOn = timeoutInSeconds == -1; // This is set to -1 for Hertzner runner
             
             while (System.currentTimeMillis() < endTime || alwaysOn) {
-
                 IterableStream<ServiceBusReceivedMessage> messages = 
                 receiver.receiveMessages(5, Duration.ofSeconds(45));
             
                 Iterator<ServiceBusReceivedMessage> iterator = messages.iterator();
 
-                if (iterator.hasNext()) {
+                while (iterator.hasNext()) {
                     ServiceBusReceivedMessage message = iterator.next();
-                    
                     String correlationId = message.getCorrelationId();
                     ThreadContext.put("correlationId", correlationId);
 
                     log.info("Started processing ScraperRequest. Agent is running with active.profile: {}", ACTIVE_PROFILE);
-
+                    ScraperRequest request = null;
                     try {
-                        ScraperRequest request = message.getBody().toObject(ScraperRequest.class);
+                        request = message.getBody().toObject(ScraperRequest.class);
         
-                        log.info("The job is {}, for route {} -> {}", request.getScraperRequestSource(), request.getSourceCity().name(), request.getTargetCity().name());
+                        log.info("ScraperRequestType: {}. The job is {}, for route {} -> {}", request.getScraperRequestType(), request.getScraperRequestSource(), request.getSourceCity().name(), request.getTargetCity().name());
 
                         List<ScraperResponse> scraperResponses = scraper.scrapeData(request);
                         
                         if (scraperResponses.size() == 0) {
-                            log.warn("WebScraper found no route instances for route {} -> {}. DLQing.", request.getSourceCity().name(), request.getTargetCity().name());
-                            throw new NoRoutesFoundException("Scraper found no route instances for route " +  request.getSourceCity().name() + " -> " +  request.getTargetCity().name() + ". DLQing");
+                            throw new NoRoutesFoundException("Scraper found no route instances for route " +  request.getSourceCity().name() + " -> " +  request.getTargetCity().name());
                         }
 
                         serviceBusBatchSender.sendBatch(scraperResponses, correlationId); 
 
                         log.info("Successfully sent message");
                         receiver.complete(message);
-
                         // Reset timeout
                         endTime = System.currentTimeMillis() + timeout.toMillis();
     
-                    } catch(NoRoutesFoundException e)  {
-                        log.error("DLQing the following message. Reason: {}", e.getMessage());
-                        receiver.deadLetter(message);
+                    } catch (NoRoutesFoundException e)  {
+                    
+                        ScraperRequestType type = request.getScraperRequestType();
+                        if (type.equals(ScraperRequestType.ROUTE_UPDATE)) {
+                            log.info("{}. ScraperRequestType was {}. Therefore abandoning message (putting back on queue)", e.getMessage(), type);
+                            receiver.abandon(message);
+                        } else {
+                            log.warn("{}. ScraperRequestType is {}. Therefore DLQing the following message.", e.getMessage(), type);
+                            DeadLetterOptions reason = new DeadLetterOptions().setDeadLetterReason(e.getMessage());
+                            receiver.deadLetter(message, reason);
+                        }
+
                     } catch (Exception e) {
                         log.error("Abandoning the following message. Reason: {}", e.getMessage());
                         receiver.abandon(message);

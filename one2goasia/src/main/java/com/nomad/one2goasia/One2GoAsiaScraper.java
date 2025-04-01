@@ -30,7 +30,7 @@ public class One2GoAsiaScraper implements WebScraperInterface {
 
     private final Playwright playwright;
     private final Browser browser;
-    private final Page page;
+    private Page page;
     private final BrowserContext browserContext;
 
     public One2GoAsiaScraper() {
@@ -42,7 +42,6 @@ public class One2GoAsiaScraper implements WebScraperInterface {
                 .setSlowMo(50));// Add delay to respect rate limits
 
         browserContext = browser.newContext();
-        page = browserContext.newPage();
     }
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -58,18 +57,19 @@ public class One2GoAsiaScraper implements WebScraperInterface {
                     request.getSearchDate());
 
             log.info("Scraping page with url: {}", url);
+            page = browserContext.newPage();
+
             page.navigate(url);
             page.waitForLoadState(LoadState.NETWORKIDLE);
 
-            page.setDefaultTimeout(5000);
-            page.waitForSelector(tripListCard);
+            page.setDefaultTimeout(3000);
+            // page.waitForSelector(tripListCard);
 
             Set<RouteDTO> routesSet = new HashSet<>();
 
             int timesScrolled = 0, maxScrolls = 8, lastItemCount = 0;
             while (timesScrolled < maxScrolls) {
 
-                page.mouse().wheel(0, 900);
                 List<Locator> divList = page.locator(tripListCard).all();
                 int currentItemCount = divList.size();
 
@@ -83,18 +83,22 @@ public class One2GoAsiaScraper implements WebScraperInterface {
                 } catch (Exception e) {
                     log.error("Unexpected exception was: {}", e.getMessage(), e);
                 }
+                page.mouse().wheel(0, 900);
                 timesScrolled ++;
             }
 
             Map<TransportType, List<RouteDTO>> groupedRoutes = routesSet.stream().collect(Collectors.groupingBy(RouteDTO::transportType));
 
             groupedRoutes.forEach((type, routeListForType) -> {
-                ScraperResponse response = new ScraperResponse(request.getScraperRequestSource(), request.getType(), ScraperIdentifier.ONE2GOASIA, type, request.getSourceCity(), request.getTargetCity(), routeListForType, request.getSearchDate());
+                ScraperResponse response = new ScraperResponse(request.getScraperRequestSource(), request.getScraperRequestType(), ScraperIdentifier.ONE2GOASIA, type, request.getSourceCity(), request.getTargetCity(), routeListForType, request.getSearchDate());
                 scraperResponses.add(response);
             });
 
         } catch (PlaywrightException e) {
             log.error("Playwright Scraping error: " + e.getMessage());
+        } finally {
+            log.info("Scrape complete, Closing page");
+            page.close();
         }
         return scraperResponses;
     }

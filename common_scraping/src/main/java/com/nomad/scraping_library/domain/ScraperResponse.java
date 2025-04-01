@@ -18,14 +18,14 @@ public class ScraperResponse extends ScraperMessage {
     
     @JsonCreator
     public ScraperResponse(@JsonProperty("scraperRequestSource") String scraperRequestSource,
-                           @JsonProperty("type") ScraperRequestType type,
+                           @JsonProperty("scraperRequestType") ScraperRequestType scraperRequestType,
                            @JsonProperty("scraperIdentifier") ScraperIdentifier scraperIdentifier,
                            @JsonProperty("transportType") TransportType transportType,
                            @JsonProperty("sourceCity") CityDTO sourceCity,
                            @JsonProperty("targetCity") CityDTO targetCity,
                            @JsonProperty("routes") List<RouteDTO> routes,
                            @JsonProperty("searchDate") LocalDate searchDate) {
-        super(scraperRequestSource, type, sourceCity, targetCity, searchDate);
+        super(scraperRequestSource, scraperRequestType, sourceCity, targetCity, searchDate);
         this.scraperIdentifier = scraperIdentifier;
         this.transportType = transportType;
         this.routes = routes;
@@ -33,7 +33,7 @@ public class ScraperResponse extends ScraperMessage {
 
     @Override
     public String toString() {
-        return "ScraperResponse [scraperRequestSource=" + scraperRequestSource + ", scraperIdentifier=" + scraperIdentifier + ", type=" + type + "," +
+        return "ScraperResponse [scraperRequestSource=" + scraperRequestSource + ", scraperIdentifier=" + scraperIdentifier + ", scraperRequestType=" + scraperRequestType + "," +
                 " transportType=" + transportType + ", sourceCity=" + sourceCity + ", routes=" + routes + ", targetCity=" + targetCity + ", searchDate=" + searchDate + "]";
     }
 

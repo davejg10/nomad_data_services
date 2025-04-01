@@ -35,15 +35,8 @@ public class ServiceBusConfig {
 
     // This is the client id of the;
     // - User Assigned Identity if executed on Azure Container App Job
-    // - or Service principal if executed on Hertzner VM
-    @Value("${AZURE_CLIENT_ID}")
+    @Value("${AZURE_CLIENT_ID:local}")
     private String AZURE_CLIENT_ID;
-    
-    // Passed if code is executed on Hertzner VM.
-    @Value("${AZURE_TENANT_ID}")
-    private String AZURE_TENANT_ID;
-    @Value("${AZURE_CLIENT_SECRET}")
-    private String AZURE_CLIENT_SECRET;
 
     @Bean
     public ServiceBusSenderClient clientSender() {
@@ -83,19 +76,7 @@ public class ServiceBusConfig {
             }
             credential = builder.build();
 
-        } else if ("hertzner".equalsIgnoreCase(ACTIVE_PROFILE)) {
-            log.info("Using ClientSecretCredentialBuilder as ACTIVE_PROFILE is hertzner (Service Principal Auth).");
-            if (AZURE_TENANT_ID == null || AZURE_CLIENT_ID == null || AZURE_CLIENT_SECRET == null) {
-                log.error("Missing required Service Principal configuration (tenantId, clientId, clientSecret) for 'hertzner' profile.");
-                throw new IllegalStateException("Service Principal configuration is incomplete for hertzner profile.");
-            }
-            // Explicitly use Service Principal with Client Secret
-            credential = new ClientSecretCredentialBuilder()
-                .tenantId(AZURE_TENANT_ID)
-                .clientId(AZURE_CLIENT_ID)
-                .clientSecret(AZURE_CLIENT_SECRET)
-                .build();
-        } else { // Default case (e.g., "local" profile)
+        } else { // Default case (e.g., "local or hetzner" profile)
             log.info("Using DefaultAzureCredentialBuilder as ACTIVE_PROFILE is '{}'.", ACTIVE_PROFILE);
             credential = new DefaultAzureCredentialBuilder()
                 .build();
