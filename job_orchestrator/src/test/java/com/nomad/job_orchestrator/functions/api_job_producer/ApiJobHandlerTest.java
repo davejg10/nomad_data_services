@@ -50,7 +50,7 @@ public class ApiJobHandlerTest {
 
         CityDTO sourceCity = new CityDTO("d637fdf7-d4d8-4bbb-a0d7-218b87d86442", "CityA");
         CityDTO targetCity = new CityDTO("9ef0a8a7-fab9-4c7d-8040-194ba1e3a726", "CityB");
-        ScraperRequest expected = new ScraperRequest("httpTrigger", ScraperRequestType.ROUTE_DISCOVERY, sourceCity, targetCity, LocalDate.of(2025, 03, 10));
+        ScraperRequest expected = new ScraperRequest("httpTrigger", ScraperRequestType.ROUTE_UPDATE, sourceCity, targetCity, LocalDate.of(2025, 03, 10));
 
         assertThat(scraperRequest).isEqualTo(expected);
     }
