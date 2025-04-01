@@ -1,6 +1,7 @@
 package com.nomad.one2goasia.config;
 
 import com.azure.core.credential.TokenCredential;
+import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.identity.ManagedIdentityCredentialBuilder;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
@@ -29,21 +30,24 @@ public class ServiceBusConfig {
     @Value("${sb_namespace_fqdn}")
     private String FQDN_NAMESPACE;
 
-    // This is the client id of the User Assigned Identity assigned to the Azure Containerapp job
-    @Value("${AZURE_CLIENT_ID:local}")
+    @Value("${spring.profiles.active}")
+    private String ACTIVE_PROFILE;
+
+    // This is the client id of the;
+    // - User Assigned Identity if executed on Azure Container App Job
+    // - or Service principal if executed on Hertzner VM
+    @Value("${AZURE_CLIENT_ID}")
     private String AZURE_CLIENT_ID;
+    
+    // Passed if code is executed on Hertzner VM.
+    @Value("${AZURE_TENANT_ID}")
+    private String AZURE_TENANT_ID;
+    @Value("${AZURE_CLIENT_SECRET}")
+    private String AZURE_CLIENT_SECRET;
 
     @Bean
     public ServiceBusSenderClient clientSender() {
-        // Must pass the client id if using a User Assigned Identity
-        TokenCredential credential = null;
-        if (!AZURE_CLIENT_ID.equals("local")) {
-            log.info("Using ManagedIdentityCredentialBuilder as AZURE_CLIENT_ID was null");
-            credential = new ManagedIdentityCredentialBuilder().clientId(AZURE_CLIENT_ID).build();
-        } else {
-            log.info("Using DefaultAzureCredentialBulder as AZURE_CLIENT_ID was null");
-            credential = new DefaultAzureCredentialBuilder().build();
-        }
+        TokenCredential credential = createTokenCredential();
 
         ServiceBusSenderClient sender = new ServiceBusClientBuilder()
                 .credential(FQDN_NAMESPACE, credential)
@@ -55,14 +59,7 @@ public class ServiceBusConfig {
 
     @Bean
     public ServiceBusReceiverClient clientReciever() {
-        TokenCredential credential = null;
-        if (!AZURE_CLIENT_ID.equals("local")) {
-            log.info("Using ManagedIdentityCredentialBuilder as AZURE_CLIENT_ID was null");
-            credential = new ManagedIdentityCredentialBuilder().clientId(AZURE_CLIENT_ID).build();
-        } else {
-            log.info("Using DefaultAzureCredentialBulder as AZURE_CLIENT_ID was null");
-            credential = new DefaultAzureCredentialBuilder().build();
-        }
+        TokenCredential credential = createTokenCredential();
         
         ServiceBusReceiverClient receiver = new ServiceBusClientBuilder()
                 .credential(FQDN_NAMESPACE, credential)
@@ -70,6 +67,40 @@ public class ServiceBusConfig {
                 .queueName(PRE_PROCESSED_QUEUE_NAME)
                 .buildClient();
         return receiver;
+    }
+
+    private TokenCredential createTokenCredential() {
+        TokenCredential credential;
+
+        if ("cloud".equalsIgnoreCase(ACTIVE_PROFILE)) {
+            log.info("Using ManagedIdentityCredentialBuilder as ACTIVE_PROFILE is cloud.");
+            ManagedIdentityCredentialBuilder builder = new ManagedIdentityCredentialBuilder();
+            if (AZURE_CLIENT_ID != null && !AZURE_CLIENT_ID.isBlank()) {
+                 log.info("Applying specific Client ID for Managed Identity: {}", AZURE_CLIENT_ID);
+                 builder.clientId(AZURE_CLIENT_ID);
+            } else {
+                 log.info("Using System-Assigned Managed Identity (no specific client ID provided).");
+            }
+            credential = builder.build();
+
+        } else if ("hertzner".equalsIgnoreCase(ACTIVE_PROFILE)) {
+            log.info("Using ClientSecretCredentialBuilder as ACTIVE_PROFILE is hertzner (Service Principal Auth).");
+            if (AZURE_TENANT_ID == null || AZURE_CLIENT_ID == null || AZURE_CLIENT_SECRET == null) {
+                log.error("Missing required Service Principal configuration (tenantId, clientId, clientSecret) for 'hertzner' profile.");
+                throw new IllegalStateException("Service Principal configuration is incomplete for hertzner profile.");
+            }
+            // Explicitly use Service Principal with Client Secret
+            credential = new ClientSecretCredentialBuilder()
+                .tenantId(AZURE_TENANT_ID)
+                .clientId(AZURE_CLIENT_ID)
+                .clientSecret(AZURE_CLIENT_SECRET)
+                .build();
+        } else { // Default case (e.g., "local" profile)
+            log.info("Using DefaultAzureCredentialBuilder as ACTIVE_PROFILE is '{}'.", ACTIVE_PROFILE);
+            credential = new DefaultAzureCredentialBuilder()
+                .build();
+        }
+        return credential;
     }
 
     @Bean 
