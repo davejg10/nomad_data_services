@@ -10,11 +10,11 @@ public class ScraperRequest extends ScraperMessage {
     
     @JsonCreator
     public ScraperRequest(@JsonProperty("scraperRequestSource") String scraperRequestSource,
-                          @JsonProperty("type") ScraperRequestType type,
+                          @JsonProperty("scraperRequestType") ScraperRequestType scraperRequestType,
                           @JsonProperty("sourceCity") CityDTO sourceCity,
                           @JsonProperty("targetCity") CityDTO targetCity,
                           @JsonProperty("searchDate") LocalDate searchDate) {
-        super(scraperRequestSource, type, sourceCity, targetCity, searchDate);
+        super(scraperRequestSource, scraperRequestType, sourceCity, targetCity, searchDate);
     }
 
     public String toString() {

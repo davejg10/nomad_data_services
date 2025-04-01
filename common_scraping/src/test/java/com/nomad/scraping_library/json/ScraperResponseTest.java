@@ -43,7 +43,7 @@ public class ScraperResponseTest {
     String scraperResponseJson = String.format("""
             {
                 "scraperRequestSource": "httpTrigger",
-                "type": "ROUTE_DISCOVERY",
+                "scraperRequestType": "ROUTE_DISCOVERY",
                 "scraperIdentifier": "ONE2GOASIA",
                 "transportType": "FLIGHT",
                 "sourceCity": {

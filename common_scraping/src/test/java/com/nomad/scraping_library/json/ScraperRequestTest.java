@@ -33,7 +33,7 @@ public class ScraperRequestTest {
     String scraperRequestJson = String.format("""
             {
                 "scraperRequestSource": "httpTrigger",
-                "type": "ROUTE_DISCOVERY",
+                "scraperRequestType": "ROUTE_DISCOVERY",
                 "sourceCity": {
                     "id": "d637fdf7-d4d8-4bbb-a0d7-218b87d86442",
                     "name": "CityA"

@@ -33,7 +33,7 @@ public class ScraperResponse extends ScraperMessage {
 
     @Override
     public String toString() {
-        return "ScraperResponse [scraperRequestSource=" + scraperRequestSource + ", scraperIdentifier=" + scraperIdentifier + ", scraperRequestType=" + scraperRequestType + "," +
+        return "ScraperResponse [scraperRequestSource=" + scraperRequestSource + ", scraperRequestType=" + scraperRequestType + "," + ", scraperIdentifier=" + scraperIdentifier  +
                 " transportType=" + transportType + ", sourceCity=" + sourceCity + ", routes=" + routes + ", targetCity=" + targetCity + ", searchDate=" + searchDate + "]";
     }
 
