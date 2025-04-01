@@ -49,11 +49,13 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
         try {
             Duration timeout = Duration.ofSeconds(timeoutInSeconds);
             long endTime = System.currentTimeMillis() + timeout.toMillis();
+
+            boolean alwaysOn = timeoutInSeconds == -1; // This is set to -1 for Hertzner runner
             
-            while (System.currentTimeMillis() < endTime) {
+            while (System.currentTimeMillis() < endTime || alwaysOn) {
 
                 IterableStream<ServiceBusReceivedMessage> messages = 
-                receiver.receiveMessages(1, Duration.ofSeconds(5));
+                receiver.receiveMessages(5, Duration.ofSeconds(45));
             
                 Iterator<ServiceBusReceivedMessage> iterator = messages.iterator();
 

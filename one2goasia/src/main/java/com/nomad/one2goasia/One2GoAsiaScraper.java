@@ -69,7 +69,7 @@ public class One2GoAsiaScraper implements WebScraperInterface {
             int timesScrolled = 0, maxScrolls = 8, lastItemCount = 0;
             while (timesScrolled < maxScrolls) {
 
-                page.mouse().wheel(0, 1200);
+                page.mouse().wheel(0, 900);
                 List<Locator> divList = page.locator(tripListCard).all();
                 int currentItemCount = divList.size();
 
