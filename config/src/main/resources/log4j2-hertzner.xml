@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%highlight{%-5level }[%style{%X{correlationId}}{bright,blue}] %style{%C{1.}}{bright,yellow}: %msg%n%throwable" disableAnsi="false"/>
+        </Console>
+
+        <!-- Daily Rolling File Appender -->
+        <RollingFile name="DailyRollingFile" fileName="/app/logs/app.log" 
+             filePattern="/app/logs/app-%d{yyyy-MM-dd}.log.gz">  <!-- Updated Pattern -->
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30">  <!-- Keep last 30 days of logs -->
+                <Delete basePath="logs" maxDepth="1">
+                    <IfFileName glob="app-*.log.gz" />
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <ApplicationInsightsAppender  name="AIAppender">
+            <InstrumentationKey>52c31484-0b48-4b47-8bc0-16aa9bf3bffd</InstrumentationKey>
+        </ApplicationInsightsAppender >
+    </Appenders>
+    
+    <Loggers>
+        <!-- LOG everything at INFO level -->
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AIAppender"/>
+            <AppenderRef ref="DailyRollingFile"/>
+        </Root>
+
+        <!-- Suppress excessive Azure SDK logs -->
+        <Logger name="com.azure" level="warn" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AIAppender"/>
+            <AppenderRef ref="DailyRollingFile"/>
+        </Logger>
+
+        <Logger name="com.azure.messaging.servicebus" level="warn" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AIAppender"/>
+            <AppenderRef ref="DailyRollingFile"/>
+        </Logger>
+
+        <Logger name="com.azure.core.util.logging.LoggingEventBuilder" level="warn" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AIAppender"/>
+            <AppenderRef ref="DailyRollingFile"/>
+        </Logger>
+    </Loggers>
+</Configuration>
