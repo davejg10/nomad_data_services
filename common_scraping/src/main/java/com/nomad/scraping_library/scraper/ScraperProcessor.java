@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.logging.log4j.ThreadContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
@@ -29,6 +30,9 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
     public final ServiceBusReceiverClient receiver;
     public final ApplicationContext applicationContext;
     public final int timeoutInSeconds;
+    
+    @Value("${spring.profiles.active}")
+    private String ACTIVE_PROFILE;
 
     public ScraperProcessor(
         T scraper,
@@ -65,7 +69,7 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
                     String correlationId = message.getCorrelationId();
                     ThreadContext.put("correlationId", correlationId);
 
-                    log.info("Started processing ScraperRequest");
+                    log.info("Started processing ScraperRequest. Agent is running with active.profile: {}", ACTIVE_PROFILE);
 
                     try {
                         ScraperRequest request = message.getBody().toObject(ScraperRequest.class);
