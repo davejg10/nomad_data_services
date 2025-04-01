@@ -76,8 +76,6 @@ public class ProcessedQueueHandler implements Consumer<ScraperResponse> {
         log.info("Route instances lenght: {}", routeInstances.size());
 
         sqlRouteInstanceRepository.saveAll(routeInstances);
-        
-        
     }
 }
 
