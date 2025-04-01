@@ -38,19 +38,16 @@
         <Logger name="com.azure" level="warn" additivity="false">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="AIAppender"/>
-            <AppenderRef ref="DailyRollingFile"/>
         </Logger>
 
         <Logger name="com.azure.messaging.servicebus" level="warn" additivity="false">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="AIAppender"/>
-            <AppenderRef ref="DailyRollingFile"/>
         </Logger>
 
         <Logger name="com.azure.core.util.logging.LoggingEventBuilder" level="warn" additivity="false">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="AIAppender"/>
-            <AppenderRef ref="DailyRollingFile"/>
         </Logger>
     </Loggers>
 </Configuration>
