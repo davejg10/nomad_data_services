@@ -35,6 +35,7 @@ import lombok.extern.log4j.Log4j2;
 public abstract class ScraperProcessor<T extends WebScraperInterface> implements CommandLineRunner {
  
     public final T scraper;
+    private final String JOB_ORCHESTRATOR_PROCESSED_API_URL;
     public final ServiceBusBatchSender<ScraperResponse> serviceBusBatchSender;
     public final ServiceBusReceiverClient receiver;
     public final ApplicationContext applicationContext;
@@ -46,12 +47,15 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
 
     public ScraperProcessor(
         T scraper,
+        String jobOrchestratorProcessedApiUrl,
+        String JOB_ORCHESTRATOR_PROCESSED_API_URL,
         ServiceBusBatchSender<ScraperResponse> serviceBusBatchSender,
         ServiceBusReceiverClient receiver,
         ApplicationContext applicationContext,
         int timeoutInSeconds,
         ObjectMapper objectMapper) {
             this.scraper = scraper;
+            this.JOB_ORCHESTRATOR_PROCESSED_API_URL = jobOrchestratorProcessedApiUrl;
             this.serviceBusBatchSender = serviceBusBatchSender;
             this.receiver = receiver;
             this.applicationContext = applicationContext;
@@ -153,7 +157,7 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
     }
 
     private int handleApiRequestSource(ScraperRequest request, List<ScraperResponse> scraperResponses) throws JsonProcessingException, IOException, InterruptedException  {
-        String url = String.format("%s/api/%s", PROCESSED_API_ENDPOINT);
+        String url = String.format("%s/api/%s", JOB_ORCHESTRATOR_PROCESSED_API_URL, PROCESSED_API_ENDPOINT);
         String jsonRequest = objectMapper.writeValueAsString(scraperResponses);
         HttpRequest httpRequest = HttpRequest.newBuilder()
             .uri(URI.create(url))
