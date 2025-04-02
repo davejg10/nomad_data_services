@@ -73,6 +73,7 @@ public class One2GoAsiaScraper implements WebScraperInterface {
 
                 List<Locator> divList = page.locator(tripListCard).all();
                 int currentItemCount = divList.size();
+                log.info("Number of items found in div: {}", currentItemCount);
 
                 // If no new elements were loaded, stop scrolling
                 if (currentItemCount == lastItemCount) {
@@ -84,7 +85,8 @@ public class One2GoAsiaScraper implements WebScraperInterface {
                 } catch (Exception e) {
                     log.error("Unexpected exception was: {}", e.getMessage(), e);
                 }
-                page.mouse().wheel(0, 900);
+                log.info("Scrolling down");
+                page.mouse().wheel(0, 1200);
                 timesScrolled ++;
             }
 
