@@ -21,7 +21,7 @@ public class One2GoAsiaProcessor extends ScraperProcessor<One2GoAsiaScraper> {
     private ObjectMapper objectMapper;
     
     public One2GoAsiaProcessor(@Value("${app_settings.TIMEOUT_IN_SECONDS}") int TIMEOUT_IN_SECONDS,
-                               @Value("${job_orchestrator_processed_api_url}") String jobOrchestratorProcessedApiUrl, 
+                               @Value("${app_settings.job_orchestrator_processed_api_url}") String jobOrchestratorProcessedApiUrl, 
                                 One2GoAsiaScraper one2GoAsiaScraper,
                                 ServiceBusBatchSender<ScraperResponse> serviceBusBatchSender,
                                 ServiceBusReceiverClient receiver, 

@@ -1,6 +1,6 @@
 app_settings:
     TIMEOUT_IN_SECONDS: 60
-    job_orchestrator_function_app_name: https://fa-${ENVIRONMENT}-uks-nomad-02-job-orchestrator.azurewebsites.net
+    job_orchestrator_processed_api_url: https://fa-${ENVIRONMENT}-uks-nomad-02-job-orchestrator.azurewebsites.net
     azure_client_id: ${AZURE_CLIENT_ID}
     service_bus:
         processed_queue_name: ${SB_PROCESSED_QUEUE_NAME}
