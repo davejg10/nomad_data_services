@@ -24,11 +24,12 @@ import lombok.extern.log4j.Log4j2;
 @SpringBootTest(classes = {One2GoAsiaScraper.class, AppConfig.class})
 public class One2GoAsiaScraperIntegrationTest {
 
-    One2GoAsiaScraper one2GoAsiaScraper = new One2GoAsiaScraper();
     LocalDate futureDate = LocalDate.now().plusDays(2);
 
     @Autowired
     ObjectMapper objectMapper;
+
+    One2GoAsiaScraper one2GoAsiaScraper = new One2GoAsiaScraper(objectMapper);
 
     String validScrapeRequest = String.format("""
             {
