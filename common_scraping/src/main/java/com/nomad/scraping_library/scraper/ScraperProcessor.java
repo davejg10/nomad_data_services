@@ -1,5 +1,9 @@
 package com.nomad.scraping_library.scraper;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +20,7 @@ import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import com.azure.messaging.servicebus.models.DeadLetterOptions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.scraping_library.connectors.ServiceBusBatchSender;
 import com.nomad.scraping_library.domain.ScraperRequest;
 import com.nomad.scraping_library.domain.ScraperRequestType;
@@ -36,6 +41,9 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
     @Value("${spring.profiles.active}")
     private String ACTIVE_PROFILE;
 
+    public final HttpClient httpClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     public ScraperProcessor(
         T scraper,
         ServiceBusBatchSender<ScraperResponse> serviceBusBatchSender,
@@ -47,6 +55,7 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
             this.receiver = receiver;
             this.applicationContext = applicationContext;
             this.timeoutInSeconds = timeoutInSeconds;
+            this.httpClient = HttpClient.newHttpClient();
         }
 
     @Override
@@ -82,6 +91,24 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
                             throw new NoRoutesFoundException("Scraper found no route instances for route " +  request.getSourceCity().name() + " -> " +  request.getTargetCity().name());
                         }
 
+                        if (request.getScraperRequestSource().contains("http")) {
+                            log.info("ScraperRequestSource was http therefore hitting processedApiConsumer");
+                            String url = "https://fa-dev-uks-nomad-02-job-orchestrator.azurewebsites.net/api/processedApiConsumer";
+                            String jsonRequest = objectMapper.writeValueAsString(scraperResponses);
+                            HttpRequest httpRequest = HttpRequest.newBuilder()
+                                .uri(URI.create(url))
+                                .header("Content-Type", "application/json")
+                                .POST(HttpRequest.BodyPublishers.ofString(jsonRequest))
+                                .build();
+                            HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+                            if (response.statusCode() == 200) {
+                                log.info("Response from processedApiConsumer was 200, continuing with loop");
+                                continue;
+                            }
+                        }
+                        
+                        log.info("Preparing to send scraperResponses as batch");
                         serviceBusBatchSender.sendBatch(scraperResponses, correlationId); 
 
                         log.info("Successfully sent message");
@@ -92,7 +119,7 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
                     } catch (NoRoutesFoundException e)  {
                     
                         ScraperRequestType type = request.getScraperRequestType();
-                        if (type.equals(ScraperRequestType.ROUTE_UPDATE)) {
+                        if (type.equals(ScraperRequestType.ROUTE_UPDATE)) { // We do this because we know we've found a route last time
                             log.info("{}. ScraperRequestType was {}. Therefore abandoning message (putting back on queue)", e.getMessage(), type);
                             receiver.abandon(message);
                         } else {
