@@ -105,7 +105,8 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
                             HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
                             log.info(response);
                             if (response.statusCode() == 200) {
-                                log.info("Response from processedApiConsumer was 200, continuing with loop");
+                                log.info("Response from processedApiConsumer was 200, continuing with next message");
+                                receiver.complete(message);
                                 continue;
                             }
                         }
