@@ -37,27 +37,29 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
     public final ServiceBusReceiverClient receiver;
     public final ApplicationContext applicationContext;
     public final int timeoutInSeconds;
-    
-    @Value("${spring.profiles.active}")
-    private String ACTIVE_PROFILE;
+    private final ObjectMapper objectMapper;
 
     public final HttpClient httpClient;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ScraperProcessor(
         T scraper,
         ServiceBusBatchSender<ScraperResponse> serviceBusBatchSender,
         ServiceBusReceiverClient receiver,
         ApplicationContext applicationContext,
-        int timeoutInSeconds) {
+        int timeoutInSeconds,
+        ObjectMapper objectMapper) {
             this.scraper = scraper;
             this.serviceBusBatchSender = serviceBusBatchSender;
             this.receiver = receiver;
             this.applicationContext = applicationContext;
             this.timeoutInSeconds = timeoutInSeconds;
+            this.objectMapper = objectMapper;
             this.httpClient = HttpClient.newHttpClient();
         }
-
+    
+    @Value("${spring.profiles.active}")
+    private String ACTIVE_PROFILE;
+    
     @Override
     public void run(String... args) throws JsonMappingException, JsonProcessingException {
 

@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 @Log4j2
 public class One2GoAsiaScraper implements WebScraperInterface {
 
+    private final ObjectMapper objectMapper;
     private static final String BASE_URL = "https://12go.asia/en/travel/";
     private static final String timeTableShowMoreButtonSelector = "#best_options > div.container.block-module > div.list > button";
     private static final String tripListCard = "#best_options > div.container.block-module > div.list > div:has(a)";
@@ -33,7 +34,8 @@ public class One2GoAsiaScraper implements WebScraperInterface {
     private Page page;
     private final BrowserContext browserContext;
 
-    public One2GoAsiaScraper() {
+    public One2GoAsiaScraper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         // Initialize Playwright with proper configurations for scraping
         playwright = Playwright.create();
 
@@ -43,7 +45,6 @@ public class One2GoAsiaScraper implements WebScraperInterface {
 
         browserContext = browser.newContext();
     }
-    ObjectMapper objectMapper = new ObjectMapper();
 
     // Method to extract data from a webpage
     public List<ScraperResponse> scrapeData(ScraperRequest request) {
