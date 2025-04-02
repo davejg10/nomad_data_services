@@ -42,7 +42,7 @@ public class One2GoAsiaScraper implements WebScraperInterface {
         playwright = Playwright.create();
 
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
-                .setHeadless(false)  // Run in headless mode for better performance
+                .setHeadless(true)  // Run in headless mode for better performance
                 .setSlowMo(50));// Add delay to respect rate limits
 
         browserContext = browser.newContext();
@@ -66,39 +66,26 @@ public class One2GoAsiaScraper implements WebScraperInterface {
             page.waitForLoadState(LoadState.NETWORKIDLE);
 
             page.setDefaultTimeout(3000);
-            // page.waitForSelector(tripListCard);
 
             Set<RouteDTO> routesSet = new HashSet<>();
 
             String travelCardSelector = ":has(a.trip-card)";
 
-            String expandableStyleSelector = ":has(div.trip-card-footer)";
-
             int timesScrolled = 0, maxScrolls = 8, lastItemCount = 0;
             while (timesScrolled < maxScrolls) {
-                List<Locator> compactCardList = new ArrayList<>();
-                List<Locator> expandableCardList = new ArrayList<>();
-
                 List<Locator> divList = page.locator(DIV_LIST_BASE_SELECTOR + travelCardSelector).all();
 
-//                List<Locator> divListExpandable = page.locator(DIV_LIST_BASE_SELECTOR + expandableStyleSelector).all();
-
-//                int compactItemCount = divListCompact.size();
-//                int expandableItemCount = divListExpandable.size();
                 int currentItemCount = divList.size();
 
                 log.info("Number of items found in div: {}", currentItemCount);
 
-                // If no new elements were loaded, stop scrolling
-//                if (currentItemCount == lastItemCount) {
-//                    log.info("No new items found. Stopping scroll.");
-//                    break;
-//                }
+//                 If no new elements were loaded, stop scrolling
+                if (currentItemCount == lastItemCount) {
+                    log.info("No new items found. Stopping scroll.");
+                    break;
+                }
                 try {
                     routesSet.addAll(parseDivList(DIV_LIST_BASE_SELECTOR + travelCardSelector, request.getSearchDate()));
-
-//                    routesSet.addAll(parseExpandableDivList(DIV_LIST_BASE_SELECTOR + expandableStyleSelector, request.getSearchDate()));
-
 
                 } catch (Exception e) {
                     log.error("Unexpected exception was: {}", e.getMessage(), e);
