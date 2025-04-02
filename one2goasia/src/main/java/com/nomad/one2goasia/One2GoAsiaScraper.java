@@ -40,7 +40,7 @@ public class One2GoAsiaScraper implements WebScraperInterface {
         playwright = Playwright.create();
 
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
-                .setHeadless(false)  // Run in headless mode for better performance
+                .setHeadless(true)  // Run in headless mode for better performance
                 .setSlowMo(50));// Add delay to respect rate limits
 
         browserContext = browser.newContext();
@@ -87,6 +87,7 @@ public class One2GoAsiaScraper implements WebScraperInterface {
                 }
                 log.info("Scrolling down");
                 page.mouse().wheel(0, 1200);
+                Thread.sleep(200);
                 timesScrolled ++;
             }
 
@@ -99,6 +100,9 @@ public class One2GoAsiaScraper implements WebScraperInterface {
 
         } catch (PlaywrightException e) {
             log.error("Playwright Scraping error: " + e.getMessage());
+        } catch (InterruptedException e) {
+            log.error("InterruptedException");
+            throw new RuntimeException(e);
         } finally {
             log.info("Scrape complete, Closing page");
             page.close();
