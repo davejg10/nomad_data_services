@@ -1,5 +1,6 @@
 package com.nomad.job_orchestrator.functions.processed_api_consumer;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.azure.messaging.servicebus.ServiceBusMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.functions.ExecutionContext;
@@ -55,9 +57,11 @@ public class ProcessedApiTrigger {
                 String requestString = request.getBody().get();
                 log.info("apiJobProducer function hit. Request body is {}", requestString);
 
-                ScraperResponse scraperResponse = objectMapper.readValue(requestString, ScraperResponse.class);
+                List<ScraperResponse> scraperResponses = objectMapper.readValue(requestString, new TypeReference<List<ScraperResponse>>(){});
 
-                processedQueueHandler.accept(scraperResponse);
+                for (ScraperResponse response : scraperResponses) {
+                    processedQueueHandler.accept(response);
+                }
 
                 return request.createResponseBuilder(HttpStatus.OK).body("Successfully processed message...").build(); 
             }
