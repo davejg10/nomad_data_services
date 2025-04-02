@@ -33,10 +33,10 @@ public class ProcessedQueueTrigger {
      */
     @FunctionName("processedQueueConsumer")
     public void execute(@ServiceBusQueueTrigger(name = "msg", queueName = sb_processed_queue_name, connection = "nomadservicebus") String message,
-                        @BindingName("CorrelationId") String correlationId,
+                        // @BindingName("CorrelationId") String correlationId,
                         ExecutionContext context) throws JsonProcessingException {
         try {
-            ThreadContext.put("correlationId", correlationId);
+            // ThreadContext.put("correlationId", correlationId);
 
             ScraperResponse scraperResponse = objectMapper.readValue(message, ScraperResponse.class);
 
@@ -44,10 +44,12 @@ public class ProcessedQueueTrigger {
 
         } catch (Exception e) {
             log.error("An exception was thrown when trying to either serialize/desirialize. Message: {}", message, e);
-            context.getLogger().log(Level.SEVERE, "An exception was thrown when trying to either serialize/desirialize. CorrelationId " + correlationId + " Exception: " + e.getMessage(), e);
-        } finally {
-            ThreadContext.clearAll();
-        }
+            context.getLogger().log(Level.SEVERE, "An exception was thrown when trying to either serialize/desirialize. Exception: " + e.getMessage(), e);
+            // context.getLogger().log(Level.SEVERE, "An exception was thrown when trying to either serialize/desirialize. CorrelationId " + correlationId + " Exception: " + e.getMessage(), e);
+        } 
+        // finally {
+        //     ThreadContext.clearAll();
+        // }
     }
 
 }
