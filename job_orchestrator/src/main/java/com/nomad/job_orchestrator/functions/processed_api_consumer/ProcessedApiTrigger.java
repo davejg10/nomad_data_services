@@ -6,6 +6,7 @@ import java.util.logging.Level;
 
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.azure.messaging.servicebus.ServiceBusMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,6 +28,7 @@ import com.nomad.scraping_library.domain.ScraperResponse;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
+@Component
 public class ProcessedApiTrigger {
 
     @Autowired

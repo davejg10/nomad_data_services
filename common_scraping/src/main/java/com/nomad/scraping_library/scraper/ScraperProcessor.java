@@ -59,7 +59,7 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
     
     @Value("${spring.profiles.active}")
     private String ACTIVE_PROFILE;
-    
+
     @Override
     public void run(String... args) throws JsonMappingException, JsonProcessingException {
 
@@ -103,7 +103,7 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
                                 .POST(HttpRequest.BodyPublishers.ofString(jsonRequest))
                                 .build();
                             HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-
+                            log.info(response);
                             if (response.statusCode() == 200) {
                                 log.info("Response from processedApiConsumer was 200, continuing with loop");
                                 continue;
