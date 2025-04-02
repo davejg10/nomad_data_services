@@ -21,13 +21,13 @@ public class One2GoAsiaProcessor extends ScraperProcessor<One2GoAsiaScraper> {
     private ObjectMapper objectMapper;
     
     public One2GoAsiaProcessor(@Value("${app_settings.TIMEOUT_IN_SECONDS}") int TIMEOUT_IN_SECONDS,
-                               @Value("${job_orchestrator_processed_api_url}") String JOB_ORCHESTRATOR_PROCESSED_API_URL, 
+                               @Value("${job_orchestrator_processed_api_url}") String jobOrchestratorProcessedApiUrl, 
                                 One2GoAsiaScraper one2GoAsiaScraper,
                                 ServiceBusBatchSender<ScraperResponse> serviceBusBatchSender,
                                 ServiceBusReceiverClient receiver, 
                                 ApplicationContext applicationContext, 
                                 ObjectMapper objectMapper) {
-        super(one2GoAsiaScraper, serviceBusBatchSender, receiver, applicationContext, TIMEOUT_IN_SECONDS, objectMapper);
+        super(one2GoAsiaScraper, jobOrchestratorProcessedApiUrl, serviceBusBatchSender, receiver, applicationContext, TIMEOUT_IN_SECONDS, objectMapper);
     }
 
 }

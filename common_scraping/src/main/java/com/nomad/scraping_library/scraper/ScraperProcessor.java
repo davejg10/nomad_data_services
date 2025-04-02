@@ -48,7 +48,6 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
     public ScraperProcessor(
         T scraper,
         String jobOrchestratorProcessedApiUrl,
-        String JOB_ORCHESTRATOR_PROCESSED_API_URL,
         ServiceBusBatchSender<ScraperResponse> serviceBusBatchSender,
         ServiceBusReceiverClient receiver,
         ApplicationContext applicationContext,
