@@ -29,7 +29,8 @@ public class One2GoAsiaScraperIntegrationTest {
     @Autowired
     ObjectMapper objectMapper;
 
-    One2GoAsiaScraper one2GoAsiaScraper = new One2GoAsiaScraper(objectMapper);
+    @Autowired
+    One2GoAsiaScraper one2GoAsiaScraper;
 
     String validScrapeRequest = String.format("""
             {
@@ -37,7 +38,7 @@ public class One2GoAsiaScraperIntegrationTest {
                 "scraperRequestType": "ROUTE_DISCOVERY",
                 "sourceCity": {
                     "id": "d637fdf7-d4d8-4bbb-a0d7-218b87d86442",
-                    "name": "Bangkok"
+                    "name": "Phuket"
                 },
                 "targetCity": {
                     "id": "9ef0a8a7-fab9-4c7d-8040-194ba1e3a726",

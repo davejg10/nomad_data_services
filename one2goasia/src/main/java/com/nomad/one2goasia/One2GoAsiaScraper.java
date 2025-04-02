@@ -146,10 +146,15 @@ public class One2GoAsiaScraper implements WebScraperInterface {
         List<Map<String, String>> tripList = objectMapper.convertValue(tripData, new TypeReference<List<Map<String, String>>>() {});
 
         for (Map<String, String> trip : tripList) {
-            if (trip.get("departure").equals("--:--")) {
-                log.error("Not adding due to departTime being --:--");
-                continue;
+            try {
+                if (trip.get("departure").equals("--:--")) {
+                    log.error("Not adding due to departTime being --:--");
+                    continue;
+                }
+            } catch (NullPointerException e) {
+                log.error("Nullpointer thrown when trying to trip.get(departure). Trip list map is: {}", tripList);
             }
+
             RouteDTO newRoute = RouteDTO.createWithSchema(
                     trip.get("transportType"),
                     trip.get("transportOperator"),
