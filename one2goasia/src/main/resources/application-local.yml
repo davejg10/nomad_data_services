@@ -1,7 +1,6 @@
-
-
 app_settings:
     TIMEOUT_IN_SECONDS: 1000
+    job_orchestrator_function_app_name: localhost:7072
     service_bus:
         processed_queue_name: nomad_processed
         pre_processed_queue_name: nomad_pre_processed

@@ -153,7 +153,7 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
     }
 
     private int handleApiRequestSource(ScraperRequest request, List<ScraperResponse> scraperResponses) throws JsonProcessingException, IOException, InterruptedException  {
-        String url = String.format("https://%s.azurewebsites.net/api/%s", PROCESSED_API_ENDPOINT);
+        String url = String.format("%s/api/%s", PROCESSED_API_ENDPOINT);
         String jsonRequest = objectMapper.writeValueAsString(scraperResponses);
         HttpRequest httpRequest = HttpRequest.newBuilder()
             .uri(URI.create(url))
