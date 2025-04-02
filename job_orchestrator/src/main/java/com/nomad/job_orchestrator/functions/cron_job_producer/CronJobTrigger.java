@@ -26,7 +26,7 @@
  @Component
  public class CronJobTrigger {
 
-     @Value("${CRON_JOB_CONFIG_FILE}")
+     @Value("${app_settings.cron_job_config_file}")
      private String CRON_JOB_CONFIG_FILE;
     
      // Note that no matter the cron schedule on the jobs within jobs-config, the maximumum frequency with

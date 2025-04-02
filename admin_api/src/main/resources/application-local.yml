@@ -1,0 +1,23 @@
+spring:
+    datasource:
+        url: jdbc:postgresql://localhost:5432/mydatabase
+        username: myuser
+        password: mypassword
+    jpa:
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.PostgreSQLDialect
+    neo4j:
+        uri: bolt://localhost:7687
+        authentication:
+            username: neo4j
+            password: mypassword
+    main: # Color output in console
+        banner-mode: off
+    output: # Color output in console
+        ansi:
+            enabled: ALWAYS
+
+# Logger
+logging:
+    config: classpath:log4j2-local.xml

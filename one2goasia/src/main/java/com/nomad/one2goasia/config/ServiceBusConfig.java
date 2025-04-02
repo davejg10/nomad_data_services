@@ -1,7 +1,6 @@
 package com.nomad.one2goasia.config;
 
 import com.azure.core.credential.TokenCredential;
-import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.identity.ManagedIdentityCredentialBuilder;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
@@ -23,11 +22,11 @@ import org.springframework.context.annotation.Profile;
 @Profile("!maven")
 public class ServiceBusConfig {
 
-    @Value("${sb_processed_queue_name}")
+    @Value("${app_settings.service_bus.processed_queue_name}")
     private String PROCESSED_QUEUE_NAME;
-    @Value("${sb_pre_processed_queue_name}")
+    @Value("${app_settings.service_bus.pre_processed_queue_name}")
     private String PRE_PROCESSED_QUEUE_NAME;
-    @Value("${sb_namespace_fqdn}")
+    @Value("${app_settings.service_bus.namespace_fqdn}")
     private String FQDN_NAMESPACE;
 
     @Value("${spring.profiles.active}")
@@ -35,7 +34,7 @@ public class ServiceBusConfig {
 
     // This is the client id of the;
     // - User Assigned Identity if executed on Azure Container App Job
-    @Value("${AZURE_CLIENT_ID:local}")
+    @Value("${app_settings.azure_client_id:local}")
     private String AZURE_CLIENT_ID;
 
     @Bean

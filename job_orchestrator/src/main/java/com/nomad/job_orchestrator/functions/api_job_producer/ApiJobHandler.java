@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.nomad.scraping_library.domain.CityDTO;
 import com.nomad.scraping_library.domain.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperRequestSource;
 import com.nomad.scraping_library.domain.ScraperRequestType;
 
 import lombok.extern.log4j.Log4j2;
@@ -20,7 +21,7 @@ public class ApiJobHandler implements Function<HttpScraperRequest, ScraperReques
         CityDTO sourceCity = new CityDTO(routeRequest.sourceCity().id(), routeRequest.sourceCity().name());
         CityDTO targetCity = new CityDTO(routeRequest.targetCity().id(), routeRequest.targetCity().name());
 
-        ScraperRequest scraperRequest = new ScraperRequest("httpTrigger", ScraperRequestType.ROUTE_UPDATE, sourceCity, targetCity, routeRequest.searchDate());
+        ScraperRequest scraperRequest = new ScraperRequest(ScraperRequestSource.API, ScraperRequestType.ROUTE_UPDATE, sourceCity, targetCity, routeRequest.searchDate());
         return scraperRequest;
     }
     

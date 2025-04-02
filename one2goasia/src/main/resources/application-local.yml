@@ -1,0 +1,12 @@
+
+
+app_settings:
+    TIMEOUT_IN_SECONDS: 1000
+    service_bus:
+        processed_queue_name: nomad_processed
+        pre_processed_queue_name: nomad_pre_processed
+        namespace_fqdn: sbns-sandbox-uks-resources.servicebus.windows.net
+
+# Logger
+logging:
+    config: classpath:log4j2-local.xml

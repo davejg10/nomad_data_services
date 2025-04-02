@@ -20,7 +20,7 @@ public class One2GoAsiaProcessor extends ScraperProcessor<One2GoAsiaScraper> {
     private One2GoAsiaScraper one2GoAsiaScraper;
     private ObjectMapper objectMapper;
     
-    public One2GoAsiaProcessor(@Value("${TIMEOUT_IN_SECONDS}") int TIMEOUT_IN_SECONDS, One2GoAsiaScraper one2GoAsiaScraper, ServiceBusBatchSender<ScraperResponse> serviceBusBatchSender, ServiceBusReceiverClient receiver, ApplicationContext applicationContext, ObjectMapper objectMapper) {
+    public One2GoAsiaProcessor(@Value("${app_settings.TIMEOUT_IN_SECONDS}") int TIMEOUT_IN_SECONDS, One2GoAsiaScraper one2GoAsiaScraper, ServiceBusBatchSender<ScraperResponse> serviceBusBatchSender, ServiceBusReceiverClient receiver, ApplicationContext applicationContext, ObjectMapper objectMapper) {
         super(one2GoAsiaScraper, serviceBusBatchSender, receiver, applicationContext, TIMEOUT_IN_SECONDS, objectMapper);
     }
 

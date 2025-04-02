@@ -33,7 +33,7 @@ public class One2GoAsiaScraperIntegrationTest {
 
     String validScrapeRequest = String.format("""
             {
-                "scraperRequestSource": "httpTrigger",
+                "scraperRequestSource": "API",
                 "scraperRequestType": "ROUTE_DISCOVERY",
                 "sourceCity": {
                     "id": "d637fdf7-d4d8-4bbb-a0d7-218b87d86442",

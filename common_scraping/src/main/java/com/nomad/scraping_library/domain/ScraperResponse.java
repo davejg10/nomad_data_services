@@ -17,7 +17,7 @@ public class ScraperResponse extends ScraperMessage {
     private List<RouteDTO> routes;
     
     @JsonCreator
-    public ScraperResponse(@JsonProperty("scraperRequestSource") String scraperRequestSource,
+    public ScraperResponse(@JsonProperty("scraperRequestSource") ScraperRequestSource scraperRequestSource,
                            @JsonProperty("scraperRequestType") ScraperRequestType scraperRequestType,
                            @JsonProperty("scraperIdentifier") ScraperIdentifier scraperIdentifier,
                            @JsonProperty("transportType") TransportType transportType,

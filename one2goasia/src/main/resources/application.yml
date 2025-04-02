@@ -1,0 +1,10 @@
+spring:
+    application:
+        name: one2goasia
+    profiles:
+        active: ${SPRING_PROFILE:local}
+    main: # Color output in console
+        banner-mode: off
+    output: # Color output in console
+        ansi:
+            enabled: ALWAYS

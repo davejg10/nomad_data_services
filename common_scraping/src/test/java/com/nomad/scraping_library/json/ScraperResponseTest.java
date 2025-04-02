@@ -39,10 +39,10 @@ public class ScraperResponseTest {
     RouteDTO routeDTOEasyjet = new RouteDTO(TransportType.FLIGHT, "Easyjet", departEasy, arrivalEasy, "London", "Bangkok", new BigDecimal("12.99"), "someurl");
     RouteDTO routeDTOWizz = new RouteDTO(TransportType.FLIGHT, "WizzAir", departWizz, arrivalWizz, "London", "Bangkok", new BigDecimal("4.22"), "someurl");
 
-    ScraperResponse scraperResponseObject = new ScraperResponse("httpTrigger", ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, sourceCity, targetCity, List.of(routeDTOEasyjet, routeDTOWizz), futureDate);
+    ScraperResponse scraperResponseObject = new ScraperResponse(ScraperRequestSource.API, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, sourceCity, targetCity, List.of(routeDTOEasyjet, routeDTOWizz), futureDate);
     String scraperResponseJson = String.format("""
             {
-                "scraperRequestSource": "httpTrigger",
+                "scraperRequestSource": "API",
                 "scraperRequestType": "ROUTE_DISCOVERY",
                 "scraperIdentifier": "ONE2GOASIA",
                 "transportType": "FLIGHT",

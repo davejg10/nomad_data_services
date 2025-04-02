@@ -1,5 +1,6 @@
 package com.nomad.scraping_library.scraper;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.scraping_library.connectors.ServiceBusBatchSender;
 import com.nomad.scraping_library.domain.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperRequestSource;
 import com.nomad.scraping_library.domain.ScraperRequestType;
 import com.nomad.scraping_library.domain.ScraperResponse;
 import com.nomad.scraping_library.exceptions.NoRoutesFoundException;
@@ -38,6 +40,7 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
     public final ApplicationContext applicationContext;
     public final int timeoutInSeconds;
     private final ObjectMapper objectMapper;
+    private final static String PROCESSED_API_ENDPOINT = "processedApiConsumer";
 
     public final HttpClient httpClient;
 
@@ -93,28 +96,25 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
                             throw new NoRoutesFoundException("Scraper found no route instances for route " +  request.getSourceCity().name() + " -> " +  request.getTargetCity().name());
                         }
 
-                        if (request.getScraperRequestSource().contains("http")) {
-                            log.info("ScraperRequestSource was http therefore hitting processedApiConsumer");
-                            String url = "https://fa-dev-uks-nomad-02-job-orchestrator.azurewebsites.net/api/processedApiConsumer";
-                            String jsonRequest = objectMapper.writeValueAsString(scraperResponses);
-                            HttpRequest httpRequest = HttpRequest.newBuilder()
-                                .uri(URI.create(url))
-                                .header("Content-Type", "application/json")
-                                .POST(HttpRequest.BodyPublishers.ofString(jsonRequest))
-                                .build();
-                            HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-                            log.info(response);
-                            if (response.statusCode() == 200) {
-                                log.info("Response from processedApiConsumer was 200, continuing with next message");
-                                receiver.complete(message);
-                                continue;
+                        if (ScraperRequestSource.API.equals(request.getScraperRequestSource())) {
+                            log.info("ScraperRequestSource was: {}, therefore creating POST request to: {}", request.getScraperRequestSource(), PROCESSED_API_ENDPOINT);
+                            try {
+                                int responseStatusCode = handleApiRequestSource(request, scraperResponses);
+                                if (responseStatusCode == 200) {
+                                    log.info("Response [{}] from {}, continuing with next message", responseStatusCode, PROCESSED_API_ENDPOINT);
+                                    receiver.complete(message);
+                                    continue;
+                                }
+                                log.warn("Response [{}] from {}, Will attempt to send List<ScraperResponse> to Service Bus instead.", responseStatusCode, PROCESSED_API_ENDPOINT);
+                            } catch (Exception e) {
+                                log.warn("An unexcepted exception was thrown when trying to POST to: {}. Will attempt to send List<ScraperResponse> to Service Bus instead", PROCESSED_API_ENDPOINT);
                             }
                         }
                         
-                        log.info("Preparing to send scraperResponses as batch");
+                        log.info("Preparing to send {} messages to Service Bus as batch", scraperResponses.size());
                         serviceBusBatchSender.sendBatch(scraperResponses, correlationId); 
 
-                        log.info("Successfully sent message");
+                        log.info("Successfully sent message(s)");
                         receiver.complete(message);
                         // Reset timeout
                         endTime = System.currentTimeMillis() + timeout.toMillis();
@@ -150,5 +150,19 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
             SpringApplication.exit(applicationContext, () -> 0);
             System.exit(0);
         }
+    }
+
+    private int handleApiRequestSource(ScraperRequest request, List<ScraperResponse> scraperResponses) throws JsonProcessingException, IOException, InterruptedException  {
+        String url = String.format("https://%s.azurewebsites.net/api/%s", PROCESSED_API_ENDPOINT);
+        String jsonRequest = objectMapper.writeValueAsString(scraperResponses);
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+            .uri(URI.create(url))
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(jsonRequest))
+            .build();
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        return response.statusCode();
+        
     }
 }

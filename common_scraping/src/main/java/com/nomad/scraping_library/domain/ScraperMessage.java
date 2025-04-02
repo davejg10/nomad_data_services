@@ -10,13 +10,13 @@ import lombok.ToString;
 @ToString
 public abstract class ScraperMessage {
 
-    String scraperRequestSource;
+    ScraperRequestSource scraperRequestSource;
     ScraperRequestType scraperRequestType;
     CityDTO sourceCity;
     CityDTO targetCity;
     LocalDate searchDate;
 
-    public ScraperMessage(String scraperRequestSource, ScraperRequestType scraperRequestType, CityDTO sourceCity, CityDTO targetCity, LocalDate searchDate) {
+    public ScraperMessage(ScraperRequestSource scraperRequestSource, ScraperRequestType scraperRequestType, CityDTO sourceCity, CityDTO targetCity, LocalDate searchDate) {
         this.scraperRequestSource = scraperRequestSource;
         this.scraperRequestType = scraperRequestType;
         this.sourceCity = sourceCity;

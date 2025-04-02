@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ScraperRequest extends ScraperMessage {
     
     @JsonCreator
-    public ScraperRequest(@JsonProperty("scraperRequestSource") String scraperRequestSource,
+    public ScraperRequest(@JsonProperty("scraperRequestSource") ScraperRequestSource scraperRequestSource,
                           @JsonProperty("scraperRequestType") ScraperRequestType scraperRequestType,
                           @JsonProperty("sourceCity") CityDTO sourceCity,
                           @JsonProperty("targetCity") CityDTO targetCity,

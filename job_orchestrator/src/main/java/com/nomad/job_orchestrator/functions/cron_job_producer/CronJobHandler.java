@@ -3,6 +3,7 @@ package com.nomad.job_orchestrator.functions.cron_job_producer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.nomad.scraping_library.domain.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperRequestSource;
 import com.nomad.scraping_library.domain.ScraperRequestType;
 import com.nomad.job_orchestrator.domain.CityPair;
 import com.nomad.job_orchestrator.repositories.Neo4jCityRepository;
@@ -74,7 +75,7 @@ public class CronJobHandler {
                 List<CityPair> cityPairs = cityRepository.routeDiscoveryGivenCountry(filteredCronJob.countryName());
 
                 for (CityPair cityPair : cityPairs) {
-                    ScraperRequest scraperRequest = new ScraperRequest("cronTrigger-" + filteredCronJob.id(), ScraperRequestType.ROUTE_DISCOVERY, cityPair.sourceCity(), cityPair.targetCity(), filteredCronJob.searchDate());
+                    ScraperRequest scraperRequest = new ScraperRequest(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, cityPair.sourceCity(), cityPair.targetCity(), filteredCronJob.searchDate());
                     log.info("Scraper request created. Request is: {}", scraperRequest);
                     scraperRequests.add(scraperRequest);
                 }

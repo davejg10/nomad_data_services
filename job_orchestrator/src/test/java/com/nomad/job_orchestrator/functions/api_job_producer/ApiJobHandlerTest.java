@@ -14,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.nomad.scraping_library.domain.CityDTO;
 import com.nomad.scraping_library.domain.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperRequestSource;
 import com.nomad.scraping_library.domain.ScraperRequestType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.scraping_library.config.AppConfig;
@@ -50,7 +51,7 @@ public class ApiJobHandlerTest {
 
         CityDTO sourceCity = new CityDTO("d637fdf7-d4d8-4bbb-a0d7-218b87d86442", "CityA");
         CityDTO targetCity = new CityDTO("9ef0a8a7-fab9-4c7d-8040-194ba1e3a726", "CityB");
-        ScraperRequest expected = new ScraperRequest("httpTrigger", ScraperRequestType.ROUTE_UPDATE, sourceCity, targetCity, LocalDate.of(2025, 03, 10));
+        ScraperRequest expected = new ScraperRequest(ScraperRequestSource.API, ScraperRequestType.ROUTE_UPDATE, sourceCity, targetCity, LocalDate.of(2025, 03, 10));
 
         assertThat(scraperRequest).isEqualTo(expected);
     }

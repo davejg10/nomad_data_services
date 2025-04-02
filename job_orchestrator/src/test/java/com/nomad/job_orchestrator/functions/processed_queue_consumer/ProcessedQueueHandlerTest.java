@@ -31,7 +31,6 @@ import com.nomad.job_orchestrator.repositories.SqlRouteInstanceRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.harness.Neo4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -47,6 +46,7 @@ import com.nomad.scraping_library.domain.CityDTO;
 import com.nomad.scraping_library.domain.RouteDTO;
 import com.nomad.scraping_library.domain.ScraperIdentifier;
 import com.nomad.scraping_library.domain.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperRequestSource;
 import com.nomad.scraping_library.domain.ScraperRequestType;
 import com.nomad.scraping_library.domain.ScraperResponse;
 
@@ -125,7 +125,7 @@ public class ProcessedQueueHandlerTest {
 
         RouteDefinition routeDefinition = sqlRouteDefinitionRepository.save(RouteDefinition.of(1, TransportType.FLIGHT, cityAId, cityBId));
 
-        ScraperResponse scraperResponse = new ScraperResponse("cronTrigger", ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1), futureDate);
+        ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1), futureDate);
         processedQueueHandler.accept(scraperResponse);
 
         Optional<RouteDefinition> routeDefinitionAfterSave = sqlRouteDefinitionRepository.findById(routeDefinition.getId());
@@ -139,7 +139,7 @@ public class ProcessedQueueHandlerTest {
     void shouldCreateRouteDefinition_ifRouteDefinitionWithSameTransportTypeAndSourceCityIdAndTargetCityIdDoesntExist() throws Neo4jGenericException {
         List<RouteDefinition> allRouteDefinitionsBeforeSave = (List<RouteDefinition>) sqlRouteDefinitionRepository.findAll();
 
-        ScraperResponse scraperResponse = new ScraperResponse("cronTrigger", ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1), futureDate);
+        ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1), futureDate);
         processedQueueHandler.accept(scraperResponse);
         List<RouteDefinition> allRouteDefinitionsAfterSave = (List<RouteDefinition>) sqlRouteDefinitionRepository.findAll();
         RouteDefinition routeDefinition = allRouteDefinitionsAfterSave.get(0);
@@ -153,7 +153,7 @@ public class ProcessedQueueHandlerTest {
 
     @Test
     void shouldCreateRouteInstances_forEachRouteDTOInScraperResponse() throws Neo4jGenericException {
-        ScraperResponse scraperResponse = new ScraperResponse("cronTrigger", ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), futureDate);
+        ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), futureDate);
         processedQueueHandler.accept(scraperResponse);
         List<RouteInstance> allRouteInstances = (List<RouteInstance>) sqlRouteInstanceRepository.findAll();
 
@@ -172,7 +172,7 @@ public class ProcessedQueueHandlerTest {
         RouteInstance routeInstance2 = sqlRouteInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "EasyJet", "London", "Bangkok", "url", futureDate, routeDefinition));
         List<RouteInstance> allRouteInstanceBeforeSave = (List<RouteInstance>) sqlRouteInstanceRepository.findAll();
 
-        ScraperResponse scraperResponse = new ScraperResponse("cronTrigger", ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), futureDate);
+        ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), futureDate);
         processedQueueHandler.accept(scraperResponse);
 
         List<RouteInstance> allRouteInstanceAfterSave = (List<RouteInstance>) sqlRouteInstanceRepository.findAll();
@@ -195,7 +195,7 @@ public class ProcessedQueueHandlerTest {
         List<RouteInstance> allRouteInstanceBeforeSave = (List<RouteInstance>) sqlRouteInstanceRepository.findAll();
 
         LocalDate differentSearchDate = futureDate.plusDays(5);
-        ScraperResponse scraperResponse = new ScraperResponse("cronTrigger", ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), differentSearchDate);
+        ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), differentSearchDate);
         processedQueueHandler.accept(scraperResponse);
 
         List<RouteInstance> allRouteInstanceAfterSave = (List<RouteInstance>) sqlRouteInstanceRepository.findAll();
@@ -210,7 +210,7 @@ public class ProcessedQueueHandlerTest {
     void shouldCreateRouteRelationshipInNeo4j_ifRouteDefinitionWithSameTransportTypeAndSourceCityIdAndTargetCityIdDoesntExist() throws Neo4jGenericException {
         List<RouteDefinition> allRouteDefinitionsBeforeSave = (List<RouteDefinition>) sqlRouteDefinitionRepository.findAll();
 
-        ScraperResponse scraperResponse = new ScraperResponse("cronTrigger", ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), futureDate);
+        ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), futureDate);
         processedQueueHandler.accept(scraperResponse);
         List<RouteDefinition> allRouteDefinitionsAfterSave = (List<RouteDefinition>) sqlRouteDefinitionRepository.findAll();
 
@@ -231,7 +231,7 @@ public class ProcessedQueueHandlerTest {
         UUID cityBId = UUID.fromString(cityDTOB.id());
         RouteDefinition routeDefinition = sqlRouteDefinitionRepository.save(RouteDefinition.of(1, TransportType.FLIGHT, cityAId, cityBId));
 
-        ScraperResponse scraperResponse = new ScraperResponse("cronTrigger", ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), futureDate);
+        ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), futureDate);
         processedQueueHandler.accept(scraperResponse);
 
         Neo4jCity neo4jCity = neo4jRepository.findByIdFetchRoutes(cityDTOA.id()).get();
@@ -243,7 +243,7 @@ public class ProcessedQueueHandlerTest {
     void shouldCalculateAverageCostAndDuration_whenCreatingRouteRelationshipInNeo4j() throws Neo4jGenericException {
         List<RouteDTO> allRoutes = List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3);
 
-        ScraperResponse scraperResponse = new ScraperResponse("cronTrigger", ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, allRoutes, futureDate);
+        ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, allRoutes, futureDate);
         processedQueueHandler.accept(scraperResponse);
 
         Neo4jCity neo4jCity = neo4jRepository.findByIdFetchRoutes(cityDTOA.id()).get();

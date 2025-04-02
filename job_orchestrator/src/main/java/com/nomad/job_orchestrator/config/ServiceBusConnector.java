@@ -21,14 +21,14 @@ import org.springframework.context.annotation.Profile;
 @Profile("!maven")
 public class ServiceBusConnector {
 
-    @Value("${sb_pre_processed_queue_name}")
+    @Value("${app_settings.service_bus.pre_processed_queue_name}")
     private String QUEUE_NAME;
 
-    @Value("${nomadservicebus__fullyQualifiedNamespace}")
+    @Value("${app_settings.service_bus.namespace_fqdn}")
     private String FQDN_NAMESPACE;
 
     // This is the client id of the User Assigned Identity assigned to the Azure Containerapp job
-    @Value("${AZURE_CLIENT_ID:local}")
+    @Value("${app_settings.azure_client_id:local}")
     private String AZURE_CLIENT_ID;
 
     @Bean

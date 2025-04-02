@@ -1,0 +1,33 @@
+app_settings:
+    cron_job_config_file: jobs-config-cloud.yml
+    key_vault_uri: ${KEY_VAULT_URI}
+    neo4j:
+        uri: ${NEO4J_URI}
+        user: ${NEO4J_USER}
+        password_key: ${NEO4J_PASSWORD_KEY}
+    azure_client_id: ${AZURE_CLIENT_ID}
+    service_bus:
+        processed_queue_name: ${SB_PROCESSED_QUEUE_NAME}
+        pre_processed_queue_name: ${SB_PRE_PROCESSED_QUEUE_NAME}
+        namespace_fqdn: ${nomadservicebus__fullyQualifiedNamespace}
+
+spring:
+    datasource:
+        url: ${POSTGRES_URI}
+        username: ${FUNCTION_APP_MANAGED_IDENTITY_PRINCIPAL_NAME}
+        azure:
+            passwordless-enabled: true
+        hikari: # Changing this to 4 as was hogging all the connections
+            maximum-pool-size: 4
+    cloud:
+        azure:
+            credential:
+                managed-identity-enabled: true
+                client-id: ${AZURE_CLIENT_ID}
+    jpa:
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.PostgreSQLDialect
+
+logging:
+    config: classpath:log4j2-fa.xml

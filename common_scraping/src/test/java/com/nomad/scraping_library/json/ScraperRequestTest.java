@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.nomad.scraping_library.config.AppConfig;
 import com.nomad.scraping_library.domain.CityDTO;
 import com.nomad.scraping_library.domain.ScraperRequest;
+import com.nomad.scraping_library.domain.ScraperRequestSource;
 import com.nomad.scraping_library.domain.ScraperRequestType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,11 +29,11 @@ public class ScraperRequestTest {
 
     CityDTO sourceCity = new CityDTO("d637fdf7-d4d8-4bbb-a0d7-218b87d86442", "CityA");
     CityDTO targetCity = new CityDTO("9ef0a8a7-fab9-4c7d-8040-194ba1e3a726", "CityB");
-    ScraperRequest scraperRequestObject = new ScraperRequest("httpTrigger", ScraperRequestType.ROUTE_DISCOVERY, sourceCity, targetCity, futureDate);
+    ScraperRequest scraperRequestObject = new ScraperRequest(ScraperRequestSource.API, ScraperRequestType.ROUTE_DISCOVERY, sourceCity, targetCity, futureDate);
 
     String scraperRequestJson = String.format("""
             {
-                "scraperRequestSource": "httpTrigger",
+                "scraperRequestSource": "API",
                 "scraperRequestType": "ROUTE_DISCOVERY",
                 "sourceCity": {
                     "id": "d637fdf7-d4d8-4bbb-a0d7-218b87d86442",

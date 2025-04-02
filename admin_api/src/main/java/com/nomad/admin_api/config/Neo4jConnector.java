@@ -17,15 +17,15 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 @Configuration
 public class Neo4jConnector {
 
-    @Value("${key_vault_uri}")
+    @Value("${app_settings.key_vault_uri}")
     private String key_vault_uri;
-    @Value("${neo4j_uri}")
+    @Value("${app_settings.neo4j.uri}")
     private String neo4j_uri;
-    @Value("${neo4j_user}")
+    @Value("${app_settings.neo4j.user}")
     private String neo4j_user;
-    @Value("${neo4j_password_key}")
+    @Value("${app_settings.neo4j.password_key}")
     private String neo4j_password_key;
-    @Value("${AZURE_CLIENT_ID}")
+    @Value("${app_settings.azure_client_id}")
     private String AZURE_CLIENT_ID;
 
     @Bean
