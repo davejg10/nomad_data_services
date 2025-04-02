@@ -40,7 +40,7 @@ public class One2GoAsiaScraper implements WebScraperInterface {
         playwright = Playwright.create();
 
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
-                .setHeadless(true)  // Run in headless mode for better performance
+                .setHeadless(false)  // Run in headless mode for better performance
                 .setSlowMo(50));// Add delay to respect rate limits
 
         browserContext = browser.newContext();
