@@ -24,7 +24,7 @@ import lombok.extern.log4j.Log4j2;
 @SpringBootTest(classes = {One2GoAsiaScraper.class, AppConfig.class})
 public class One2GoAsiaScraperIntegrationTest {
 
-    LocalDate futureDate = LocalDate.now().plusDays(2);
+    LocalDate futureDate = LocalDate.now().plusDays(8);
 
     @Autowired
     ObjectMapper objectMapper;
@@ -38,11 +38,11 @@ public class One2GoAsiaScraperIntegrationTest {
                 "scraperRequestType": "ROUTE_DISCOVERY",
                 "sourceCity": {
                     "id": "d637fdf7-d4d8-4bbb-a0d7-218b87d86442",
-                    "name": "Phuket"
+                    "name": "Bangkok"
                 },
                 "targetCity": {
                     "id": "9ef0a8a7-fab9-4c7d-8040-194ba1e3a726",
-                    "name": "Chiang-mai"
+                    "name": "Phuket"
                 },
                 "searchDate": "%s"
             }

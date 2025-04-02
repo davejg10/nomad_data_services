@@ -26,7 +26,9 @@ public class One2GoAsiaScraper implements WebScraperInterface {
     private final ObjectMapper objectMapper;
     private static final String BASE_URL = "https://12go.asia/en/travel/";
     private static final String timeTableShowMoreButtonSelector = "#best_options > div.container.block-module > div.list > button";
-    private static final String tripListCard = "#best_options > div.container.block-module > div.list > div:has(a)";
+    private static final String tripListCardSimple = "#best_options > div.container.block-module > div.list > div:has(a)";
+    private static final String DIV_LIST_BASE_SELECTOR = "#best_options > div.container.block-module > div.list > div";
+
     private static final int RATE_LIMIT_DELAY = 1000;
 
     private final Playwright playwright;
@@ -40,7 +42,7 @@ public class One2GoAsiaScraper implements WebScraperInterface {
         playwright = Playwright.create();
 
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
-                .setHeadless(true)  // Run in headless mode for better performance
+                .setHeadless(false)  // Run in headless mode for better performance
                 .setSlowMo(50));// Add delay to respect rate limits
 
         browserContext = browser.newContext();
@@ -68,26 +70,41 @@ public class One2GoAsiaScraper implements WebScraperInterface {
 
             Set<RouteDTO> routesSet = new HashSet<>();
 
+            String travelCardSelector = ":has(a.trip-card)";
+
+            String expandableStyleSelector = ":has(div.trip-card-footer)";
+
             int timesScrolled = 0, maxScrolls = 8, lastItemCount = 0;
             while (timesScrolled < maxScrolls) {
+                List<Locator> compactCardList = new ArrayList<>();
+                List<Locator> expandableCardList = new ArrayList<>();
 
-                List<Locator> divList = page.locator(tripListCard).all();
+                List<Locator> divList = page.locator(DIV_LIST_BASE_SELECTOR + travelCardSelector).all();
+
+//                List<Locator> divListExpandable = page.locator(DIV_LIST_BASE_SELECTOR + expandableStyleSelector).all();
+
+//                int compactItemCount = divListCompact.size();
+//                int expandableItemCount = divListExpandable.size();
                 int currentItemCount = divList.size();
+
                 log.info("Number of items found in div: {}", currentItemCount);
 
                 // If no new elements were loaded, stop scrolling
-                if (currentItemCount == lastItemCount) {
-                    log.info("No new items found. Stopping scroll.");
-                    break;
-                }
+//                if (currentItemCount == lastItemCount) {
+//                    log.info("No new items found. Stopping scroll.");
+//                    break;
+//                }
                 try {
-                    routesSet.addAll(parseDivListRow(tripListCard, request.getSearchDate()));
+                    routesSet.addAll(parseDivList(DIV_LIST_BASE_SELECTOR + travelCardSelector, request.getSearchDate()));
+
+//                    routesSet.addAll(parseExpandableDivList(DIV_LIST_BASE_SELECTOR + expandableStyleSelector, request.getSearchDate()));
+
+
                 } catch (Exception e) {
                     log.error("Unexpected exception was: {}", e.getMessage(), e);
                 }
                 log.info("Scrolling down");
-                page.mouse().wheel(0, 1200);
-                Thread.sleep(200);
+                page.mouse().wheel(0, 1100);
                 timesScrolled ++;
             }
 
@@ -100,9 +117,6 @@ public class One2GoAsiaScraper implements WebScraperInterface {
 
         } catch (PlaywrightException e) {
             log.error("Playwright Scraping error: " + e.getMessage());
-        } catch (InterruptedException e) {
-            log.error("InterruptedException");
-            throw new RuntimeException(e);
         } finally {
             log.info("Scrape complete, Closing page");
             page.close();
@@ -110,70 +124,71 @@ public class One2GoAsiaScraper implements WebScraperInterface {
         return scraperResponses;
     }
 
-    private Set<RouteDTO> parseDivListRow(String tripListCard, LocalDate searchDate) throws Exception {
+    private Set<RouteDTO> parseDivList(String listSelector, LocalDate searchDate) throws Exception {
         Set<RouteDTO> routes = new HashSet<>();
-        Object tripData = page.evalOnSelectorAll(tripListCard, """
-                            elements => elements.map(el => {
-                                let anchor = el.querySelector("a");
-                                let href = anchor ? anchor.href : null;
-                        
-                                let trip = { href: href };
-                        
-                                let items = anchor ? anchor.querySelectorAll("div.trip-body div.points div.item") : [];
-                                
-                                items.forEach(item => {
-                                    let innerHTML = item.innerHTML;
-                        
-                                    if (innerHTML.includes("vehclasses")) {
-                                        let vehClasses = item.querySelector("div.vehclasses > div");
-                                        let newVehClass = vehClasses ? vehClasses : item.querySelector("div.vehclasses > span");
-                                        let transport = newVehClass ? newVehClass.getAttribute("tooltip") : null;
-                                        if (transport) {
-                                            let transportSplit = transport.split(" with ");
-                                            trip.transportType = transportSplit[0] || null;
-                                            trip.transportOperator = transportSplit[1] || null;
-                                        }
-                                    } else if (innerHTML.includes("trip-time dep")) {
-                                        let departTime = item.querySelector("strong.time")?.innerText;
-                                        trip.departure = departTime;
-                                        trip.departureLocation = item.querySelector("div.one-line")?.innerText;
-                                    } else {
-                                        let arrivalTime = item.querySelector("strong.time")?.innerText;
-                                        trip.arrival = arrivalTime;
-                                        trip.arrivalLocation = item.querySelector("div.one-line")?.innerText;
-                                    }
-                                });
-                                
-                                let cost = anchor.querySelector("div.trip-cta > div.price > meta[data-qa='trip-card-meta-price']").getAttribute("content");
-                                trip.cost = cost;
-                                return trip;
-                            })
-                        """);
-        List<Map<String, String>> tripList = objectMapper.convertValue(tripData, new TypeReference<List<Map<String, String>>>() {});
+         Object tripData = page.evalOnSelectorAll(listSelector, """
+                     elements => elements.map(el => {
+                         let anchor = el.querySelector("a");
+                         let href = el.querySelector("a.trip-card.trip-card-options")?.href ?? el.querySelector("a")?.href
 
-        for (Map<String, String> trip : tripList) {
-            try {
-                if (trip.get("departure").equals("--:--")) {
-                    log.error("Not adding due to departTime being --:--");
-                    continue;
-                }
-            } catch (NullPointerException e) {
-                log.error("Nullpointer thrown when trying to trip.get(departure). Trip list map is: {}", tripList);
-            }
+                
+                         let trip = { href: href };
+                
+                         let items = el.querySelectorAll("div.trip-body div.points div.item");
+                        
+                         items.forEach(item => {
+                             let innerHTML = item.innerHTML;
+                
+                             if (innerHTML.includes("vehclasses")) {
+                                 let vehClasses = item.querySelector("div.vehclasses > div");
+                                 let newVehClass = vehClasses ? vehClasses : item.querySelector("div.vehclasses > span");
+                                 let transport = newVehClass ? newVehClass.getAttribute("tooltip") : null;
+                                 if (transport) {
+                                     let transportSplit = transport.split(" with ");
+                                     trip.transportType = transportSplit[0] || null;
+                                     trip.transportOperator = transportSplit[1] || null;
+                                 }
+                             } else if (innerHTML.includes("trip-time dep")) {
+                                 let departTime = item.querySelector("strong.time")?.innerText;
+                                 trip.departure = departTime;
+                                 trip.departureLocation = item.querySelector("div.one-line")?.innerText;
+                             } else {
+                                 let arrivalTime = item.querySelector("strong.time")?.innerText;
+                                 trip.arrival = arrivalTime;
+                                 trip.arrivalLocation = item.querySelector("div.one-line")?.innerText;
+                             }
+                         });
+                        
+                         let cost = anchor.querySelector("div.price > meta[data-qa='trip-card-meta-price']").getAttribute("content");
+                         trip.cost = cost;
+                         return trip;
+                     })
+                 """);
+         List<Map<String, String>> tripList = objectMapper.convertValue(tripData, new TypeReference<List<Map<String, String>>>() {});
 
-            RouteDTO newRoute = RouteDTO.createWithSchema(
-                    trip.get("transportType"),
-                    trip.get("transportOperator"),
-                    trip.get("departure"),
-                    trip.get("arrival"),
-                    trip.get("departureLocation"),
-                    trip.get("arrivalLocation"),
-                    trip.get("cost"),
-                    trip.get("href"),
-                    searchDate
-            );
-            routes.add(newRoute);
-        }
+         for (Map<String, String> trip : tripList) {
+             try {
+                 if (trip.get("departure").equals("--:--")) {
+                     log.error("Not adding due to departTime being --:--");
+                     continue;
+                 }
+             } catch (NullPointerException e) {
+                 log.error("Nullpointer thrown when trying to trip.get(departure). Trip list map is: {}", tripList);
+             }
+
+             RouteDTO newRoute = RouteDTO.createWithSchema(
+                     trip.get("transportType"),
+                     trip.get("transportOperator"),
+                     trip.get("departure"),
+                     trip.get("arrival"),
+                     trip.get("departureLocation"),
+                     trip.get("arrivalLocation"),
+                     trip.get("cost"),
+                     trip.get("href"),
+                     searchDate
+             );
+             routes.add(newRoute);
+         }
 
         return routes;
     }
