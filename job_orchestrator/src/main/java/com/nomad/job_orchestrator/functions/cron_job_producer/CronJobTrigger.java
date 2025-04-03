@@ -63,7 +63,7 @@
              log.error("An exception was thrown when trying to create ScraperRequests within the cronJobProducer.", e);
              context.getLogger().log(Level.SEVERE, "An exception was thrown when trying to create ScraperRequests within the cronJobProducer. CorrelationId " + correlationId + " Exception: " + e.getMessage(), e);
          } finally {
-             ThreadContext.clearAll();
+            ThreadContext.remove("correlationId");
          }
         
      }

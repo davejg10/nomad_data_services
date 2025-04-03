@@ -161,6 +161,7 @@ public abstract class ScraperProcessor<T extends WebScraperInterface> implements
         HttpRequest httpRequest = HttpRequest.newBuilder()
             .uri(URI.create(url))
             .header("Content-Type", "application/json")
+            .header("correlationId", ThreadContext.get("correlationId"))
             .POST(HttpRequest.BodyPublishers.ofString(jsonRequest))
             .build();
         HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());

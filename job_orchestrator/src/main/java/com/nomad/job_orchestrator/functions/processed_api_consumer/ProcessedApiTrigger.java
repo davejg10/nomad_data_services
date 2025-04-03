@@ -1,8 +1,9 @@
 package com.nomad.job_orchestrator.functions.processed_api_consumer;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.logging.Level;
 
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,9 @@ public class ProcessedApiTrigger {
         HttpRequestMessage<Optional<String>> request,
         ExecutionContext context) throws JsonMappingException, JsonProcessingException  {
         
-        String correlationId = UUID.randomUUID().toString();
+        Map<String, String> headers = request.getHeaders();
+
+        String correlationId = headers.get("correlationId");
         ThreadContext.put("correlationId", correlationId);
 
         try {
@@ -62,10 +65,11 @@ public class ProcessedApiTrigger {
                 return request.createResponseBuilder(HttpStatus.OK).body("Successfully processed message...").build(); 
             }
         } catch (Exception e) {
-            log.error("There was an error in the processedApiConsumer.", e);
+            log.error("An unexpected exception was thrown in processedApiConsumer. Error: {}", e.getMessage());
+            context.getLogger().log(Level.SEVERE, "An unexpected exception was thrown in processedApiConsumer. CorrelationId " + correlationId + " Exception: " + e.getMessage(), e);
             return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("An exception was thrown when trying to queue the job. Error: " + e.getMessage()).build();
         } finally {
-            ThreadContext.clearAll();
+            ThreadContext.remove("correlationId");
         }
         
     }
