@@ -8,7 +8,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.data_library.domain.CityMetric;
-import com.nomad.data_library.domain.CityMetrics;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

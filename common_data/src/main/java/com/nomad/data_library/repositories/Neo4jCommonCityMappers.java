@@ -2,7 +2,7 @@ package com.nomad.data_library.repositories;
 
 import com.nomad.data_library.domain.CityCriteria;
 import com.nomad.data_library.domain.CityMetric;
-import com.nomad.data_library.domain.TransportType;
+import com.nomad.common_utils.domain.TransportType;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
 import com.nomad.data_library.domain.neo4j.Neo4jRoute;
@@ -14,6 +14,8 @@ import org.neo4j.driver.types.MapAccessor;
 import org.neo4j.driver.types.TypeSystem;
 import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 
+import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -97,12 +99,13 @@ public class Neo4jCommonCityMappers {
     private Set<Neo4jRoute> mapRoutes(Value routes, ArrayList<Neo4jCity> targetCities) {
         AtomicInteger index = new AtomicInteger(0);
         return new HashSet<>(routes.asList(route -> new Neo4jRoute(
-                    route.get("id").asString(),
-                    targetCities.get(index.getAndIncrement()),
-                    route.get("popularity").asDouble(),
-                    route.get("time").asDouble(),
-                    route.get("cost").asDouble(),
-                    TransportType.valueOf(route.get("transportType").asString())
+                        route.get("id").asString(),
+                        targetCities.get(index.getAndIncrement()),
+                        route.get("popularity").asDouble(),
+                        Duration.parse(route.get("averageDuration").asString()),
+                        new BigDecimal(route.get("averageCost").asString()),
+                        TransportType.valueOf(route.get("transportType").asString())
+
         )));
     }
 }

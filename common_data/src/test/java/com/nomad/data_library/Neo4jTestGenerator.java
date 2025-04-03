@@ -1,12 +1,16 @@
 package com.nomad.data_library;
 
-import com.nomad.data_library.domain.TransportType;
+import com.nomad.common_utils.domain.TransportType;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
 import com.nomad.data_library.domain.neo4j.Neo4jRoute;
 import com.nomad.data_library.domain.sql.SqlCity;
 import com.nomad.data_library.domain.sql.SqlCountry;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -14,16 +18,24 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.springframework.data.neo4j.types.GeographicPoint3d;
 
 public class Neo4jTestGenerator {
+
+    public static Duration calculateRandomDuration() {
+        return Duration.between(LocalDateTime.now(), LocalDateTime.now().plusHours(ThreadLocalRandom.current().nextInt(0, 10)));
+    }
+
+    public static BigDecimal calculateRandomCost() {
+        return new BigDecimal(ThreadLocalRandom.current().nextDouble(0.0, 100.0)).setScale(2, RoundingMode.HALF_UP);
+    }
     
     public static Neo4jRoute neo4jRoute(Neo4jCity targetCity) {
         double min = 0.0;
         double popularity = ThreadLocalRandom.current().nextDouble(min, 10.0);
-        double time = ThreadLocalRandom.current().nextDouble(min, 20.0);
-        double cost = ThreadLocalRandom.current().nextDouble(min, 100.0);
+        Duration averageDuration = calculateRandomDuration();
+        BigDecimal averageCost = calculateRandomCost();
         TransportType[] allTransports = TransportType.values();
         TransportType randomTransportType = allTransports[ThreadLocalRandom.current().nextInt(allTransports.length)];
 
-        return new Neo4jRoute(UUID.randomUUID().toString(), targetCity, popularity, time, cost, randomTransportType);
+        return new Neo4jRoute(UUID.randomUUID().toString(), targetCity, popularity, averageDuration, averageCost, randomTransportType);
     }
 
     public static GeographicPoint3d generateCoords() {

@@ -10,15 +10,15 @@ import lombok.ToString;
 @ToString
 public abstract class ScraperMessage {
 
-    String scraperRequestSource;
-    ScraperRequestType type;
+    ScraperRequestSource scraperRequestSource;
+    ScraperRequestType scraperRequestType;
     CityDTO sourceCity;
     CityDTO targetCity;
     LocalDate searchDate;
 
-    public ScraperMessage(String scraperRequestSource, ScraperRequestType type, CityDTO sourceCity, CityDTO targetCity, LocalDate searchDate) {
+    public ScraperMessage(ScraperRequestSource scraperRequestSource, ScraperRequestType scraperRequestType, CityDTO sourceCity, CityDTO targetCity, LocalDate searchDate) {
         this.scraperRequestSource = scraperRequestSource;
-        this.type = type;
+        this.scraperRequestType = scraperRequestType;
         this.sourceCity = sourceCity;
         this.targetCity = targetCity;
         this.searchDate = searchDate;
@@ -29,7 +29,7 @@ public abstract class ScraperMessage {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((scraperRequestSource == null) ? 0 : scraperRequestSource.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + ((scraperRequestType == null) ? 0 : scraperRequestType.hashCode());
         result = prime * result + ((sourceCity == null) ? 0 : sourceCity.hashCode());
         result = prime * result + ((targetCity == null) ? 0 : targetCity.hashCode());
         result = prime * result + ((searchDate == null) ? 0 : searchDate.hashCode());
@@ -50,7 +50,7 @@ public abstract class ScraperMessage {
                 return false;
         } else if (!scraperRequestSource.equals(other.scraperRequestSource))
             return false;
-        if (type != other.type)
+        if (scraperRequestType != other.scraperRequestType)
             return false;
         if (sourceCity == null) {
             if (other.sourceCity != null)
@@ -69,8 +69,5 @@ public abstract class ScraperMessage {
             return false;
         return true;
     }
-
-    
-
     
 }

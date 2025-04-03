@@ -1,0 +1,8 @@
+spring:
+    application:
+        name: admin-api
+    profiles:
+        active: ${SPRING_PROFILE:local}
+    jpa:
+        hibernate:  # Dont create anything in the DB based on our Entities.
+            ddl-auto: none

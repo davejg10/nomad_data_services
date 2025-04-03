@@ -1,0 +1,20 @@
+spring:
+    datasource:
+        url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;INIT=CREATE DOMAIN IF NOT EXISTS JSONB AS JSON;
+        username: sa
+        password: 
+        driverClassName: org.h2.Driver
+    jpa:
+        database-platform: org.hibernate.dialect.H2Dialect
+    sql:
+        init: # Located in common module 
+            schema-locations: classpath:local/psql_schema.sql
+    main: # Color output in console
+        banner-mode: off
+    output: # Color output in console
+        ansi:
+            enabled: ALWAYS
+
+# Logger
+logging:
+    config: classpath:log4j2-local.xml

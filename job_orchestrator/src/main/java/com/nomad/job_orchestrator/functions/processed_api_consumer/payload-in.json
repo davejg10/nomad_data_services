@@ -1,0 +1,76 @@
+[
+    {
+        "scraperRequestSource": "CRON",
+        "scraperRequestType": "ROUTE_DISCOVERY",
+        "scraperIdentifier": "ONE2GOASIA",
+        "transportType": "FLIGHT",
+        "sourceCity": {
+            "id": "d637fdf7-d4d8-4bbb-a0d7-218b87d86442",
+            "name": "CityA"
+        },
+        "targetCity": {
+            "id": "9ef0a8a7-fab9-4c7d-8040-194ba1e3a726",
+            "name": "CityB"
+        },
+        "routes": [
+            {
+                "transportType": "FLIGHT",
+                "operator": "Easyjet",
+                "depart": "",
+                "arrival": "",
+                "departureLocation": "London",
+                "arrivalLocation": "Bangkok",
+                "cost": 12.99,
+                "url": "someurl"
+            },
+            {
+                "transportType": "FLIGHT",
+                "operator": "WizzAir",
+                "depart": "",
+                "arrival": "",
+                "departureLocation": "London",
+                "arrivalLocation": "Bangkok",
+                "cost": 4.22,
+                "url": "someurl"
+            }
+        ],
+        "searchDate": "2024-03-10"
+    },
+    {
+        "scraperRequestSource": "CRON",
+        "scraperRequestType": "ROUTE_DISCOVERY",
+        "scraperIdentifier": "ONE2GOASIA",
+        "transportType": "BUS",
+        "sourceCity": {
+            "id": "d637fdf7-d4d8-4bbb-a0d7-218b87d86442",
+            "name": "CityA"
+        },
+        "targetCity": {
+            "id": "9ef0a8a7-fab9-4c7d-8040-194ba1e3a726",
+            "name": "CityB"
+        },
+        "routes": [
+            {
+                "transportType": "BUS",
+                "operator": "Tfl",
+                "depart": "",
+                "arrival": "",
+                "departureLocation": "London",
+                "arrivalLocation": "Bangkok",
+                "cost": 12.99,
+                "url": "someurl"
+            },
+            {
+                "transportType": "BUS",
+                "operator": "Nationwide",
+                "depart": "",
+                "arrival": "",
+                "departureLocation": "London",
+                "arrivalLocation": "Bangkok",
+                "cost": 4.22,
+                "url": "someurl"
+            }
+        ],
+        "searchDate": "2024-03-10"
+    }
+]

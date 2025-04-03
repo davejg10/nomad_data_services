@@ -8,10 +8,14 @@ import org.neo4j.harness.Neo4jBuilders;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.neo4j.core.Neo4jClient;
+import org.springframework.data.neo4j.core.convert.Neo4jConversions;
+import org.springframework.data.neo4j.core.mapping.Neo4jMappingContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import lombok.extern.log4j.Log4j2;
+
+import java.util.Set;
 
 @Log4j2
 @TestConfiguration
@@ -46,6 +50,5 @@ public class Neo4jTestConfiguration {
         registry.add("spring.neo4j.authentication.username", () -> neo4jUser);
         registry.add("spring.neo4j.authentication.password", () -> neo4jPass);
     }
-
 
 }

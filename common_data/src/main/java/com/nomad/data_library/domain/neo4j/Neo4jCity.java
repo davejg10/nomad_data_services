@@ -1,5 +1,7 @@
 package com.nomad.data_library.domain.neo4j;
 
+import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -14,7 +16,7 @@ import org.springframework.data.neo4j.types.GeographicPoint3d;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.nomad.data_library.domain.TransportType;
+import com.nomad.common_utils.domain.TransportType;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -77,12 +79,12 @@ public class Neo4jCity {
     }
 
     public Neo4jCity addRoute(Neo4jRoute route) {
-        return addRoute(route.getId(), route.getTargetCity(), route.getPopularity(), route.getTime(), route.getCost(), route.getTransportType());
+        return addRoute(route.getId(), route.getTargetCity(), route.getPopularity(), route.getAverageDuration(), route.getAverageCost(), route.getTransportType());
     }
 
-    public Neo4jCity addRoute(String id, Neo4jCity targetCity, double popularity, double time, double cost, TransportType transportType) {
+    public Neo4jCity addRoute(String id, Neo4jCity targetCity, double popularity, Duration averageDuration, BigDecimal averageCost, TransportType transportType) {
         Set<Neo4jRoute> existingRoutes = getRoutes();
-        Neo4jRoute routeToAdd = new Neo4jRoute(id, targetCity, popularity, time, cost, transportType);
+        Neo4jRoute routeToAdd = new Neo4jRoute(id, targetCity, popularity, averageDuration, averageCost, transportType);
         log.info("Adding route: {}", routeToAdd);
 
         Optional<Neo4jRoute> route = existingRoutes.stream()
@@ -91,7 +93,7 @@ public class Neo4jCity {
 
         if (route.isPresent()) {
             Neo4jRoute existingRoute = route.get();
-            if (!Objects.equals(existingRoute.getPopularity(), popularity) || !Objects.equals(existingRoute.getTime(), time) || !Objects.equals(existingRoute.getCost(), cost)) {
+            if (!Objects.equals(existingRoute.getPopularity(), popularity) || !Objects.equals(existingRoute.getAverageDuration(), averageDuration) || !Objects.equals(existingRoute.getAverageCost(), averageCost)) {
                 existingRoutes.remove(existingRoute);
                 existingRoutes.add(routeToAdd);
             }

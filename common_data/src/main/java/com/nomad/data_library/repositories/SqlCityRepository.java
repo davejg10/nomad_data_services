@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 
 import com.nomad.data_library.domain.sql.SqlCity;
 
-
 @Repository
 public interface SqlCityRepository extends CrudRepository<SqlCity, UUID> {
 

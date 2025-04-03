@@ -9,6 +9,7 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
+import com.nomad.data_library.domain.neo4j.Neo4jRoute;
 import com.nomad.data_library.exceptions.Neo4jGenericException;
 
 import java.util.*;
@@ -37,6 +38,19 @@ public class Neo4jCommonCityRepository {
     public Optional<Neo4jCity> findByIdFetchRoutes(String id) {
         return findById(id, true);
     }
+
+    public static String QUERY_SAVE_ROUTE = """
+                MATCH (c:City {id: $id})            
+                MATCH (t:City {id: $targetId})
+                     
+                MERGE (c)-[rel:ROUTE {
+                    transportType: $transportType
+                }]->(t)
+                SET rel.id = $routeId,
+                    rel.popularity = $popularity,
+                    rel.averageDuration = $averageDuration,
+                    rel.averageCost = $averageCost
+            """;
 
     private static String QUERY_RETURN_ALL_RELATIONSHIPS = """
             OPTIONAL MATCH (city)-[:OF_COUNTRY]->(country)
@@ -140,36 +154,23 @@ public class Neo4jCommonCityRepository {
     }
 
     public Neo4jCity saveRoute(Neo4jCity city) {
-
-        Map<String, Object> cityAsMap = mapifyCity(city);
-
-        neo4jClient.query("""
-            MATCH (c:City {id: $id})
-          
-            WITH c
-            UNWIND $routes AS routeData
-            
-            MATCH (t:City {id: routeData.targetCity.id})
-            
-            WITH c, t, routeData   
-            OPTIONAL MATCH (c)-[r:ROUTE {
-                   transportType: routeData.transportType
-            }]->(t)
-            WHERE r.popularity <> routeData.popularity OR r.time <> routeData.time OR r.cost <> routeData.cost
-            DELETE r
-            
-            MERGE (c)-[rel:ROUTE {
-                popularity: routeData.popularity,
-                time: routeData.time,
-                cost: routeData.cost,
-                transportType: routeData.transportType
-            }]->(t)
-            ON CREATE SET rel.id = routeData.id
-        """)
-        .bindAll(cityAsMap)
-        .run();
-
-        return findByName(cityAsMap.get("name").toString()).get();
+        for (Neo4jRoute route : city.getRoutes()) {
+            try {
+                neo4jClient.query(QUERY_SAVE_ROUTE)
+                .bind(route.getId()).to("routeId")
+                .bind(city.getId()).to("id")
+                .bind(route.getTargetCity().getId()).to("targetId")
+                .bind(route.getPopularity()).to("popularity")
+                .bind(route.getAverageDuration().toString()).to("averageDuration")
+                .bind(route.getAverageCost().toString()).to("averageCost")
+                .bind(route.getTransportType().toString()).to("transportType")
+                .run();
+            } catch (Exception e) {
+                log.error("Unexpected exception when trying to save route to Neo4j. Exception: {}", e.getMessage());
+                throw new Neo4jGenericException("Unexpected exception when trying to save route to Neo4j.", e);
+            }
+        }
+        return findByName(city.getName()).get();
     }
 
     public Map<String, Object> mapifyCity(Neo4jCity city) {

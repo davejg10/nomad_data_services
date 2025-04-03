@@ -1,0 +1,14 @@
+app_settings:
+    TIMEOUT_IN_SECONDS: -1
+    job_orchestrator_processed_api_url: https://fa-${ENVIRONMENT}-uks-nomad-02-job-orchestrator.azurewebsites.net
+    azure_client_id: ${AZURE_CLIENT_ID}
+    azure_tenant_id: ${AZURE_TENANT_ID}
+    azure_client_secret: ${AZURE_CLIENT_SECRET}
+    service_bus:
+        processed_queue_name: nomad_processed
+        pre_processed_queue_name: nomad_pre_processed
+        namespace_fqdn: sbns-${ENVIRONMENT}-uks-nomad-02.servicebus.windows.net
+
+# Logger
+logging:
+    config: classpath:log4j2-hetzner.xml
