@@ -18,6 +18,7 @@ import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
+import com.nomad.admin_api.services.CountryService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -29,10 +30,14 @@ public class DeleteCountryTrigger {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private DeleteCountryHandler deleteCountryHandler;
+    private CountryService countryService;
 
     @FunctionName("deleteCountry")
-    public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
+    public HttpResponseMessage execute(
+        @HttpTrigger(
+            name = "req", 
+            methods = {HttpMethod.POST}, 
+            authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request, 
         ExecutionContext context) throws Exception {
         
@@ -49,7 +54,7 @@ public class DeleteCountryTrigger {
                     String countryToBeDeleted = objectMapper.readTree(request.getBody().get()).get("name").asText();
                     log.info("deleteCountry function hit. Request body is {}", countryToBeDeleted);
                 
-                    deleteCountryHandler.accept(countryToBeDeleted);
+                    countryService.deleteCountry(countryToBeDeleted);
     
                     return request.createResponseBuilder(HttpStatus.OK).body("Successfully deleted Country " + countryToBeDeleted + " in PostgreSQl flexible server & deleted in Neo4j.").build();
     
@@ -63,7 +68,7 @@ public class DeleteCountryTrigger {
                 }
             }
         } finally {
-            ThreadContext.clearAll();
+            ThreadContext.remove("correlationId");
         }
         
     }

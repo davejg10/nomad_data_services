@@ -19,6 +19,7 @@ import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.nomad.admin_api.domain.CityToDeleteDTO;
+import com.nomad.admin_api.services.CityService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -30,7 +31,7 @@ public class DeleteCityTrigger {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private DeleteCityHandler deleteCityHandler;
+    private CityService cityService;
 
     @FunctionName("deleteCity")
     public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
@@ -51,7 +52,7 @@ public class DeleteCityTrigger {
 
                     CityToDeleteDTO cityToBeDeleted = objectMapper.readValue(request.getBody().get(), CityToDeleteDTO.class);
     
-                    deleteCityHandler.accept(cityToBeDeleted);
+                    cityService.deleteCity(cityToBeDeleted);
     
                     return request.createResponseBuilder(HttpStatus.OK).body("Successfully deleted City " + cityToBeDeleted.name() + " in PostgreSQl flexible server & deleted in Neo4j.").build();
     
@@ -65,7 +66,7 @@ public class DeleteCityTrigger {
                 } 
             }
         } finally {
-            ThreadContext.clearAll();
+            ThreadContext.remove("correlationId");
         }
     }
 }

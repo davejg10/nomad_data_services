@@ -1,5 +1,7 @@
 package com.nomad.admin_api.repositories;
 
+import java.util.Map;
+
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Repository;
 
@@ -33,6 +35,40 @@ public class Neo4jCityRepository extends Neo4jCommonCityRepository {
             .run();
         } catch (Exception e) {
             throw new Neo4jGenericException("Exception when trying to delete City. Exception: {}", e);
+        }
+    }
+
+    public Neo4jCity update(Neo4jCity city) throws Neo4jGenericException {
+        Map<String, Object> cityAsMap = mapifyCity(city);
+
+        try {
+            Neo4jCity neo4jCity = neo4jClient
+            .query("""
+                MERGE (city:City {id: $id})
+                SET city.name = $name,
+                    city.shortDescription = $shortDescription,
+                    city.primaryBlobUrl = $primaryBlobUrl,
+                    city.coordinate = point($coordinate)
+
+                WITH city
+                MATCH(country:Country {id: $countryId})
+                
+                WITH city, country
+                UNWIND $cityMetrics AS cityMetric
+                MERGE (city)-[:HAS_METRIC]->(m:Metric {criteria: cityMetric.criteria})
+                SET m.metric = cityMetric.metric
+                    
+                RETURN city, country, collect(m) as cityMetrics
+            """)
+            .bind(city.getCountry().getId()).to("countryId")
+            .bindAll(cityAsMap)
+            .fetchAs(Neo4jCity.class)
+            .mappedBy(cityWithNoRoutesMapper)
+            .first()
+            .get();
+            return neo4jCity;
+        } catch (Exception e) {
+            throw new Neo4jGenericException("Exception when trying to update City. Exception: {}", e);
         }
     }
 

@@ -1,4 +1,4 @@
-package com.nomad.admin_api.functions.create_country;
+package com.nomad.admin_api.functions.update_country;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -16,6 +16,7 @@ import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
+import com.microsoft.azure.functions.annotation.BindingName;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.nomad.admin_api.domain.CountryDTO;
@@ -26,7 +27,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Component
-public class CreateCountryTrigger {
+public class UpdateCountryTrigger {
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -34,9 +35,15 @@ public class CreateCountryTrigger {
     @Autowired
     private CountryService countryService;
 
-    @FunctionName("createCountry")
-    public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
+    @FunctionName("updateCountry")
+    public HttpResponseMessage execute(
+        @HttpTrigger(
+            name = "req",
+            methods = {HttpMethod.PUT},
+            route = "updateCountry/{countryId}",
+            authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request, 
+        @BindingName("countryId") String countryId,
         ExecutionContext context) throws Exception {
         
         String correlationId = UUID.randomUUID().toString();
@@ -49,20 +56,20 @@ public class CreateCountryTrigger {
             } else {
                 
                 try {
-                    CountryDTO countryToBeCreated = objectMapper.readValue(request.getBody().get(), CountryDTO.class);
-                    log.info("createCountry function hit. Request body is {}", countryToBeCreated);
+                    CountryDTO countryToBeUpdated = objectMapper.readValue(request.getBody().get(), CountryDTO.class);
+                    log.info("updateCountry function hit. Request body is {}", countryToBeUpdated);
                 
-                    countryService.createCountry(countryToBeCreated);
+                    countryService.updateCountry(countryId, countryToBeUpdated);
     
-                    return request.createResponseBuilder(HttpStatus.OK).body("Successfully created Country " + countryToBeCreated.name() + " in PostgreSQl flexible server & synced to Neo4j.").build();
+                    return request.createResponseBuilder(HttpStatus.OK).body("Successfully updated Country " + countryToBeUpdated.name() + " in PostgreSQl flexible server & synced to Neo4j.").build();
     
                 } catch(JsonMappingException e) {    
                     log.error("An error was thrown when trying to map message to SqlCountry.", e);
                     context.getLogger().log(Level.SEVERE, "An error was thrown when trying to map message to SqlCountry. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
                     return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Json mapping error. Please ensure you have the correct payload. Issue: " + e.getMessage()).build();
                 } catch (Exception e) {
-                    context.getLogger().log(Level.SEVERE, "There was an issue creating the country. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
-                    return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue creating Country. Issue: " + e.getMessage()).build();
+                    context.getLogger().log(Level.SEVERE, "There was an issue updating the country. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
+                    return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue updating Country. Issue: " + e.getMessage()).build();
                 }
             }
         } finally {

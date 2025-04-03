@@ -1,5 +1,6 @@
 package com.nomad.data_library.domain.sql;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -52,4 +53,15 @@ public class SqlCity {
         this.countryId = countryId;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SqlCity sqlCity)) return false;
+        return Objects.equals(id, sqlCity.id) && Objects.equals(name, sqlCity.name) && Objects.equals(description, sqlCity.description) && Objects.equals(cityMetrics, sqlCity.cityMetrics) && Objects.equals(countryId, sqlCity.countryId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, cityMetrics, countryId);
+    }
 }

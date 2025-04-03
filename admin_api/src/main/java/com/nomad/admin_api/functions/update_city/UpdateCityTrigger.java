@@ -1,4 +1,4 @@
-package com.nomad.admin_api.functions.create_city;
+package com.nomad.admin_api.functions.update_city;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -16,6 +16,7 @@ import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
+import com.microsoft.azure.functions.annotation.BindingName;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.nomad.admin_api.domain.CityDTO;
@@ -25,7 +26,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Component
-public class CreateCityTrigger {
+public class UpdateCityTrigger {
     
     @Autowired
     private ObjectMapper objectMapper;
@@ -33,9 +34,15 @@ public class CreateCityTrigger {
     @Autowired
     private CityService cityService;
 
-    @FunctionName("createCity")
-    public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
+    @FunctionName("updateCity")
+    public HttpResponseMessage execute(
+        @HttpTrigger(
+            name = "req",
+            methods = {HttpMethod.PUT},
+            route = "updateCity/{cityId}",
+            authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
+        @BindingName("cityId") String cityId,
         ExecutionContext context) throws Exception {
 
         String correlationId = UUID.randomUUID().toString();
@@ -48,20 +55,20 @@ public class CreateCityTrigger {
             } else {
     
                 try {
-                    CityDTO cityToBeCreated = objectMapper.readValue(request.getBody().get(), CityDTO.class);
-                    log.info("createCity function hit. Request body is {}", cityToBeCreated);
+                    CityDTO cityToBeUpdated = objectMapper.readValue(request.getBody().get(), CityDTO.class);
+                    log.info("updateCity function hit. Request body is {}", cityToBeUpdated);
     
-                    cityService.createCity(cityToBeCreated);
+                    cityService.updateCity(cityId, cityToBeUpdated);
     
-                    return request.createResponseBuilder(HttpStatus.OK).body("Successfully created City " + cityToBeCreated.name() + " in PostgreSQl flexible server & synced to Neo4j.").build();
+                    return request.createResponseBuilder(HttpStatus.OK).body("Successfully updated City " + cityToBeUpdated.name() + " in PostgreSQl flexible server & synced to Neo4j.").build();
     
                 } catch(JsonMappingException e) {
                     log.error("An error was thrown when trying to map message to CityDTO.", e);
                     context.getLogger().log(Level.SEVERE, "An error was thrown when trying to map message to CityDTO. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
                     return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Json mapping error. Please ensure you have the correct payload. Issue: " + e.getMessage()).build();
                 } catch (Exception e) {
-                    context.getLogger().log(Level.SEVERE, "There was an issue saving the city. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
-                    return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue creating City. Issue: " + e.getMessage()).build();
+                    context.getLogger().log(Level.SEVERE, "There was an issue updating the city. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
+                    return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue updating City. Issue: " + e.getMessage()).build();
                 } 
             }
         } finally {

@@ -1,9 +1,12 @@
 package com.nomad.admin_api.repositories;
 
+import java.util.Map;
+
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
 import com.nomad.data_library.domain.sql.SqlCountry;
 import com.nomad.data_library.exceptions.Neo4jGenericException;
@@ -34,7 +37,31 @@ public class Neo4jCountryRepository extends Neo4jCommonCountryRepository {
         } catch (Exception e) {
             throw new Neo4jGenericException("Exception when trying to delete Country. Exception: {}", e);
         }
-        
+    }
+
+    public Neo4jCountry update(Neo4jCountry country) throws Neo4jGenericException {
+        Map<String, Object> countryAsMap = mapifyCountry(country);
+
+        try {
+            Neo4jCountry neo4jCountry = neo4jClient
+            .query("""
+                MATCH (country:Country {id: $id}) 
+                SET country.name = $name,
+                    country.shortDescription = $shortDescription,
+                    country.primaryBlobUrl = $primaryBlobUrl
+                    
+                RETURN country
+            """)
+            .bindAll(countryAsMap)
+            .fetchAs(Neo4jCountry.class)
+            .mappedBy(countryNoCitiesMapper)
+            .first()
+            .get();
+            return neo4jCountry;
+        } catch (Exception e) {
+            log.info("Exception when trying to update Country; {}", e.getMessage(), e);
+            throw new Neo4jGenericException("Issue when trying to updateCountry", e);
+        }
     }
     
 
