@@ -46,7 +46,7 @@ public class ProcessedQueueTrigger {
             log.error("An exception was thrown when trying to either serialize/desirialize. Message: {}", message, e);
             context.getLogger().log(Level.SEVERE, "An exception was thrown when trying to either serialize/desirialize. CorrelationId " + correlationId + " Exception: " + e.getMessage(), e);
         } finally {
-            ThreadContext.clearAll();
+            ThreadContext.remove("correlationId");
         }
     }
 

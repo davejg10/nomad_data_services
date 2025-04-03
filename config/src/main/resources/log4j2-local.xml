@@ -3,7 +3,8 @@
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout
-                    pattern="%d{HH:mm:ss,SSS} %highlight{%-5level }[%style{%X{correlationId}}{bright,blue}] %style{%C{1.}}{bright,yellow}: %msg%n%throwable" disableAnsi="false"/>
+                pattern="%d{HH:mm:ss,SSS} %highlight{%-5level }%notEmpty{[%style{%X{correlationId}}{bright,blue}] }%style{%C{1.}}{bright,yellow}: %msg%n%throwable" disableAnsi="false"/>
+                <!-- pattern="%d{HH:mm:ss,SSS} %highlight{%-5level }%X{correlationId}%notEmpty{[%style{%X{correlationId}}{bright,blue}] }%style{%C{1.}}{bright,yellow}: %msg%n%throwable" disableAnsi="false"/> -->
         </Console>
     </Appenders>
     
