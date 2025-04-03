@@ -98,7 +98,6 @@ public class Neo4jCommonCityMappers {
 
     private Set<Neo4jRoute> mapRoutes(Value routes, ArrayList<Neo4jCity> targetCities) {
         AtomicInteger index = new AtomicInteger(0);
-
         return new HashSet<>(routes.asList(route -> new Neo4jRoute(
                         route.get("id").asString(),
                         targetCities.get(index.getAndIncrement()),
@@ -106,6 +105,7 @@ public class Neo4jCommonCityMappers {
                         Duration.parse(route.get("averageDuration").asString()),
                         new BigDecimal(route.get("averageCost").asString()),
                         TransportType.valueOf(route.get("transportType").asString())
+
         )));
     }
 }
