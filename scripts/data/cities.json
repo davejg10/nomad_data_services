@@ -1,70 +1,158 @@
 [
-    {
-      "name": "CityA",
-      "shortDescription": "Capital of CountryA",
-      "description": "CityA is a bustling metropolis in CountryA.",
-      "primaryBlobUrl": "https://example.com/images/cityA.jpg",
-      "coordinate": {
+  {
+    "name": "Phuket",
+    "shortDescription": "Thailand’s largest island, famous for stunning beaches, lively nightlife, and luxury resorts. Great for island hopping, diving, and partying in Patong.",
+    "description": "Phuket is Thailand’s most popular island destination, offering a mix of relaxation and excitement. Patong Beach is the epicenter of nightlife, while Kata and Karon beaches provide a more laid-back atmosphere. Adventure seekers can enjoy diving in the Andaman Sea, visiting the Big Buddha, or exploring Phang Nga Bay’s limestone cliffs. The island also boasts top-tier resorts, vibrant markets, and delicious seafood.",
+    "primaryBlobUrl": "https://stdevuksjoborchestrator.blob.core.windows.net/images/phiphi.jpg",
+    "coordinate": {
+        "latitude": 7.8804,
+        "longitude": 98.3923,
+        "height": 0.0
+    },
+    "cityMetrics": [
+        {
+            "criteria": "SAILING",
+            "metric": "8"
+        },
+        {
+            "criteria": "FOOD",
+            "metric": "7"
+        },
+        {
+            "criteria": "NIGHTLIFE",
+            "metric": 7
+        }
+    ],
+    "countryName": "Thailand"
+},
+{
+    "name": "Pai",
+    "shortDescription": "A peaceful mountain town in northern Thailand, known for its hippie vibe, natural hot springs, and waterfalls.",
+    "description": "Pai is a hidden gem nestled in the mountains of northern Thailand. It's a haven for backpackers and nature lovers, offering scenic landscapes, waterfalls, and hot springs. The Pai Canyon is a must-visit for breathtaking views, while the relaxed atmosphere attracts artists and free spirits. With a thriving café culture and a small but lively nightlife scene, Pai is perfect for those seeking tranquility and adventure.",
+    "primaryBlobUrl": "https://stdevuksjoborchestrator.blob.core.windows.net/images/pai.jpg",
+    "coordinate": {
+        "latitude": 18.78,
+        "longitude": 98.28,
+        "height": 0.0
+    },
+    "cityMetrics": [
+        {
+            "criteria": "SAILING",
+            "metric": "3"
+        },
+        {
+            "criteria": "FOOD",
+            "metric": "8"
+        },
+        {
+            "criteria": "NIGHTLIFE",
+            "metric": 10
+        }
+    ],
+    "countryName": "Thailand"
+},
+{
+    "name": "Chiang-Mai",
+    "shortDescription": "A cultural and historic city in northern Thailand, famous for its temples, night markets, and mountainous landscapes.",
+    "description": "Chiang Mai is Thailand’s cultural heart, home to over 300 temples, including the stunning Wat Phra That Doi Suthep. The city is known for its relaxed vibe, delicious northern Thai cuisine, and vibrant night bazaars. Adventure lovers can explore elephant sanctuaries, go jungle trekking, or take part in the famous Yi Peng Lantern Festival. The café and digital nomad scene here is thriving, making it a great base for long-term travelers.",
+    "primaryBlobUrl": "https://stdevuksjoborchestrator.blob.core.windows.net/images/chiang-mai.jpg",
+    "coordinate": {
+        "latitude": 18.78,
+        "longitude": 98.979263,
+        "height": 0.0
+    },
+    "cityMetrics": [
+        {
+            "criteria": "SAILING",
+            "metric": "3"
+        },
+        {
+            "criteria": "FOOD",
+            "metric": "10"
+        },
+        {
+            "criteria": "NIGHTLIFE",
+            "metric": 7
+        }
+    ],
+    "countryName": "Thailand"
+},
+{
+    "name": "Bangkok",
+    "shortDescription": "Thailand’s bustling capital, known for its vibrant street life, temples, shopping malls, and legendary nightlife.",
+    "description": "Bangkok is a city of contrasts, where ancient temples like Wat Arun and Wat Pho sit alongside towering skyscrapers. Street food is legendary, with night markets offering everything from Pad Thai to mango sticky rice. Khao San Road and Sukhumvit are nightlife hotspots, while the Chao Phraya River provides a scenic way to explore the city. Whether you’re into shopping, cultural sites, or party scenes, Bangkok has something for everyone.",
+    "primaryBlobUrl": "https://stdevuksjoborchestrator.blob.core.windows.net/images/bangkok.jpg",
+    "coordinate": {
         "latitude": 13.7563,
         "longitude": 100.5018,
         "height": 0.0
-      },
-      "cityMetrics": [
-        { "criteria": "SAILING", "metric": 3.0 },
-        { "criteria": "FOOD", "metric": 8.5 },
-        { "criteria": "NIGHTLIFE", "metric": 7.0 }
-      ],
-      "countryName": "CountryA"
     },
-    {
-      "name": "CityB",
-      "shortDescription": "Coastal city in CountryB",
-      "description": "CityB offers beautiful beaches and is located in CountryB.",
-      "primaryBlobUrl": "https://example.com/images/cityB.png",
-      "coordinate": {
-        "latitude": 34.0522,
-        "longitude": -118.2437,
-        "height": 80.0
-      },
-      "cityMetrics": [
-        { "criteria": "SAILING", "metric": 9.0 },
-        { "criteria": "FOOD", "metric": 7.0 },
-        { "criteria": "NIGHTLIFE", "metric": 8.0 }
-      ],
-      "countryName": "CountryB"
+    "cityMetrics": [
+        {
+            "criteria": "SAILING",
+            "metric": 3
+        },
+        {
+            "criteria": "FOOD",
+            "metric": 10
+        },
+        {
+            "criteria": "NIGHTLIFE",
+            "metric": 10
+        }
+    ],
+    "countryName": "Thailand"
+},
+{
+    "name": "Koh-Samui",
+    "shortDescription": "A luxury island paradise with stunning beaches, high-end resorts, and a vibrant nightlife scene.",
+    "description": "Koh Samui is a favorite for honeymooners and luxury travelers, featuring pristine beaches like Chaweng and Lamai, as well as upscale resorts and beach clubs. The island offers incredible seafood, lively nightlife, and access to natural attractions like Ang Thong National Marine Park. It’s also a great destination for wellness retreats, with many yoga and spa resorts.",
+    "primaryBlobUrl": "https://stdevuksjoborchestrator.blob.core.windows.net/images/koh-samui.jpeg",
+    "coordinate": {
+        "latitude": 9.5120,
+        "longitude": 100.0136,
+        "height": 0.0
     },
-    {
-      "name": "CityC",
-      "shortDescription": "and this one",
-      "description": "CityC is nestled in the mountains of CountryC.",
-      "primaryBlobUrl": "https://example.com/images/cityC.gif",
-      "coordinate": {
-        "latitude": 46.8182,
-        "longitude": 8.2275,
-        "height": 1500.0
-      },
-      "cityMetrics": [
-        { "criteria": "SAILING", "metric": 1.0 },
-        { "criteria": "FOOD", "metric": 6.0 },
-        { "criteria": "NIGHTLIFE", "metric": 4.0 }
-      ],
-      "countryName": "CountryC"
+    "cityMetrics": [
+        {
+            "criteria": "SAILING",
+            "metric": 9
+        },
+        {
+            "criteria": "FOOD",
+            "metric": 4
+        },
+        {
+            "criteria": "NIGHTLIFE",
+            "metric": 8
+        }
+    ],
+    "countryName": "Thailand"
+},
+{
+    "name": "Koh-Tao",
+    "shortDescription": "A diver’s paradise, famous for crystal-clear waters, marine life, and laid-back island vibes.",
+    "description": "Koh Tao is one of the best places in the world to get a scuba diving certification, thanks to its clear waters and abundant marine life. The island has a more relaxed atmosphere compared to its neighbors but still offers some nightlife in Sairee Beach. Hiking trails, snorkeling spots, and breathtaking viewpoints make it a top destination for adventure seekers.",
+    "primaryBlobUrl": "https://stdevuksjoborchestrator.blob.core.windows.net/images/koh-tao.jpg",
+    "coordinate": {
+        "latitude": 10.0956,
+        "longitude": 99.8404,
+        "height": 0.0
     },
-      {
-      "name": "CityD",
-      "shortDescription": "Im chaging this now to test",
-      "description": "CityD is known for its history within CountryA.",
-      "primaryBlobUrl": "https://example.com/images/cityD.jpg",
-      "coordinate": {
-        "latitude": 14.0000,
-        "longitude": 101.0000,
-        "height": 10.0
-      },
-      "cityMetrics": [
-        { "criteria": "SAILING", "metric": 4.0 },
-        { "criteria": "FOOD", "metric": 7.5 },
-        { "criteria": "NIGHTLIFE", "metric": 5.0 }
-      ],
-      "countryName": "CountryA"
-    }
-  ]
+    "cityMetrics": [
+        {
+            "criteria": "SAILING",
+            "metric": 10
+        },
+        {
+            "criteria": "FOOD",
+            "metric": 5
+        },
+        {
+            "criteria": "NIGHTLIFE",
+            "metric": 9
+        }
+    ],
+    "countryName": "Thailand"
+  }
+]

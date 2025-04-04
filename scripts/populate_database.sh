@@ -2,8 +2,8 @@
 ENV=$1
 # --- Configuration ---
 API_BASE_URL="http://localhost:7071/api" # Replace with your actual API base URL
-if [[ "$http_status" -eq 409 ]]; then
-    API_BASE_URL="https://fa-$ENV-uks-nomad-02-admin-api/api"
+if [[ "$ENV" -eq "dev" ]]; then
+    API_BASE_URL="https://fa-$ENV-uks-nomad-02-admin-api.azurewebsites.net/api"
 fi
 
 echo "Environment is $ENV, therefore API_BASE_URL is: $API_BASE_URL"
