@@ -34,7 +34,7 @@ public class Neo4jCityRepository extends Neo4jCommonCityRepository {
             .bind(city.getId().toString()).to("id")
             .run();
         } catch (Exception e) {
-            throw new Neo4jGenericException("Exception when trying to delete City. Exception: {}", e);
+            throw new Neo4jGenericException("Exception when trying to delete City.", e);
         }
     }
 
@@ -68,7 +68,23 @@ public class Neo4jCityRepository extends Neo4jCommonCityRepository {
             .get();
             return neo4jCity;
         } catch (Exception e) {
-            throw new Neo4jGenericException("Exception when trying to update City. Exception: {}", e);
+            throw new Neo4jGenericException("Exception when trying to update City.", e);
+        }
+    }
+
+    public void updateAllRoutesPopularity(String sourceCityId, String targetCityId, double popularity) throws Neo4jGenericException {
+        try {
+            neo4jClient
+            .query("""
+                MATCH (sourceCity:City {id: $sourceCityId}) -[routes:ROUTE]-> (targetCity:City {id: $targetCityId})
+                SET routes.popularity = $popularity
+            """)
+            .bind(sourceCityId).to("sourceCityId")
+            .bind(targetCityId).to("targetCityId")
+            .bind(popularity).to("popularity")
+            .run();
+        } catch (Exception e) {
+            throw new Neo4jGenericException("Exception when trying to update routes popularity in Neo4j.", e);
         }
     }
 

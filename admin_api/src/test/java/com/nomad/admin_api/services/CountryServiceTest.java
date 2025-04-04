@@ -1,9 +1,11 @@
 package com.nomad.admin_api.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.util.Set;
 
+import com.nomad.admin_api.exceptions.DuplicateEntityException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +58,22 @@ public class CountryServiceTest {
         assertThat(sqlCountries.size()).isEqualTo(1);
         assertThat(neo4jCountries.size()).isEqualTo(1);
         assertThat(sqlCountry.getId().toString()).isEqualTo(neo4jCountry.getId().toString());
+    }
+
+    @Test
+    void createCountry_shouldThrowDuplicateEntityException_whenCountryWithSameNameExists() {
+
+        CountryDTO countryToBeCreated = new CountryDTO("CountryA", "Short description", "A description of countryA", "url:blob");
+
+        countryService.createCountry(countryToBeCreated);
+
+        SqlCountry sqlCountry = sqlCountryRepository.findAll().stream().findFirst().get();
+
+        DuplicateEntityException ex = assertThrowsExactly(DuplicateEntityException.class, () -> {
+            countryService.createCountry(countryToBeCreated);
+        });
+
+        assertThat(ex.getEntityId()).isEqualTo(sqlCountry.getId().toString());
     }
 
     @Test

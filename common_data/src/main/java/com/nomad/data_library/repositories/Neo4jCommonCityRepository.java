@@ -149,7 +149,7 @@ public class Neo4jCommonCityRepository {
             return neo4jCity;
         } catch (Exception e) {
             log.info("Exception when trying to create City; {}", e.getMessage(), e);
-            throw new Neo4jGenericException("Issue when trying to createCity", e);
+            throw new Neo4jGenericException("Issue when trying to createCity.", e);
         }
     }
 

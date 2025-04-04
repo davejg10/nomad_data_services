@@ -101,7 +101,7 @@ public class CityServiceMockNeo4jTest {
         SqlCity sqlCityAfterUpdate = sqlCityRepository.findById(sqlCity.getId()).get();
 
         assertThat(sqlCities.size()).isEqualTo(1);
-        assertThat(sqlCityAfterUpdate).isEqualTo(sqlCity);
+        assertThat(sqlCityAfterUpdate).usingRecursiveAssertion().isEqualTo(sqlCity);
 
     }
 

@@ -20,14 +20,18 @@ import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jRoute;
 import com.nomad.data_library.domain.sql.RouteDefinition;
 import com.nomad.data_library.domain.sql.RouteInstance;
+import com.nomad.data_library.domain.sql.RoutePopularity;
+import com.nomad.data_library.domain.sql.RoutePopularityId;
 import com.nomad.data_library.domain.sql.SqlCity;
 import com.nomad.data_library.domain.sql.SqlCountry;
+import com.nomad.data_library.repositories.RoutePopularityRepository;
 import com.nomad.data_library.repositories.SqlCityRepository;
 import com.nomad.data_library.repositories.SqlCountryRepository;
 import com.nomad.job_orchestrator.repositories.Neo4jCityRepository;
 import com.nomad.job_orchestrator.repositories.Neo4jCountryRepository;
-import com.nomad.job_orchestrator.repositories.SqlRouteDefinitionRepository;
-import com.nomad.job_orchestrator.repositories.SqlRouteInstanceRepository;
+import com.nomad.job_orchestrator.repositories.RouteDefinitionRepository;
+import com.nomad.job_orchestrator.repositories.RouteInstanceRepository;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,10 +81,13 @@ public class ProcessedQueueHandlerTest {
     private SqlCountryRepository sqlCountryRepository;
 
     @Autowired
-    private SqlRouteInstanceRepository sqlRouteInstanceRepository;
+    private RouteInstanceRepository routeInstanceRepository;
 
     @Autowired
-    private SqlRouteDefinitionRepository sqlRouteDefinitionRepository;
+    private RouteDefinitionRepository routeDefinitionRepository;
+
+    @Autowired
+    private RoutePopularityRepository routePopularityRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -123,13 +130,14 @@ public class ProcessedQueueHandlerTest {
         UUID cityAId = UUID.fromString(cityDTOA.id());
         UUID cityBId = UUID.fromString(cityDTOB.id());
 
-        RouteDefinition routeDefinition = sqlRouteDefinitionRepository.save(RouteDefinition.of(1, TransportType.FLIGHT, cityAId, cityBId));
+        routePopularityRepository.save(new RoutePopularity(new RoutePopularityId(cityAId, cityBId)));
+        RouteDefinition routeDefinition = routeDefinitionRepository.save(RouteDefinition.of(TransportType.FLIGHT, cityAId, cityBId));
 
         ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1), futureDate);
         processedQueueHandler.accept(scraperResponse);
 
-        Optional<RouteDefinition> routeDefinitionAfterSave = sqlRouteDefinitionRepository.findById(routeDefinition.getId());
-        List<RouteDefinition> allRouteDefinitions = (List<RouteDefinition>) sqlRouteDefinitionRepository.findAll();
+        Optional<RouteDefinition> routeDefinitionAfterSave = routeDefinitionRepository.findById(routeDefinition.getId());
+        List<RouteDefinition> allRouteDefinitions = (List<RouteDefinition>) routeDefinitionRepository.findAll();
 
         assertThat(routeDefinitionAfterSave).isPresent();
         assertThat(allRouteDefinitions.size()).isEqualTo(1);
@@ -137,11 +145,11 @@ public class ProcessedQueueHandlerTest {
 
     @Test
     void shouldCreateRouteDefinition_ifRouteDefinitionWithSameTransportTypeAndSourceCityIdAndTargetCityIdDoesntExist() throws Neo4jGenericException {
-        List<RouteDefinition> allRouteDefinitionsBeforeSave = (List<RouteDefinition>) sqlRouteDefinitionRepository.findAll();
+        List<RouteDefinition> allRouteDefinitionsBeforeSave = (List<RouteDefinition>) routeDefinitionRepository.findAll();
 
         ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1), futureDate);
         processedQueueHandler.accept(scraperResponse);
-        List<RouteDefinition> allRouteDefinitionsAfterSave = (List<RouteDefinition>) sqlRouteDefinitionRepository.findAll();
+        List<RouteDefinition> allRouteDefinitionsAfterSave = (List<RouteDefinition>) routeDefinitionRepository.findAll();
         RouteDefinition routeDefinition = allRouteDefinitionsAfterSave.get(0);
 
         assertThat(allRouteDefinitionsBeforeSave.size()).isEqualTo(0);
@@ -155,7 +163,7 @@ public class ProcessedQueueHandlerTest {
     void shouldCreateRouteInstances_forEachRouteDTOInScraperResponse() throws Neo4jGenericException {
         ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), futureDate);
         processedQueueHandler.accept(scraperResponse);
-        List<RouteInstance> allRouteInstances = (List<RouteInstance>) sqlRouteInstanceRepository.findAll();
+        List<RouteInstance> allRouteInstances = (List<RouteInstance>) routeInstanceRepository.findAll();
 
         List<String> allRouteDefinitionIds = allRouteInstances.stream().map(routeInstance -> routeInstance.getRouteDefinition().getId().toString()).distinct().toList();
         assertThat(allRouteInstances.size()).isEqualTo(3);
@@ -166,16 +174,18 @@ public class ProcessedQueueHandlerTest {
     void shouldReplaceRouteInstances_ifRouteInstancesExistWithSameSearchDateAndRouteDefinitionId() throws Neo4jGenericException {
         UUID cityAId = UUID.fromString(cityDTOA.id());
         UUID cityBId = UUID.fromString(cityDTOB.id());
-        RouteDefinition routeDefinition = sqlRouteDefinitionRepository.save(RouteDefinition.of(1, TransportType.FLIGHT, cityAId, cityBId));
 
-        RouteInstance routeInstance1 = sqlRouteInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "EasyJet", "London", "Bangkok", "url", futureDate, routeDefinition));
-        RouteInstance routeInstance2 = sqlRouteInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "EasyJet", "London", "Bangkok", "url", futureDate, routeDefinition));
-        List<RouteInstance> allRouteInstanceBeforeSave = (List<RouteInstance>) sqlRouteInstanceRepository.findAll();
+        routePopularityRepository.save(new RoutePopularity(new RoutePopularityId(cityAId, cityBId)));
+        RouteDefinition routeDefinition = routeDefinitionRepository.save(RouteDefinition.of(TransportType.FLIGHT, cityAId, cityBId));
+
+        RouteInstance routeInstance1 = routeInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "EasyJet", "London", "Bangkok", "url", futureDate, routeDefinition));
+        RouteInstance routeInstance2 = routeInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "EasyJet", "London", "Bangkok", "url", futureDate, routeDefinition));
+        List<RouteInstance> allRouteInstanceBeforeSave = (List<RouteInstance>) routeInstanceRepository.findAll();
 
         ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), futureDate);
         processedQueueHandler.accept(scraperResponse);
 
-        List<RouteInstance> allRouteInstanceAfterSave = (List<RouteInstance>) sqlRouteInstanceRepository.findAll();
+        List<RouteInstance> allRouteInstanceAfterSave = (List<RouteInstance>) routeInstanceRepository.findAll();
         List<String> allRouteDefinitionIds = allRouteInstanceAfterSave.stream().map(routeInstance -> routeInstance.getRouteDefinition().getId().toString()).distinct().toList();
 
         assertThat(allRouteInstanceAfterSave.size()).isEqualTo(3);
@@ -188,17 +198,19 @@ public class ProcessedQueueHandlerTest {
     void shouldNotReplaceRouteInstances_ifRouteInstancesExistButNotWithSameSearchDateAndRouteDefinitionId() throws Neo4jGenericException {
         UUID cityAId = UUID.fromString(cityDTOA.id());
         UUID cityBId = UUID.fromString(cityDTOB.id());
-        RouteDefinition routeDefinition = sqlRouteDefinitionRepository.save(RouteDefinition.of(1, TransportType.FLIGHT, cityAId, cityBId));
 
-        RouteInstance routeInstance1 = sqlRouteInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "EasyJet", "London", "Bangkok", "url", futureDate, routeDefinition));
-        RouteInstance routeInstance2 = sqlRouteInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "EasyJet", "London", "Bangkok", "url", futureDate, routeDefinition));
-        List<RouteInstance> allRouteInstanceBeforeSave = (List<RouteInstance>) sqlRouteInstanceRepository.findAll();
+        routePopularityRepository.save(new RoutePopularity(new RoutePopularityId(cityAId, cityBId)));
+        RouteDefinition routeDefinition = routeDefinitionRepository.save(RouteDefinition.of(TransportType.FLIGHT, cityAId, cityBId));
+
+        RouteInstance routeInstance1 = routeInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "EasyJet", "London", "Bangkok", "url", futureDate, routeDefinition));
+        RouteInstance routeInstance2 = routeInstanceRepository.save(RouteInstance.of(BigDecimal.valueOf(10.99), generateRandomDepartureTime(), generateRandomArrivalTime(), "EasyJet", "London", "Bangkok", "url", futureDate, routeDefinition));
+        List<RouteInstance> allRouteInstanceBeforeSave = (List<RouteInstance>) routeInstanceRepository.findAll();
 
         LocalDate differentSearchDate = futureDate.plusDays(5);
         ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), differentSearchDate);
         processedQueueHandler.accept(scraperResponse);
 
-        List<RouteInstance> allRouteInstanceAfterSave = (List<RouteInstance>) sqlRouteInstanceRepository.findAll();
+        List<RouteInstance> allRouteInstanceAfterSave = (List<RouteInstance>) routeInstanceRepository.findAll();
         List<String> allRouteDefinitionIds = allRouteInstanceAfterSave.stream().map(routeInstance -> routeInstance.getRouteDefinition().getId().toString()).distinct().toList();
 
         assertThat(allRouteInstanceAfterSave.size()).isEqualTo(5);
@@ -208,11 +220,11 @@ public class ProcessedQueueHandlerTest {
 
     @Test
     void shouldCreateRouteRelationshipInNeo4j_ifRouteDefinitionWithSameTransportTypeAndSourceCityIdAndTargetCityIdDoesntExist() throws Neo4jGenericException {
-        List<RouteDefinition> allRouteDefinitionsBeforeSave = (List<RouteDefinition>) sqlRouteDefinitionRepository.findAll();
+        List<RouteDefinition> allRouteDefinitionsBeforeSave = (List<RouteDefinition>) routeDefinitionRepository.findAll();
 
         ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), futureDate);
         processedQueueHandler.accept(scraperResponse);
-        List<RouteDefinition> allRouteDefinitionsAfterSave = (List<RouteDefinition>) sqlRouteDefinitionRepository.findAll();
+        List<RouteDefinition> allRouteDefinitionsAfterSave = (List<RouteDefinition>) routeDefinitionRepository.findAll();
 
         Neo4jCity neo4jCity = neo4jRepository.findByIdFetchRoutes(cityDTOA.id()).get();
         List<Neo4jRoute> allNeo4jRoutes = neo4jCity.getRoutes().stream().distinct().toList();
@@ -229,7 +241,9 @@ public class ProcessedQueueHandlerTest {
     void shouldNotCreateRouteRelationshipInNeo4j_ifRouteDefinitionWithSameTransportTypeAndSourceCityIdAndTargetCityIdExists() throws Neo4jGenericException {
         UUID cityAId = UUID.fromString(cityDTOA.id());
         UUID cityBId = UUID.fromString(cityDTOB.id());
-        RouteDefinition routeDefinition = sqlRouteDefinitionRepository.save(RouteDefinition.of(1, TransportType.FLIGHT, cityAId, cityBId));
+        
+        routePopularityRepository.save(new RoutePopularity(new RoutePopularityId(cityAId, cityBId)));
+        RouteDefinition routeDefinition = routeDefinitionRepository.save(RouteDefinition.of(TransportType.FLIGHT, cityAId, cityBId));
 
         ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1, routeDTOFlight2, routeDTOFlight3), futureDate);
         processedQueueHandler.accept(scraperResponse);
@@ -256,6 +270,53 @@ public class ProcessedQueueHandlerTest {
         BigDecimal averageCost = (routeDTOFlight1.cost().add(routeDTOFlight2.cost()).add(routeDTOFlight3.cost())).divide(BigDecimal.valueOf(3), 2, RoundingMode.HALF_UP);
         assertThat(neo4jRoute.getAverageCost()).isEqualTo(averageCost);
         assertThat(neo4jRoute.getAverageDuration()).isEqualTo(averageDuration);
+    }
 
+    @Test
+    void shouldCreateRoutePopularity_andSetPopularityTo0_ifRouteDefinitionDoesntExistAndRoutePopularityDoesntExist() {
+       List<RoutePopularity> allRoutePopularityBeforeSave = (List<RoutePopularity>) routePopularityRepository.findAll();
+
+        ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1), futureDate);
+        processedQueueHandler.accept(scraperResponse);
+
+        List<RoutePopularity> allRoutePopularityAfterSave = (List<RoutePopularity>) routePopularityRepository.findAll();
+
+        RoutePopularity createdRoutePopularity = allRoutePopularityAfterSave.get(0);
+        Neo4jRoute neo4jRoute = neo4jRepository.findByIdFetchRoutes(cityDTOA.id()).get().getRoutes().stream().findFirst().get();
+        assertThat(allRoutePopularityBeforeSave.size()).isEqualTo(0);
+        assertThat(allRoutePopularityAfterSave.size()).isEqualTo(1);
+
+        assertThat(createdRoutePopularity.getPopularity()).isEqualTo(0.0);
+        assertThat(neo4jRoute.getPopularity()).isEqualTo(0.0);
+    }
+
+    @Test
+    void shouldNotCreateRoutePopularity_ifRoutePopularityExists() {
+        UUID cityAId = UUID.fromString(cityDTOA.id());
+        UUID cityBId = UUID.fromString(cityDTOB.id());
+
+        RoutePopularity routePopularity = routePopularityRepository.save(new RoutePopularity(cityAId, cityBId));
+
+        ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1), futureDate);
+        processedQueueHandler.accept(scraperResponse);
+
+        RoutePopularity routePopularityAfterSave = ((List<RoutePopularity>) routePopularityRepository.findAll()).get(0);
+
+        assertThat(routePopularity).isEqualTo(routePopularityAfterSave);
+    }
+
+    @Test
+    void shouldSetRoutePopularityPopularity_toNeo4jRouteRelationship_ifRoutePopularityExist() {
+        UUID cityAId = UUID.fromString(cityDTOA.id());
+        UUID cityBId = UUID.fromString(cityDTOB.id());
+
+        RoutePopularity routePopularity = routePopularityRepository.save(new RoutePopularity(cityAId, cityBId, 4));
+
+        ScraperResponse scraperResponse = new ScraperResponse(ScraperRequestSource.CRON, ScraperRequestType.ROUTE_DISCOVERY, ScraperIdentifier.ONE2GOASIA, TransportType.FLIGHT, cityDTOA, cityDTOB, List.of(routeDTOFlight1), futureDate);
+        processedQueueHandler.accept(scraperResponse);
+
+        Neo4jRoute neo4jRoute = neo4jRepository.findByIdFetchRoutes(cityDTOA.id()).get().getRoutes().stream().findFirst().get();
+        assertThat(routePopularity.getPopularity()).isEqualTo(4);
+        assertThat(neo4jRoute.getPopularity()).isEqualTo(4);
     }
 }

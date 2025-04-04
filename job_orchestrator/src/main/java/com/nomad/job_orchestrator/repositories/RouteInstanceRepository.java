@@ -11,7 +11,7 @@ import com.nomad.data_library.domain.sql.RouteDefinition;
 import com.nomad.data_library.domain.sql.RouteInstance;
 
 @Repository
-public interface SqlRouteInstanceRepository extends CrudRepository<RouteInstance, UUID>{
+public interface RouteInstanceRepository extends CrudRepository<RouteInstance, UUID>{
     
     @Transactional
     public void deleteAllByRouteDefinitionAndSearchDate(RouteDefinition routeDefinition, LocalDate searchDate);

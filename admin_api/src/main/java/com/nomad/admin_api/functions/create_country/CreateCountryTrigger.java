@@ -19,8 +19,9 @@ import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.nomad.admin_api.domain.CountryDTO;
+import com.nomad.admin_api.exceptions.DuplicateEntityException;
+import com.nomad.admin_api.exceptions.GlobalExceptionHandler;
 import com.nomad.admin_api.services.CountryService;
-import com.nomad.data_library.domain.sql.SqlCountry;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -60,7 +61,13 @@ public class CreateCountryTrigger {
                     log.error("An error was thrown when trying to map message to SqlCountry.", e);
                     context.getLogger().log(Level.SEVERE, "An error was thrown when trying to map message to SqlCountry. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
                     return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Json mapping error. Please ensure you have the correct payload. Issue: " + e.getMessage()).build();
-                } catch (Exception e) {
+                } catch (DuplicateEntityException ex) {
+                    // If this is thrown we return the entity id in the response so we can allow the client to hit the updateCountry endpoint
+                    log.warn("DuplicateEntityException caught: {}, returning 409");
+                    context.getLogger().warning("DuplicateEntityException caught: " + ex.getMessage());
+                    return GlobalExceptionHandler.handleDataIntegrityViolation(ex, request);
+            
+                }  catch (Exception e) {
                     context.getLogger().log(Level.SEVERE, "There was an issue creating the country. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
                     return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue creating Country. Issue: " + e.getMessage()).build();
                 }

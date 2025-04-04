@@ -1,6 +1,7 @@
 package com.nomad.admin_api.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 
 import com.nomad.admin_api.domain.CityDTO;
 import com.nomad.admin_api.domain.CityToDeleteDTO;
+import com.nomad.admin_api.exceptions.DuplicateEntityException;
 import com.nomad.admin_api.repositories.Neo4jCityRepository;
 import com.nomad.admin_api.repositories.Neo4jCountryRepository;
 import com.nomad.data_library.GenericTestGenerator;
@@ -88,6 +90,22 @@ public class CityServiceTest {
         assertThat(neo4jCity.getShortDescription()).isEqualTo(cityDTO.shortDescription());
         assertThat(neo4jCity.getCoordinate()).isEqualTo(cityDTO.coordinate());
         assertThat(sqlCity.getDescription()).isEqualTo(cityDTO.description());
+    }
+
+    @Test
+    void createCity_shouldThrowDuplicateEntityException_whenCityExistsWithSameNameAndCountryId() throws Neo4jGenericException {
+
+        CityDTO cityDTO = new CityDTO("CityA", "Short desc", "CityA desc", "url:blob", Neo4jTestGenerator.generateCoords(), GenericTestGenerator.cityMetrics(), countryAName);
+        
+        cityService.createCity(cityDTO);
+
+        SqlCity sqlCity = sqlCityRepository.findAll().stream().findFirst().get();
+
+        DuplicateEntityException ex = assertThrowsExactly(DuplicateEntityException.class, () -> {
+            cityService.createCity(cityDTO);
+        });
+
+        assertThat(ex.getEntityId()).isEqualTo(sqlCity.getId().toString());
     }
 
     @Test

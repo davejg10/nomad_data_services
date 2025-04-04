@@ -14,6 +14,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -23,6 +24,7 @@ import lombok.ToString;
 @Getter
 @NoArgsConstructor
 @ToString
+@EqualsAndHashCode
 public class SqlCity {
 
     @Id
@@ -51,17 +53,5 @@ public class SqlCity {
         this.description = description;
         this.cityMetrics = cityMetrics;
         this.countryId = countryId;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SqlCity sqlCity)) return false;
-        return Objects.equals(id, sqlCity.id) && Objects.equals(name, sqlCity.name) && Objects.equals(description, sqlCity.description) && Objects.equals(cityMetrics, sqlCity.cityMetrics) && Objects.equals(countryId, sqlCity.countryId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, description, cityMetrics, countryId);
     }
 }

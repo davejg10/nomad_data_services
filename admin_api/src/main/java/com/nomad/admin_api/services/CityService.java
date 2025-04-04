@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.nomad.admin_api.domain.CityDTO;
 import com.nomad.admin_api.domain.CityToDeleteDTO;
 import com.nomad.admin_api.exceptions.DatabaseSyncException;
+import com.nomad.admin_api.exceptions.DuplicateEntityException;
+import com.nomad.admin_api.exceptions.GeoEntity;
 import com.nomad.admin_api.repositories.Neo4jCityRepository;
 import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
@@ -38,13 +40,25 @@ public class CityService {
 
     @Transactional
     public void createCity(CityDTO cityToCreate) {
+        String cityName = cityToCreate.name();
+
         SqlCountry sqlCountry = sqlCountryRepository.findByName(cityToCreate.countryName())
                 .orElseThrow(() -> new EntityNotFoundException("Couldnt find country: " + cityToCreate.countryName()));
 
-        String cityName = cityToCreate.name();
-        SqlCity sqlCity = SqlCity.of(cityToCreate.name(), cityToCreate.description(), cityToCreate.cityMetrics(), sqlCountry.getId());
+        Optional<SqlCity> existingCity = sqlCityRepository.findByCountryIdAndName(sqlCountry.getId(), cityName);
+
+        if (existingCity.isPresent()) {
+            throw new DuplicateEntityException(
+                "Entity with name '" + cityToCreate.name() + "' already exists.",
+                GeoEntity.CITY,
+                existingCity.get().getId().toString(),
+                cityToCreate.name()
+            );
+        }
 
         try {
+            SqlCity sqlCity = SqlCity.of(cityToCreate.name(), cityToCreate.description(), cityToCreate.cityMetrics(), sqlCountry.getId());
+
             sqlCity = sqlCityRepository.save(sqlCity);
             log.info("Created city in PostgreSQL flexible server with id: {}, and name: {}", sqlCity.getId(), cityName);
             

@@ -1,0 +1,70 @@
+[
+    {
+      "name": "CityA",
+      "shortDescription": "Capital of CountryA",
+      "description": "CityA is a bustling metropolis in CountryA.",
+      "primaryBlobUrl": "https://example.com/images/cityA.jpg",
+      "coordinate": {
+        "latitude": 13.7563,
+        "longitude": 100.5018,
+        "height": 0.0
+      },
+      "cityMetrics": [
+        { "criteria": "SAILING", "metric": 3.0 },
+        { "criteria": "FOOD", "metric": 8.5 },
+        { "criteria": "NIGHTLIFE", "metric": 7.0 }
+      ],
+      "countryName": "CountryA"
+    },
+    {
+      "name": "CityB",
+      "shortDescription": "Coastal city in CountryB",
+      "description": "CityB offers beautiful beaches and is located in CountryB.",
+      "primaryBlobUrl": "https://example.com/images/cityB.png",
+      "coordinate": {
+        "latitude": 34.0522,
+        "longitude": -118.2437,
+        "height": 80.0
+      },
+      "cityMetrics": [
+        { "criteria": "SAILING", "metric": 9.0 },
+        { "criteria": "FOOD", "metric": 7.0 },
+        { "criteria": "NIGHTLIFE", "metric": 8.0 }
+      ],
+      "countryName": "CountryB"
+    },
+    {
+      "name": "CityC",
+      "shortDescription": "and this one",
+      "description": "CityC is nestled in the mountains of CountryC.",
+      "primaryBlobUrl": "https://example.com/images/cityC.gif",
+      "coordinate": {
+        "latitude": 46.8182,
+        "longitude": 8.2275,
+        "height": 1500.0
+      },
+      "cityMetrics": [
+        { "criteria": "SAILING", "metric": 1.0 },
+        { "criteria": "FOOD", "metric": 6.0 },
+        { "criteria": "NIGHTLIFE", "metric": 4.0 }
+      ],
+      "countryName": "CountryC"
+    },
+      {
+      "name": "CityD",
+      "shortDescription": "Im chaging this now to test",
+      "description": "CityD is known for its history within CountryA.",
+      "primaryBlobUrl": "https://example.com/images/cityD.jpg",
+      "coordinate": {
+        "latitude": 14.0000,
+        "longitude": 101.0000,
+        "height": 10.0
+      },
+      "cityMetrics": [
+        { "criteria": "SAILING", "metric": 4.0 },
+        { "criteria": "FOOD", "metric": 7.5 },
+        { "criteria": "NIGHTLIFE", "metric": 5.0 }
+      ],
+      "countryName": "CountryA"
+    }
+  ]

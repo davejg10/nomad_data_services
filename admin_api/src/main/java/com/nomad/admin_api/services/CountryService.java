@@ -1,5 +1,6 @@
 package com.nomad.admin_api.services;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -8,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.nomad.admin_api.domain.CountryDTO;
 import com.nomad.admin_api.exceptions.DatabaseSyncException;
+import com.nomad.admin_api.exceptions.DuplicateEntityException;
+import com.nomad.admin_api.exceptions.GeoEntity;
 import com.nomad.admin_api.repositories.Neo4jCountryRepository;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
 import com.nomad.data_library.domain.sql.SqlCountry;
@@ -32,6 +35,16 @@ public class CountryService {
     @Transactional
     public void createCountry(CountryDTO countryToCreate) {
         String countryName = countryToCreate.name();
+        
+        Optional<SqlCountry> existingCountry = sqlCountryRepository.findByName(countryName);
+        if (existingCountry.isPresent()) {
+            throw new DuplicateEntityException(
+                "Entity with name '" + countryName + "' already exists.",
+                GeoEntity.COUNTRY,
+                existingCountry.get().getId().toString(),
+                countryName
+            );
+        }
 
         try {
             SqlCountry sqlCountry = SqlCountry.of(countryName, countryToCreate.description());

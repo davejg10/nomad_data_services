@@ -1,0 +1,20 @@
+[
+    {
+      "name": "CountryA",
+      "shortDescription": "The first example country.",
+      "description": "A detailed description of CountryA, known for its specific features.",
+      "primaryBlobUrl": "https://example.com/images/countryA.jpg"
+    },
+    {
+      "name": "CountryB",
+      "shortDescription": "The second example country.",
+      "description": "CountryB has a rich history and diverse landscapes.",
+      "primaryBlobUrl": "https://example.com/images/countryB.png"
+    },
+    {
+      "name": "CountryC",
+      "shortDescription": "The third example country.",
+      "description": "CountryC is famous for its technology and mountains.",
+      "primaryBlobUrl": "https://example.com/images/countryC.gif"
+    }
+  ]

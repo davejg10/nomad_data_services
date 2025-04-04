@@ -4,4 +4,4 @@ jobs:
     cronSchedule: "0 20 12 * * *"
     countryName: Thailand
     timeToFetch: +2d
-    isActive: true
+    isActive: false

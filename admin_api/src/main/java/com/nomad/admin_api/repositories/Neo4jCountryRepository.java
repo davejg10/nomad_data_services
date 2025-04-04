@@ -6,7 +6,6 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nomad.data_library.domain.neo4j.Neo4jCity;
 import com.nomad.data_library.domain.neo4j.Neo4jCountry;
 import com.nomad.data_library.domain.sql.SqlCountry;
 import com.nomad.data_library.exceptions.Neo4jGenericException;
@@ -35,7 +34,7 @@ public class Neo4jCountryRepository extends Neo4jCommonCountryRepository {
             .bind(country.getId().toString()).to("id")
             .run();
         } catch (Exception e) {
-            throw new Neo4jGenericException("Exception when trying to delete Country. Exception: {}", e);
+            throw new Neo4jGenericException("Exception when trying to delete Country.", e);
         }
     }
 
@@ -60,7 +59,7 @@ public class Neo4jCountryRepository extends Neo4jCommonCountryRepository {
             return neo4jCountry;
         } catch (Exception e) {
             log.info("Exception when trying to update Country; {}", e.getMessage(), e);
-            throw new Neo4jGenericException("Issue when trying to updateCountry", e);
+            throw new Neo4jGenericException("Issue when trying to updateCountry.", e);
         }
     }
     

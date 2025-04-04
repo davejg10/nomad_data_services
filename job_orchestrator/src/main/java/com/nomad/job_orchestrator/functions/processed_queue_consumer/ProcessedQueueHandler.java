@@ -13,10 +13,13 @@ import org.springframework.stereotype.Component;
 
 import com.nomad.data_library.domain.sql.RouteDefinition;
 import com.nomad.data_library.domain.sql.RouteInstance;
+import com.nomad.data_library.domain.sql.RoutePopularity;
+import com.nomad.data_library.domain.sql.RoutePopularityId;
+import com.nomad.data_library.repositories.RoutePopularityRepository;
 import com.nomad.job_orchestrator.domain.Neo4jRouteToSave;
 import com.nomad.job_orchestrator.repositories.Neo4jCityRepository;
-import com.nomad.job_orchestrator.repositories.SqlRouteDefinitionRepository;
-import com.nomad.job_orchestrator.repositories.SqlRouteInstanceRepository;
+import com.nomad.job_orchestrator.repositories.RouteDefinitionRepository;
+import com.nomad.job_orchestrator.repositories.RouteInstanceRepository;
 import com.nomad.scraping_library.domain.RouteDTO;
 import com.nomad.scraping_library.domain.ScraperResponse;
 
@@ -27,13 +30,19 @@ import lombok.extern.log4j.Log4j2;
 public class ProcessedQueueHandler implements Consumer<ScraperResponse> {
     
     private final Neo4jCityRepository neo4jCityRepository;
-    private final SqlRouteDefinitionRepository sqlRouteDefinitionRepository;
-    private final SqlRouteInstanceRepository sqlRouteInstanceRepository;
+    private final RouteDefinitionRepository routeDefinitionRepository;
+    private final RouteInstanceRepository routeInstanceRepository;
+    private final RoutePopularityRepository routePopularityRepository;
 
-    public ProcessedQueueHandler(Neo4jCityRepository neo4jCityRepository, SqlRouteDefinitionRepository sqlRouteDefinitionRepository, SqlRouteInstanceRepository sqlRouteInstanceRepository) {
+    public ProcessedQueueHandler(
+            Neo4jCityRepository neo4jCityRepository, 
+            RouteDefinitionRepository routeDefinitionRepository, 
+            RouteInstanceRepository routeInstanceRepository,
+            RoutePopularityRepository routePopularityRepository) {
         this.neo4jCityRepository = neo4jCityRepository;
-        this.sqlRouteDefinitionRepository = sqlRouteDefinitionRepository;
-        this.sqlRouteInstanceRepository = sqlRouteInstanceRepository;
+        this.routeDefinitionRepository = routeDefinitionRepository;
+        this.routeInstanceRepository = routeInstanceRepository;
+        this.routePopularityRepository = routePopularityRepository;
     }
 
     public void accept(ScraperResponse scraperResponse) {
@@ -42,18 +51,22 @@ public class ProcessedQueueHandler implements Consumer<ScraperResponse> {
         UUID sourceCityId = UUID.fromString(scraperResponse.getSourceCity().id());
         UUID targetCityId = UUID.fromString(scraperResponse.getTargetCity().id());
         
-        Optional<RouteDefinition> existingRouteDefinition = sqlRouteDefinitionRepository.findByTransportTypeAndSourceCityIdAndTargetCityId(scraperResponse.getTransportType(), sourceCityId, targetCityId);
+        Optional<RouteDefinition> existingRouteDefinition = routeDefinitionRepository.findByTransportTypeAndSourceCityIdAndTargetCityId(scraperResponse.getTransportType(), sourceCityId, targetCityId);
         RouteDefinition routeDefinition;
 
-        if (existingRouteDefinition.isPresent()) {
-            log.info("Route definition exists, deleting first and then re-adding");
+        if (existingRouteDefinition.isPresent()) { // If RouteDefinition exists WE KNOW RoutePopularity exists.. so need to do nothing
+            log.info("Route definition exists, deleting RouteInstance(s) first and then re-creating");
             routeDefinition = existingRouteDefinition.get();
-            sqlRouteInstanceRepository.deleteAllByRouteDefinitionAndSearchDate(routeDefinition, scraperResponse.getSearchDate());
+
+            routeInstanceRepository.deleteAllByRouteDefinitionAndSearchDate(routeDefinition, scraperResponse.getSearchDate());
 
         } else {
-            log.info("Route definition does not exist, creating first and adding route to Neo4j");
-            double popularity = 1;
-            routeDefinition = sqlRouteDefinitionRepository.save(RouteDefinition.of(popularity, scraperResponse.getTransportType(), sourceCityId, targetCityId));
+            log.info("Route definition does not exist, ensuring RoutePopularity exists and then creating RouteDefinition.");
+
+            RoutePopularity routePopularity = findOrCreateRoutePopularity(sourceCityId, targetCityId);
+
+            log.info("Saving RouteDefinition..");
+            routeDefinition = routeDefinitionRepository.save(RouteDefinition.of(scraperResponse.getTransportType(), sourceCityId, targetCityId));
 
             BigDecimal averageCost = scraperResponse.getRoutes().stream()
                                                 .map(RouteDTO::cost)
@@ -64,7 +77,8 @@ public class ProcessedQueueHandler implements Consumer<ScraperResponse> {
                                                 .reduce(Duration.ZERO, Duration::plus)
                                                 .dividedBy(Math.max(1, scraperResponse.getRoutes().size()));
 
-            Neo4jRouteToSave routeToSave = new Neo4jRouteToSave(routeDefinition.getId().toString(), sourceCityId.toString(), popularity, averageTravelTime, averageCost, scraperResponse.getTransportType(), targetCityId.toString());
+            Neo4jRouteToSave routeToSave = new Neo4jRouteToSave(routeDefinition.getId().toString(), sourceCityId.toString(), routePopularity.getPopularity(), averageTravelTime, averageCost, scraperResponse.getTransportType(), targetCityId.toString());
+            log.info("Saving Neo4jRoute: {}", routeToSave);
             neo4jCityRepository.saveRoute(routeToSave);
         }
 
@@ -72,10 +86,26 @@ public class ProcessedQueueHandler implements Consumer<ScraperResponse> {
         for (RouteDTO route : scraperResponse.getRoutes()) {
             routeInstances.add(RouteInstance.of(route.cost(), route.depart(), route.arrival(), route.operator(), route.departureLocation(), route.arrivalLocation(), route.url(), scraperResponse.getSearchDate(), routeDefinition));
         }
-        log.info("request length: {}", scraperResponse.getRoutes().size());
-        log.info("Route instances lenght: {}", routeInstances.size());
+        log.info("Number of RouteInstances to save: {}", routeInstances.size());
+        log.info("Number of routes in ScraperResponse: {}", scraperResponse.getRoutes().size());
+        routeInstanceRepository.saveAll(routeInstances);
+    }
 
-        sqlRouteInstanceRepository.saveAll(routeInstances);
+    private RoutePopularity findOrCreateRoutePopularity(UUID sourceCityId, UUID targetCityId) {
+        RoutePopularityId popularityId = new RoutePopularityId(sourceCityId, targetCityId);
+
+        Optional<RoutePopularity> routePopularity = routePopularityRepository.findById(popularityId);
+
+        if (routePopularity.isPresent()) {
+            log.info("RoutePopularity found with ID: {}, returning", popularityId);
+            return routePopularity.get();
+        } else {
+            log.info("RoutePopularity not found for ID: {}. Creating and saving new one.", popularityId);
+
+            RoutePopularity newPopularity = new RoutePopularity(popularityId);
+
+            return routePopularityRepository.save(newPopularity);
+        }
     }
 }
 
