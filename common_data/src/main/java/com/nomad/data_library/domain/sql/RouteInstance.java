@@ -17,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -25,6 +26,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class RouteInstance {
     
     @Id
@@ -60,7 +62,6 @@ public class RouteInstance {
     @ManyToOne
     @JoinColumn(name = "route_definition_id", referencedColumnName = "id")
     private RouteDefinition routeDefinition;
-
 
     public static RouteInstance of(BigDecimal cost, LocalDateTime departure, LocalDateTime arrival, String operator, String departureLocation, String arrivalLocation, String url, LocalDate searchDate, RouteDefinition routeDefinition) {
         return new RouteInstance(null, cost, departure, arrival, operator, departureLocation, arrivalLocation, url, Duration.between(departure, arrival), searchDate, LocalDateTime.now(), routeDefinition);

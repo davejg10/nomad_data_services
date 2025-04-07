@@ -9,6 +9,7 @@ import com.nomad.scraping_library.domain.RouteDTO;
 import com.nomad.scraping_library.domain.ScraperIdentifier;
 import com.nomad.scraping_library.domain.ScraperRequest;
 import com.nomad.scraping_library.domain.ScraperResponse;
+import com.nomad.scraping_library.exceptions.ScrapingDataSchemaException;
 import com.nomad.scraping_library.scraper.WebScraperInterface;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -156,14 +157,10 @@ public class One2GoAsiaScraper implements WebScraperInterface {
          for (Map<String, String> trip : tripList) {
              try {
                  if (trip.get("departure").equals("--:--")) {
-                     log.error("Not adding due to departTime being --:--");
+                     log.warn("Not adding due to departTime being --:--");
                      continue;
                  }
-             } catch (NullPointerException e) {
-                 log.error("Nullpointer thrown when trying to trip.get(departure). Trip list map is: {}", tripList);
-             }
-
-             RouteDTO newRoute = RouteDTO.createWithSchema(
+                 RouteDTO newRoute = RouteDTO.createWithSchema(
                      trip.get("transportType"),
                      trip.get("transportOperator"),
                      trip.get("departure"),
@@ -173,8 +170,14 @@ public class One2GoAsiaScraper implements WebScraperInterface {
                      trip.get("cost"),
                      trip.get("href"),
                      searchDate
-             );
-             routes.add(newRoute);
+                );
+                routes.add(newRoute);
+             } catch (NullPointerException e) {
+                 log.warn("Nullpointer thrown when trying to trip.get(departure). Trip list map is: {}", tripList);
+             } catch (ScrapingDataSchemaException e) {
+                log.warn("Exception thrown whilst trying to map the scraped data into the RouteDTO schema. Ignoring this route");
+             }
+             
          }
 
         return routes;

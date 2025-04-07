@@ -1,4 +1,4 @@
-package com.nomad.admin_api.functions.delete_city;
+package com.nomad.admin_api.functions.put_route_popularity;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -18,23 +18,26 @@ import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
-import com.nomad.admin_api.domain.CityToDeleteDTO;
-import com.nomad.admin_api.services.CityService;
+import com.nomad.admin_api.services.RoutePopularityService;
 
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Component
-public class DeleteCityTrigger {
+public class PutRoutePopularityTrigger {
     
     @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
-    private CityService cityService;
+    private RoutePopularityService routePopularityService;
 
-    @FunctionName("deleteCity")
-    public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
+    @FunctionName("putRoutePopularity")
+    public HttpResponseMessage execute(
+        @HttpTrigger(
+            name = "req", 
+            methods = {HttpMethod.POST}, 
+            authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
         ExecutionContext context) throws Exception {
 
@@ -48,21 +51,22 @@ public class DeleteCityTrigger {
             } else {
     
                 try {
-                    log.info("deleteCity function hit. Request body is {}", request.getBody().get());
+                    RoutePopularityDTO routePopularityDTO = objectMapper.readValue(request.getBody().get(), RoutePopularityDTO.class);
+                    log.info("putRoutePopularity function hit. Request body is {}", routePopularityDTO);
+                    
+                    routePopularityService.updateRoutePopularity(routePopularityDTO);
 
-                    CityToDeleteDTO cityToBeDeleted = objectMapper.readValue(request.getBody().get(), CityToDeleteDTO.class);
-    
-                    cityService.deleteCity(cityToBeDeleted);
-    
-                    return request.createResponseBuilder(HttpStatus.OK).body("Successfully deleted City " + cityToBeDeleted.name() + " in PostgreSQl flexible server & deleted in Neo4j.").build();
+                    log.info("RoutePopularity and updated Neo4jRoutes have been successfully saved.");
+
+                    return request.createResponseBuilder(HttpStatus.OK).body("Successfully updated all routes out of city with id: " + routePopularityDTO.sourceCityId() + " to have popularity of: " + routePopularityDTO.popularity()).build();
     
                 } catch(JsonMappingException e) {
-                    log.error("An error was thrown when trying to map message to CityToDeleteDTO.", e);
-                    context.getLogger().log(Level.SEVERE, "An error was thrown when trying to map message to CityToDeleteDTO. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
+                    context.getLogger().log(Level.SEVERE, "An error was thrown when trying to map the request to RoutePopularityDTO. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
                     return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Json mapping error. Please ensure you have the correct payload. Issue: " + e.getMessage()).build();
-                } catch (Exception  e) { 
-                    context.getLogger().log(Level.SEVERE, "There was an issue deleting the city.CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
-                    return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue deleting City. Issue: " + e.getMessage()).build();
+                
+                } catch (Exception e) {
+                    context.getLogger().log(Level.SEVERE, "There was an issue trying to update the popularity of all outbound routes from the city. CorrelationId: " + correlationId + " Exception: " + e.getMessage(), e);
+                    return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Issue updating popularity of all outbound routes from the city. Issue: " + e.getMessage()).build();
                 } 
             }
         } finally {

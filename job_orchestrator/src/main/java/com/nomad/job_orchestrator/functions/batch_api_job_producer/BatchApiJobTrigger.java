@@ -1,5 +1,6 @@
-package com.nomad.job_orchestrator.functions.api_job_producer;
+package com.nomad.job_orchestrator.functions.batch_api_job_producer;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -8,8 +9,6 @@ import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.azure.messaging.servicebus.ServiceBusMessage;
-import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,30 +20,35 @@ import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
+import com.nomad.scraping_library.connectors.ServiceBusBatchSender;
 import com.nomad.scraping_library.domain.ScraperRequest;
 
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Component
-public class ApiJobTrigger {
+public class BatchApiJobTrigger {
 
     private final String sb_pre_processed_queue_name = "nomad_pre_processed";
 
     @Autowired
-    private ApiJobHandler apiJobHandler;
+    private BatchApiJobHandler batchApiJobHandler;
+
+    @Autowired
+    private ServiceBusBatchSender<ScraperRequest> serviceBusBatchSender;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    private ServiceBusSenderClient sender;
-
     /*
      * This Azure Function acts as a HTTP endpoints to queue scraping jobs. The nomad_backend is the only client.
      */
-    @FunctionName("apiJobProducer")
-    public HttpResponseMessage execute(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
+    @FunctionName("batchApiJobProducer")
+    public HttpResponseMessage execute(
+        @HttpTrigger(
+            name = "req",
+            methods = {HttpMethod.POST}, 
+            authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
         ExecutionContext context) throws JsonMappingException, JsonProcessingException  {
         
@@ -59,28 +63,24 @@ public class ApiJobTrigger {
             } else  {
 
                 String requestString = request.getBody().get();
-                log.info("apiJobProducer function hit. Request body is {}", requestString);
+                log.info("batchApiJobProducer function hit. Request body is {}", requestString);
 
-                HttpScraperRequest routeRequest = objectMapper.readValue(requestString, HttpScraperRequest.class);
+                BatchHttpScraperRequest routeRequest = objectMapper.readValue(requestString, BatchHttpScraperRequest.class);
 
-                ScraperRequest scraperRequest = apiJobHandler.apply(routeRequest);
+                List<ScraperRequest> scraperRequests = batchApiJobHandler.apply(routeRequest);
+                if (scraperRequests.size() > 0)
+                     serviceBusBatchSender.sendBatch(scraperRequests, correlationId);
                 
-                String serviceBusMessage = objectMapper.writeValueAsString(scraperRequest);
-                ServiceBusMessage output = new ServiceBusMessage(serviceBusMessage);
-                output.setCorrelationId(correlationId);
-                sender.sendMessage(output);
-
-                String route = routeRequest.sourceCity().name() + " -> " + routeRequest.targetCity().name();
-                return request.createResponseBuilder(HttpStatus.OK).body("Successfully added scraper request for route " + route + ", to " + sb_pre_processed_queue_name + " queue.").build(); 
+                return request.createResponseBuilder(HttpStatus.OK).body("Successfully added scraper batch scraper requests for country: " + routeRequest.countryName() + " with searchDate: " + routeRequest.searchDate() + " to queue: " + sb_pre_processed_queue_name).build(); 
             }
         } catch (JsonProcessingException e) {
             log.error("A JsonProcessingException exception was thrown when trying to either serialize/desirialize.", e);
             context.getLogger().log(Level.SEVERE, "A JsonProcessingException exception was thrown when trying to either serialize/desirialize. CorrelationId " + correlationId + " Exception: " + e.getMessage(), e);
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("A JsonProcessingException exception was thrown when trying to either serialize/desirialize. Error: " + e.getMessage()).build();
         } catch (Exception e) {
-            log.error("There was an error in the apiJobProducer.", e);
-            context.getLogger().log(Level.SEVERE, "There was an error in the apiJobProducer. CorrelationId " + correlationId + " Exception: " + e.getMessage(), e);
-            return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("An exception was thrown when trying to queue the job. Error: " + e.getMessage()).build();
+            log.error("There was an error in the batchApiJobProducer.", e);
+            context.getLogger().log(Level.SEVERE, "An exception was thrown when trying to create ScraperRequests within the batchApiJobProducer. CorrelationId " + correlationId + " Exception: " + e.getMessage(), e);
+            return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("An exception was thrown when trying to create ScraperRequests within the batchApiJobProducer. Error: " + e.getMessage()).build();
         } finally {
             ThreadContext.remove("correlationId");
         }

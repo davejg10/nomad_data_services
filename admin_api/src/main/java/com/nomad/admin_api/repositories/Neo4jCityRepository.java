@@ -1,5 +1,7 @@
 package com.nomad.admin_api.repositories;
 
+import java.util.Map;
+
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Repository;
 
@@ -32,7 +34,57 @@ public class Neo4jCityRepository extends Neo4jCommonCityRepository {
             .bind(city.getId().toString()).to("id")
             .run();
         } catch (Exception e) {
-            throw new Neo4jGenericException("Exception when trying to delete City. Exception: {}", e);
+            throw new Neo4jGenericException("Exception when trying to delete City.", e);
+        }
+    }
+
+    public Neo4jCity update(Neo4jCity city) throws Neo4jGenericException {
+        Map<String, Object> cityAsMap = mapifyCity(city);
+
+        try {
+            Neo4jCity neo4jCity = neo4jClient
+            .query("""
+                MATCH (city:City {id: $id})
+                SET city.name = $name,
+                    city.shortDescription = $shortDescription,
+                    city.primaryBlobUrl = $primaryBlobUrl,
+                    city.coordinate = point($coordinate)
+
+                WITH city
+                MATCH(country:Country {id: $countryId})
+                
+                WITH city, country
+                UNWIND $cityMetrics AS cityMetric
+                MERGE (city)-[:HAS_METRIC]->(m:Metric {criteria: cityMetric.criteria})
+                SET m.metric = cityMetric.metric
+                    
+                RETURN city, country, collect(m) as cityMetrics
+            """)
+            .bind(city.getCountry().getId()).to("countryId")
+            .bindAll(cityAsMap)
+            .fetchAs(Neo4jCity.class)
+            .mappedBy(cityWithNoRoutesMapper)
+            .first()
+            .get();
+            return neo4jCity;
+        } catch (Exception e) {
+            throw new Neo4jGenericException("Exception when trying to update City.", e);
+        }
+    }
+
+    public void updateAllRoutesPopularity(String sourceCityId, String targetCityId, double popularity) throws Neo4jGenericException {
+        try {
+            neo4jClient
+            .query("""
+                MATCH (sourceCity:City {id: $sourceCityId}) -[routes:ROUTE]-> (targetCity:City {id: $targetCityId})
+                SET routes.popularity = $popularity
+            """)
+            .bind(sourceCityId).to("sourceCityId")
+            .bind(targetCityId).to("targetCityId")
+            .bind(popularity).to("popularity")
+            .run();
+        } catch (Exception e) {
+            throw new Neo4jGenericException("Exception when trying to update routes popularity in Neo4j.", e);
         }
     }
 

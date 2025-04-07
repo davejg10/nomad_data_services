@@ -29,7 +29,7 @@ public class Neo4jTestGenerator {
     
     public static Neo4jRoute neo4jRoute(Neo4jCity targetCity) {
         double min = 0.0;
-        double popularity = ThreadLocalRandom.current().nextDouble(min, 10.0);
+        double popularity = 0.0;
         Duration averageDuration = calculateRandomDuration();
         BigDecimal averageCost = calculateRandomCost();
         TransportType[] allTransports = TransportType.values();

@@ -17,10 +17,15 @@ public class ScraperRequest extends ScraperMessage {
         super(scraperRequestSource, scraperRequestType, sourceCity, targetCity, searchDate);
     }
 
+    @Override
     public String toString() {
-        StringBuilder string = new StringBuilder();
-        string.append(this.scraperRequestSource).append(" ").append(this.scraperRequestType).append(" ").append(sourceCity);
-        return string.toString();
+        return "ScraperRequest{" +
+                "scraperRequestSource='" + scraperRequestSource +
+                ", scraperRequestType='" + scraperRequestType +
+                ", sourceCity='" + sourceCity +
+                ", targetCity='" + targetCity +
+                ", searchDate='" + searchDate +
+                '}';
     }
     
     

@@ -59,10 +59,10 @@ public record RouteDTO(TransportType transportType, String operator, LocalDateTi
 
 
             } catch (DateTimeParseException e) {
-                log.error("Error when passing depart/arrival time to LocalTime. Error: {}", e.getMessage());
+                log.warn("Error when passing depart/arrival time to LocalTime. Error: {}", e.getMessage());
                 throw new ScrapingDataSchemaException("In RouteDTO createWithSchema", e);
             } catch (Exception e ) {
-                log.error("Error most likely when mapping TransportType. TransportType string given: {}. Error: {}", transportType, e.getMessage());
+                log.warn("Error most likely when mapping TransportType. TransportType string given: {}. Error: {}", transportType, e.getMessage());
                 throw new ScrapingDataSchemaException("In RouteDTO createWithSchema", e);
 
             }
