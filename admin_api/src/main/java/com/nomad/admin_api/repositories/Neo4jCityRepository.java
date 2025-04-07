@@ -44,7 +44,7 @@ public class Neo4jCityRepository extends Neo4jCommonCityRepository {
         try {
             Neo4jCity neo4jCity = neo4jClient
             .query("""
-                MERGE (city:City {id: $id})
+                MATCH (city:City {id: $id})
                 SET city.name = $name,
                     city.shortDescription = $shortDescription,
                     city.primaryBlobUrl = $primaryBlobUrl,
