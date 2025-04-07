@@ -157,7 +157,7 @@ public class One2GoAsiaScraper implements WebScraperInterface {
          for (Map<String, String> trip : tripList) {
              try {
                  if (trip.get("departure").equals("--:--")) {
-                     log.error("Not adding due to departTime being --:--");
+                     log.warn("Not adding due to departTime being --:--");
                      continue;
                  }
                  RouteDTO newRoute = RouteDTO.createWithSchema(
